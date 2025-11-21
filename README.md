@@ -2,16 +2,25 @@
 
 ## Build Status
 
-| Branch | CI | CD |
-|--------|----|----|
-| **master** | [![CI - master](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml?query=branch%3Amaster) | [![CD](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml/badge.svg)](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml) |
-| **develop** | [![CI - develop](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml?query=branch%3Adevelop) | [![CD - develop](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml/badge.svg?branch=develop)](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml?query=branch%3Adevelop) |
+| Branch | CI | CD | Coverage |
+|--------|----|----|----------|
+| **master** | [![CI - master](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml?query=branch%3Amaster) | [![CD](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml/badge.svg)](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml) | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master) |
+| **develop** | [![CI - develop](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml?query=branch%3Adevelop) | [![CD - develop](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml/badge.svg?branch=develop)](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml?query=branch%3Adevelop) | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop) |
 
 ## Package Status
 
 [![NuGet](https://img.shields.io/nuget/v/BankingHelper.svg)](https://www.nuget.org/packages/BankingHelper/)
 [![NuGet Pre-release](https://img.shields.io/nuget/vpre/BankingHelper.svg?label=nuget-pre)](https://www.nuget.org/packages/BankingHelper/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Code Coverage
+
+| Branch | Coverage | Graph |
+|--------|----------|-------|
+| **master** | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master) | [![codecov graph](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master/graphs/sunburst.svg?width=200&height=200)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master) |
+| **develop** | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop) | [![codecov graph](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop/graphs/sunburst.svg?width=200&height=200)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop) |
+
+---
 
 A comprehensive .NET library for banking operations including IBAN validation, payment reference generation, and country-specific banking utilities. Built with a modular architecture to support multiple countries and banking standards.
 
