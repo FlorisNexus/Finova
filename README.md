@@ -18,8 +18,8 @@
 
 | Branch | Coverage | Details |
 |--------|----------|---------|
-| **master** | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master) | [View Report](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master) |
-| **develop** | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop) | [View Report](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop) |
+| **master** | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/master) | [View Report](https://codecov.io/gh/fdivrusa/BankingHelper/tree/master) |
+| **develop** | [![codecov](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop/graph/badge.svg)](https://codecov.io/gh/fdivrusa/BankingHelper/branch/develop) | [View Report](https://codecov.io/gh/fdivrusa/BankingHelper/tree/develop) |
 
 ---
 
