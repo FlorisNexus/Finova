@@ -30,6 +30,9 @@
   <ItemGroup>
     <!-- Include Core project with PrivateAssets to embed it in the package -->
     <ProjectReference Include="..\BankingHelper.Core\BankingHelper.Core.csproj" PrivateAssets="all" />
+    
+    <!-- Include README.md in the package -->
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <!-- Include Core DLL in the package -->

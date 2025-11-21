@@ -1,18 +1,22 @@
 name: CD - Publish NuGet Packages
 
 on:
-  push:
-    branches:
-      - master      # Release packages from master
-      - develop     # Alpha packages from develop
   release:
     types: [published]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version number (e.g., 1.0.0)'
+        description: 'Version number (e.g., 1.0.0 or 1.0.0-alpha.1)'
         required: false
         type: string
+      branch:
+        description: 'Branch to use for versioning (master or develop)'
+        required: false
+        type: choice
+        options:
+          - master
+          - develop
+        default: 'master'
 
 jobs:
   publish:
@@ -45,15 +49,18 @@ jobs:
         elif [ -n "${{ github.event.inputs.version }}" ]; then
           # Manual workflow dispatch with version
           VERSION="${{ github.event.inputs.version }}"
-        elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-          # Alpha version for develop branch
+        else
+          # Auto-generate version based on selected branch
           COMMIT_COUNT=$(git rev-list --count HEAD)
           SHORT_SHA=$(git rev-parse --short HEAD)
-          VERSION="${BASE_VERSION}-alpha.${COMMIT_COUNT}+${SHORT_SHA}"
-        else
-          # Release version for master branch
-          COMMIT_COUNT=$(git rev-list --count HEAD)
-          VERSION="${BASE_VERSION}.${COMMIT_COUNT}"
+          
+          if [ "${{ github.event.inputs.branch }}" = "develop" ]; then
+            # Alpha version for develop branch
+            VERSION="${BASE_VERSION}-alpha.${COMMIT_COUNT}+${SHORT_SHA}"
+          else
+            # Release version for master branch
+            VERSION="${BASE_VERSION}.${COMMIT_COUNT}"
+          fi
         fi
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "Building version: $VERSION"

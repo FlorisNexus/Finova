@@ -191,20 +191,26 @@ This project uses GitHub Actions for continuous integration and deployment:
 
 ### Continuous Deployment (CD)
 - **Triggers**: 
-  - Push to `master` → Stable release (e.g., `1.0.0.123`)
-  - Push to `develop` → Alpha pre-release (e.g., `1.0.0-alpha.42+sha`)
-  - GitHub release → Tagged version (e.g., `1.2.0`)
+  - Manual workflow dispatch (choose version and branch type)
+  - GitHub release (tagged version)
 - **Destinations**: NuGet.org and GitHub Packages
 - **Badge**: [![CD](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml/badge.svg)](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml)
 
 ### Versioning Strategy
 
-See [VERSIONING.md](VERSIONING.md) for detailed information about the automatic versioning strategy.
+See [VERSIONING.md](VERSIONING.md) for detailed information about the versioning strategy.
 
-| Branch | Version Format | Example | Status |
-|--------|----------------|---------|--------|
-| `master` | `{base}.{commits}` | `1.0.0.123` | [![NuGet](https://img.shields.io/nuget/v/BankingHelper.svg)](https://www.nuget.org/packages/BankingHelper/) |
-| `develop` | `{base}-alpha.{commits}+{sha}` | `1.0.0-alpha.42+a1b2c3d` | [![NuGet Pre-release](https://img.shields.io/nuget/vpre/BankingHelper.svg?label=nuget-pre)](https://www.nuget.org/packages/BankingHelper/) |
+**To publish a package:**
+1. Go to [Actions → CD - Publish NuGet Packages](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml)
+2. Click "Run workflow"
+3. Choose branch type (master for stable, develop for alpha)
+4. Optionally specify a custom version
+5. Click "Run workflow"
+
+| Type | Version Format | Example | Status |
+|------|----------------|---------|--------|
+| Stable (master) | `{base}.{commits}` | `1.0.0.123` | [![NuGet](https://img.shields.io/nuget/v/BankingHelper.svg)](https://www.nuget.org/packages/BankingHelper/) |
+| Alpha (develop) | `{base}-alpha.{commits}+{sha}` | `1.0.0-alpha.42+a1b2c3d` | [![NuGet Pre-release](https://img.shields.io/nuget/vpre/BankingHelper.svg?label=nuget-pre)](https://www.nuget.org/packages/BankingHelper/) |
 
 ## 🔧 Supported Formats
 
@@ -258,10 +264,13 @@ dotnet test
 ### Branch Strategy
 
 - `master` - Stable releases, production-ready code
-- `develop` - Development branch, alpha pre-releases
+- `develop` - Development branch, for alpha pre-releases
 - Feature branches - Create from `develop`, merge back to `develop`
 
-When your PR is merged to `develop`, an alpha package will be automatically published. When `develop` is merged to `master`, a stable release will be published.
+To publish packages:
+- **Alpha versions**: Merge to `develop`, then manually trigger CD workflow with "develop" branch type
+- **Stable versions**: Merge to `master`, then manually trigger CD workflow with "master" branch type
+- **Tagged releases**: Create a GitHub release with a version tag
 
 ## 📋 Requirements
 
