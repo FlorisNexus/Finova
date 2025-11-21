@@ -14,6 +14,8 @@ namespace BankingHelper.Core.Internals
                 throw new ArgumentException("Input must contain only digits.", nameof(numericString));
             }
 
+            // Use BigInteger to handle very large numbers
+            BigInteger number = BigInteger.Parse(numericString);
             return (int)(number % 97);
         }
     }
