@@ -1,7 +1,9 @@
 # BankingHelper
 
-[![CI](https://github.com/yourusername/BankingHelper/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/BankingHelper/actions/workflows/ci.yml)
-[![NuGet](https://img.shields.io/nuget/v/BankingHelper.Core.svg)](https://www.nuget.org/packages/BankingHelper.Core/)
+[![CI](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml)
+[![CD](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml/badge.svg)](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml)
+[![NuGet](https://img.shields.io/nuget/v/BankingHelper.svg)](https://www.nuget.org/packages/BankingHelper/)
+[![NuGet Pre-release](https://img.shields.io/nuget/vpre/BankingHelper.svg?label=nuget-pre)](https://www.nuget.org/packages/BankingHelper/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A comprehensive .NET library for banking operations including IBAN validation, payment reference generation, and country-specific banking utilities. Built with a modular architecture to support multiple countries and banking standards.
@@ -14,38 +16,47 @@ A comprehensive .NET library for banking operations including IBAN validation, p
   - Automatic check digit calculation
   - Format validation
 
-- **Modular Architecture**
-  - Core library with shared utilities
-  - Country-specific implementations as separate packages
-  - Dependency injection support
-  - Extensible interfaces for custom implementations
-
 - **Belgian Banking Support**
   - OGM/VCS structured communication (+++XXX/XXXX/XXXXX+++)
   - ISO 11649 format support
   - Complete validation logic
   - Easy integration with ASP.NET Core
 
-## 📦 Packages
-
-| Package | Description | NuGet |
-|---------|-------------|-------|
-| `BankingHelper.Core` | Core interfaces and utilities | [![NuGet](https://img.shields.io/nuget/v/BankingHelper.Core.svg)](https://www.nuget.org/packages/BankingHelper.Core/) |
-| `BankingHelper.Belgium` | Belgian banking implementation | [![NuGet](https://img.shields.io/nuget/v/BankingHelper.Belgium.svg)](https://www.nuget.org/packages/BankingHelper.Belgium/) |
+- **Modular Architecture**
+  - Core utilities with shared interfaces
+  - Country-specific implementations included
+  - Dependency injection support
+  - Extensible for custom implementations
 
 ## 🚀 Installation
 
-Install the packages via NuGet Package Manager or .NET CLI:
+### Stable Release (from master branch)
 
-### Core Package
+Install the latest stable version via NuGet Package Manager or .NET CLI:
+
 ```bash
-dotnet add package BankingHelper.Core
+dotnet add package BankingHelper
 ```
 
-### Belgian Banking Support
-```bash
-dotnet add package BankingHelper.Belgium
+Or via Package Manager Console:
+```powershell
+Install-Package BankingHelper
 ```
+
+### Pre-release/Alpha (from develop branch)
+
+To install the latest alpha/pre-release version for testing new features:
+
+```bash
+dotnet add package BankingHelper --version *-alpha.*
+```
+
+Or via Package Manager Console:
+```powershell
+Install-Package BankingHelper -PreRelease
+```
+
+> **Note:** Alpha versions are automatically published from the `develop` branch and follow the format `1.0.0-alpha.{commits}+{sha}`. See [VERSIONING.md](VERSIONING.md) for more details.
 
 ## 📖 Usage
 
@@ -169,6 +180,32 @@ Run tests with:
 dotnet test
 ```
 
+## 🚀 CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+### Continuous Integration (CI)
+- **Triggers**: Push or PR to `master` or `develop` branches
+- **Actions**: Build, test, and code coverage analysis
+- **Badge**: [![CI](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/fdivrusa/BankingHelper/actions/workflows/ci.yml)
+
+### Continuous Deployment (CD)
+- **Triggers**: 
+  - Push to `master` → Stable release (e.g., `1.0.0.123`)
+  - Push to `develop` → Alpha pre-release (e.g., `1.0.0-alpha.42+sha`)
+  - GitHub release → Tagged version (e.g., `1.2.0`)
+- **Destinations**: NuGet.org and GitHub Packages
+- **Badge**: [![CD](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml/badge.svg)](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml)
+
+### Versioning Strategy
+
+See [VERSIONING.md](VERSIONING.md) for detailed information about the automatic versioning strategy.
+
+| Branch | Version Format | Example | Status |
+|--------|----------------|---------|--------|
+| `master` | `{base}.{commits}` | `1.0.0.123` | [![NuGet](https://img.shields.io/nuget/v/BankingHelper.svg)](https://www.nuget.org/packages/BankingHelper/) |
+| `develop` | `{base}-alpha.{commits}+{sha}` | `1.0.0-alpha.42+a1b2c3d` | [![NuGet Pre-release](https://img.shields.io/nuget/vpre/BankingHelper.svg?label=nuget-pre)](https://www.nuget.org/packages/BankingHelper/) |
+
 ## 🔧 Supported Formats
 
 ### Belgian OGM/VCS (Structured Communication)
@@ -199,7 +236,8 @@ Contributions are welcome! Please feel free to submit a Pull Request. Here are s
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/BankingHelper.git
+git clone https://github.com/fdivrusa/BankingHelper.git
+cd BankingHelper
 ```
 
 2. Restore dependencies
@@ -216,6 +254,14 @@ dotnet build
 ```bash
 dotnet test
 ```
+
+### Branch Strategy
+
+- `master` - Stable releases, production-ready code
+- `develop` - Development branch, alpha pre-releases
+- Feature branches - Create from `develop`, merge back to `develop`
+
+When your PR is merged to `develop`, an alpha package will be automatically published. When `develop` is merged to `master`, a stable release will be published.
 
 ## 📋 Requirements
 

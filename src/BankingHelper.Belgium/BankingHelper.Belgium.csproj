@@ -6,15 +6,15 @@
     <Nullable>enable</Nullable>
     
     <!-- NuGet Package Configuration -->
-    <PackageId>BankingHelper.Belgium</PackageId>
+    <PackageId>BankingHelper</PackageId>
     <Version>1.0.0</Version>
-    <Authors>Florian</Authors>
+    <Authors>Florian Di Vrusa</Authors>
     <Company>BankingHelper</Company>
-    <Description>Belgian banking implementation including OGM/VCS structured communication generation and validation. Supports both Belgian domestic format and ISO 11649 international format. Includes dependency injection extensions for easy integration.</Description>
-    <PackageTags>banking;belgium;ogm;vcs;payment;payment-reference;structured-communication;ISO11649;belgian-banking;fintech</PackageTags>
+    <Description>A comprehensive .NET library for banking operations including payment reference generation, validation, and country-specific utilities. Supports Belgian OGM/VCS structured communication and ISO 11649 (RF) international payment references with automatic check digit calculation.</Description>
+    <PackageTags>banking;belgium;ogm;vcs;payment;payment-reference;structured-communication;ISO11649;IBAN;modulo97;financial;fintech;belgian-banking</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/yourusername/BankingHelper</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/yourusername/BankingHelper</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/fdivrusa/BankingHelper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/fdivrusa/BankingHelper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -28,7 +28,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BankingHelper.Core\BankingHelper.Core.csproj" />
+    <!-- Include Core project with PrivateAssets to embed it in the package -->
+    <ProjectReference Include="..\BankingHelper.Core\BankingHelper.Core.csproj" PrivateAssets="all" />
   </ItemGroup>
+
+  <!-- Include Core DLL in the package -->
+  <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+    </ItemGroup>
+  </Target>
 
 </Project>
