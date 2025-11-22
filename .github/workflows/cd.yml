@@ -64,19 +64,19 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
 
-    - name: Pack BankingHelper
-      run: dotnet pack src/BankingHelper.Belgium/BankingHelper.Belgium.csproj --configuration Release --no-build --output ./packages -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+    - name: Pack Finova
+      run: dotnet pack src/Finova/Finova.csproj --configuration Release --no-build --output ./packages -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
 
     - name: Publish to NuGet.org
       run: |
-        dotnet nuget push ./packages/BankingHelper.${{ steps.get_version.outputs.PACKAGE_VERSION }}.nupkg \
+        dotnet nuget push ./packages/Finova.${{ steps.get_version.outputs.PACKAGE_VERSION }}.nupkg \
           --api-key ${{ secrets.NUGET_API_KEY }} \
           --source https://api.nuget.org/v3/index.json \
           --skip-duplicate
 
     - name: Publish to GitHub Packages
       run: |
-        dotnet nuget push ./packages/BankingHelper.${{ steps.get_version.outputs.PACKAGE_VERSION }}.nupkg \
+        dotnet nuget push ./packages/Finova.${{ steps.get_version.outputs.PACKAGE_VERSION }}.nupkg \
           --api-key ${{ secrets.GITHUB_TOKEN }} \
           --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
           --skip-duplicate

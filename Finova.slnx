@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Finova.Core/Finova.Core.csproj" />
+    <Project Path="src/Finova/Finova.Belgium.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Finova.Tests/Finova.Tests.csproj" />
+  </Folder>
+</Solution>

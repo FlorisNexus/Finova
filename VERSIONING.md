@@ -40,7 +40,7 @@ This project uses automatic branch-based versioning for manual deployments and t
 
 ### Manual Workflow Dispatch
 
-1. Go to [GitHub Actions → CD - Publish NuGet Packages](https://github.com/fdivrusa/BankingHelper/actions/workflows/cd.yml)
+1. Go to [GitHub Actions → CD - Publish NuGet Packages](https://github.com/fdivrusa/Finova/actions/workflows/cd.yml)
 2. Click "Run workflow" button
 3. **Select the branch** from the dropdown:
    - Choose `master` for stable release
@@ -67,13 +67,13 @@ According to [SemVer 2.0.0](https://semver.org/):
 - **Release versions** (e.g., `1.0.0.123`) are considered stable
 - **Pre-release versions** (e.g., `1.0.0-alpha.42`) are considered unstable
 - Users installing without version constraints will get the latest stable version (from master)
-- Users can opt-in to alpha versions with: `dotnet add package BankingHelper --version 1.0.0-alpha.*`
+- Users can opt-in to alpha versions with: `dotnet add package Finova --version 1.0.0-alpha.*`
 
 ## Updating Base Version
 
 To update the base version:
 1. Edit `BASE_VERSION` in `.github/workflows/cd.yml` (line ~38)
-2. Update `<Version>` in `src/BankingHelper.Belgium/BankingHelper.Belgium.csproj`
+2. Update `<Version>` in `src/Finova.Belgium/Finova.Belgium.csproj`
 
 ## Example Workflow
 

@@ -1,17 +1,17 @@
 # NuGet Package Metadata
 
-This document describes all the metadata included in the BankingHelper NuGet package.
+This document describes all the metadata included in the Finova NuGet package.
 
 ## 📦 Package Information
 
-When users view your package on [NuGet.org](https://www.nuget.org/packages/BankingHelper/), they will see:
+When users view your package on [NuGet.org](https://www.nuget.org/packages/Finova/), they will see:
 
 ### Basic Information
-- **Package ID**: `BankingHelper`
+- **Package ID**: `Finova`
 - **Version**: Automatically generated (e.g., `1.0.0.123` or `1.0.0-alpha.10`)
 - **Authors**: Florian Di Vrusa
 - **License**: MIT
-- **Project URL**: [https://github.com/fdivrusa/BankingHelper](https://github.com/fdivrusa/BankingHelper)
+- **Project URL**: [https://github.com/fdivrusa/Finova](https://github.com/fdivrusa/Finova)
 
 ### Description
 Full package description explaining features and capabilities.
@@ -65,12 +65,12 @@ Links to GitHub repository homepage.
 
 ### Repository
 Direct link to source code with:
-- Repository URL: `https://github.com/fdivrusa/BankingHelper`
+- Repository URL: `https://github.com/fdivrusa/Finova`
 - Repository Type: `git`
 - Commit Hash: Embedded in symbol package
 
 ### Release Notes
-Points to: `https://github.com/fdivrusa/BankingHelper/releases`
+Points to: `https://github.com/fdivrusa/Finova/releases`
 
 Users can click to see all release notes and changelog.
 
@@ -143,7 +143,7 @@ Your package scores highly on NuGet's quality metrics!
 
 To update package metadata:
 
-1. Edit `src/BankingHelper.Belgium/BankingHelper.Belgium.csproj`
+1. Edit `src/Finova.Belgium/Finova.Belgium.csproj`
 2. Modify the properties in the `PropertyGroup` section
 3. Commit and push changes
 4. Next package publish will include updated metadata
