@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Finova.Core\Finova.Core.csproj" />
-    <ProjectReference Include="..\..\src\Finova\Finova.Belgium.csproj" />
+    <ProjectReference Include="..\..\src\Finova.Belgium\Finova.Belgium.csproj" />
   </ItemGroup>
 
 </Project>
