@@ -37,7 +37,7 @@ namespace Finova.Tests.Core.Accounts
         [InlineData(null)] // Null
         [InlineData("1234567890")] // No country code
         [InlineData("BE6X539007547034")] // Invalid character in check digits
-        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string iban)
+        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string? iban)
         {
             // Act
             var result = IbanHelper.IsValidIban(iban);
@@ -82,7 +82,7 @@ namespace Finova.Tests.Core.Accounts
         [InlineData("")]
         [InlineData("   ")]
         [InlineData(null)]
-        public void NormalizeIban_WithEmptyInput_ReturnsEmpty(string input)
+        public void NormalizeIban_WithEmptyInput_ReturnsEmpty(string? input)
         {
             // Act
             var result = IbanHelper.NormalizeIban(input);
@@ -125,7 +125,7 @@ namespace Finova.Tests.Core.Accounts
         [InlineData("")]
         [InlineData("   ")]
         [InlineData(null)]
-        public void FormatIban_WithEmptyInput_ReturnsEmpty(string input)
+        public void FormatIban_WithEmptyInput_ReturnsEmpty(string? input)
         {
             // Act
             var result = IbanHelper.FormatIban(input);
@@ -170,7 +170,7 @@ namespace Finova.Tests.Core.Accounts
         [InlineData("B")]
         [InlineData("1")]
         [InlineData(null)]
-        public void GetCountryCode_WithInvalidInput_ReturnsEmpty(string iban)
+        public void GetCountryCode_WithInvalidInput_ReturnsEmpty(string? iban)
         {
             // Act
             var result = IbanHelper.GetCountryCode(iban);
@@ -214,7 +214,7 @@ namespace Finova.Tests.Core.Accounts
         [InlineData("BE")]
         [InlineData("BEX8539007547034")] // Non-digit check digits
         [InlineData(null)]
-        public void GetCheckDigits_WithInvalidInput_ReturnsZero(string iban)
+        public void GetCheckDigits_WithInvalidInput_ReturnsZero(string? iban)
         {
             // Act
             var result = IbanHelper.GetCheckDigits(iban);

@@ -45,7 +45,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("")] // Empty
         [InlineData("   ")] // Whitespace
         [InlineData(null)] // Null
-        public void IsValid_WithInvalidKboNumbers_ReturnsFalse(string kbo)
+        public void IsValid_WithInvalidKboNumbers_ReturnsFalse(string? kbo)
         {
             // Act
             var result = BelgianEnterpriseValidator.IsValid(kbo);
@@ -88,7 +88,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("012345674")] // Too short
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void Format_WithInvalidKboNumbers_ThrowsArgumentException(string kbo)
+        public void Format_WithInvalidKboNumbers_ThrowsArgumentException(string? kbo)
         {
             // Act
             Action act = () => BelgianEnterpriseValidator.Format(kbo);
@@ -120,7 +120,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("")]
         [InlineData("   ")]
         [InlineData(null)]
-        public void Normalize_WithEmptyInput_ReturnsEmpty(string input)
+        public void Normalize_WithEmptyInput_ReturnsEmpty(string? input)
         {
             // Act
             var result = BelgianEnterpriseValidator.Normalize(input);

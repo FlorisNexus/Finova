@@ -55,7 +55,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("")] // Empty
         [InlineData("   ")] // Whitespace
         [InlineData(null)] // Null
-        public void IsValid_WithInvalidVatNumbers_ReturnsFalse(string vat)
+        public void IsValid_WithInvalidVatNumbers_ReturnsFalse(string? vat)
         {
             // Act
             var result = BelgianVatValidator.IsValid(vat);
@@ -99,7 +99,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("BE012345674")] // Too short
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void Format_WithInvalidVatNumbers_ThrowsArgumentException(string vat)
+        public void Format_WithInvalidVatNumbers_ThrowsArgumentException(string? vat)
         {
             // Act
             Action act = () => BelgianVatValidator.Format(vat);
@@ -131,7 +131,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("")]
         [InlineData("   ")]
         [InlineData(null)]
-        public void Normalize_WithEmptyInput_ReturnsEmpty(string input)
+        public void Normalize_WithEmptyInput_ReturnsEmpty(string? input)
         {
             // Act
             var result = BelgianVatValidator.Normalize(input);
@@ -162,7 +162,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("BE0123456700")] // Invalid check digits
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void GetEnterpriseNumber_WithInvalidVat_ReturnsNull(string vat)
+        public void GetEnterpriseNumber_WithInvalidVat_ReturnsNull(string? vat)
         {
             // Act
             var result = BelgianVatValidator.GetEnterpriseNumber(vat);

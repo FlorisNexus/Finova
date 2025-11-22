@@ -60,7 +60,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("")] // Empty
         [InlineData("   ")] // Whitespace
         [InlineData(null)] // Null
-        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string iban)
+        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string? iban)
         {
             // Act
             var result = _validator.IsValidIban(iban);
@@ -109,7 +109,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("BE6853900754703X")] // Invalid character in account
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void ValidateBelgianIban_WithInvalidIbans_ReturnsFalse(string iban)
+        public void ValidateBelgianIban_WithInvalidIbans_ReturnsFalse(string? iban)
         {
             // Act
             var result = BelgianBankAccountValidator.ValidateBelgianIban(iban);
@@ -142,7 +142,7 @@ namespace Finova.Tests.Belgium.Validators
         [InlineData("BE685390075470")] // Too short
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void FormatBelgianIban_WithInvalidIbans_ThrowsArgumentException(string iban)
+        public void FormatBelgianIban_WithInvalidIbans_ThrowsArgumentException(string? iban)
         {
             // Act
             Action act = () => BelgianBankAccountValidator.FormatBelgianIban(iban);

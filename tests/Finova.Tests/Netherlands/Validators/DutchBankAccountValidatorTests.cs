@@ -59,7 +59,7 @@ namespace Finova.Tests.Netherlands.Validators
         [InlineData("")] // Empty
         [InlineData("   ")] // Whitespace
         [InlineData(null)] // Null
-        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string iban)
+        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string? iban)
         {
             // Act
             var result = _validator.IsValidIban(iban);
@@ -107,7 +107,7 @@ namespace Finova.Tests.Netherlands.Validators
         [InlineData("NL91ABNA041716430X")] // Account number contains letter
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void ValidateDutchIban_WithInvalidIbans_ReturnsFalse(string iban)
+        public void ValidateDutchIban_WithInvalidIbans_ReturnsFalse(string? iban)
         {
             // Act
             var result = DutchBankAccountValidator.ValidateDutchIban(iban);
@@ -148,7 +148,7 @@ namespace Finova.Tests.Netherlands.Validators
         [InlineData("BE68539007547034")] // Wrong country
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void GetBankCode_WithInvalidIbans_ReturnsNull(string iban)
+        public void GetBankCode_WithInvalidIbans_ReturnsNull(string? iban)
         {
             // Act
             var result = DutchBankAccountValidator.GetBankCode(iban);
@@ -180,7 +180,7 @@ namespace Finova.Tests.Netherlands.Validators
         [InlineData("NL91ABNA04171643")] // Too short
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void FormatDutchIban_WithInvalidIbans_ThrowsArgumentException(string iban)
+        public void FormatDutchIban_WithInvalidIbans_ThrowsArgumentException(string? iban)
         {
             // Act
             Action act = () => DutchBankAccountValidator.FormatDutchIban(iban);
