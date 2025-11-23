@@ -116,6 +116,19 @@ namespace Finova.Tests.Luxembourg.Validators
             result.Should().BeFalse();
         }
 
+        [Fact]
+        public void ValidateLuxembourgIban_WithCorrectLengthButWrongCountryCode_ReturnsFalse()
+        {
+            // Arrange
+            var invalidIban = "BE280019400644750000"; // 20 chars, starts with BE
+
+            // Act
+            var result = LuxembourgBankAccountValidator.ValidateLuxembourgIban(invalidIban);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
         #endregion
 
         #region Static Method Tests - FormatLuxembourgIban

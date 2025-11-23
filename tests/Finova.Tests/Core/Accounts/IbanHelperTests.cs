@@ -254,6 +254,36 @@ namespace Finova.Tests.Core.Accounts
             result.Should().BeFalse();
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        [InlineData("BE")]
+        [InlineData("BE68")]
+        public void ValidateChecksum_WithInvalidInput_ReturnsFalse(string? iban)
+        {
+            // Act
+            var result = IbanHelper.ValidateChecksum(iban);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Fact]
+        public void ValidateChecksum_WithInvalidCharacters_ReturnsFalse()
+        {
+            // Arrange
+            // Contains '-' which is not alphanumeric, so ConvertLettersToDigits throws ArgumentException
+            // ValidateChecksum catches it and returns false
+            var invalidIban = "BE68-5390-0754-7034"; 
+
+            // Act
+            var result = IbanHelper.ValidateChecksum(invalidIban);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
         #endregion
 
         #region Edge Cases
