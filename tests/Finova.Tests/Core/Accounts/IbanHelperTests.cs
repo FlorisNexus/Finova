@@ -275,7 +275,7 @@ namespace Finova.Tests.Core.Accounts
             // Arrange
             // Contains '-' which is not alphanumeric, so ConvertLettersToDigits throws ArgumentException
             // ValidateChecksum catches it and returns false
-            var invalidIban = "BE68-5390-0754-7034"; 
+            var invalidIban = "BE68-5390-0754-7034";
 
             // Act
             var result = IbanHelper.ValidateChecksum(invalidIban);
