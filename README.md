@@ -1,303 +1,189 @@
-# BankingHelper
+# Finova
 
-[![CI](https://github.com/yourusername/BankingHelper/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/BankingHelper/actions/workflows/ci.yml)
-[![NuGet](https://img.shields.io/nuget/v/BankingHelper.Core.svg)](https://www.nuget.org/packages/BankingHelper.Core/)
+<div align="center">
+
+**The Offline Financial Validation Toolkit for .NET**
+
+*IBAN · Payment References · KBO/VAT · Business Numbers*
+
+[![NuGet Version](https://img.shields.io/nuget/v/Finova.svg?style=flat&logo=nuget)](https://www.nuget.org/packages/Finova/)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/Finova.svg?style=flat&logo=nuget)](https://www.nuget.org/packages/Finova/)
+[![Build Status](https://github.com/fdivrusa/Finova/actions/workflows/ci.yml/badge.svg)](https://github.com/fdivrusa/Finova/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive .NET library for banking operations including IBAN validation, payment reference generation, and country-specific banking utilities. Built with a modular architecture to support multiple countries and banking standards.
+**🇧🇪 Belgium · 🇳🇱 Netherlands · 🇱🇺 Luxembourg**
 
-## 🌟 Features
+*100% Offline | Zero Dependencies | Lightning Fast*
 
-- **Payment Reference Generation**
-  - ISO 11649 (RF) international payment references
-  - Country-specific formats (currently supports Belgium OGM/VCS)
-  - Automatic check digit calculation
-  - Format validation
-
-- **Modular Architecture**
-  - Core library with shared utilities
-  - Country-specific implementations as separate packages
-  - Dependency injection support
-  - Extensible interfaces for custom implementations
-
-- **Belgian Banking Support**
-  - OGM/VCS structured communication (+++XXX/XXXX/XXXXX+++)
-  - ISO 11649 format support
-  - Complete validation logic
-  - Easy integration with ASP.NET Core
-
-## 📦 Packages
-
-| Package | Description | NuGet |
-|---------|-------------|-------|
-| `BankingHelper.Core` | Core interfaces and utilities | [![NuGet](https://img.shields.io/nuget/v/BankingHelper.Core.svg)](https://www.nuget.org/packages/BankingHelper.Core/) |
-| `BankingHelper.Belgium` | Belgian banking implementation | [![NuGet](https://img.shields.io/nuget/v/BankingHelper.Belgium.svg)](https://www.nuget.org/packages/BankingHelper.Belgium/) |
-
-## 🚀 Installation
-
-Install the packages via NuGet Package Manager or .NET CLI:
-
-### Core Package
-```bash
-dotnet add package BankingHelper.Core
-```
-
-### Belgian Banking Support
-```bash
-dotnet add package BankingHelper.Belgium
-```
-
-## 📖 Usage
-
-### Basic Usage - Belgian Payment References
-
-```csharp
-using BankingHelper.Belgium.Services;
-using BankingHelper.Core.Models;
-
-// Create an instance of the Belgian payment service
-var service = new BelgianPaymentService();
-
-// Generate a Belgian OGM/VCS structured communication
-string ogm = service.Generate("123456", PaymentReferenceFormat.Domestic);
-// Output: +++000/0012/34569+++
-
-// Generate an ISO 11649 international reference
-string isoRef = service.Generate("INVOICE2024", PaymentReferenceFormat.IsoRf);
-// Output: RF89INVOICE2024
-
-// Validate a payment reference
-bool isValid = service.IsValid("+++000/0012/34569+++");
-// Output: true
-```
-
-### Dependency Injection (ASP.NET Core)
-
-```csharp
-using BankingHelper.Belgium.Extensions;
-
-// In Program.cs or Startup.cs
-builder.Services.AddBelgianBanking();
-
-// In your controller or service
-public class InvoiceService
-{
-    private readonly IPaymentReferenceGenerator _paymentRefGenerator;
-
-    public InvoiceService(IPaymentReferenceGenerator paymentRefGenerator)
-    {
-        _paymentRefGenerator = paymentRefGenerator;
-    }
-
-    public string CreateInvoice(int invoiceNumber)
-    {
-        // Generate payment reference
-        var paymentRef = _paymentRefGenerator.Generate(
-            invoiceNumber.ToString(), 
-            PaymentReferenceFormat.Domestic
-        );
-        
-        return paymentRef;
-    }
-}
-```
-
-### Working with ISO 11649 References
-
-```csharp
-using BankingHelper.Core.Internals;
-
-// Generate an ISO 11649 reference
-string reference = IsoReferenceHelper.Generate("CUSTOMER12345");
-// Output: RF23CUSTOMER12345
-
-// Validate an ISO 11649 reference
-bool isValid = IsoReferenceValidator.IsValid("RF23CUSTOMER12345");
-// Output: true
-
-// Works with spaces (common in display format)
-bool isValid2 = IsoReferenceValidator.IsValid("RF23 CUSTOMER 12345");
-// Output: true
-```
-
-### Modulo 97 Calculations
-
-```csharp
-using BankingHelper.Core.Internals;
-
-// Calculate modulo 97 of a numeric string
-int result = Modulo97Helper.Calculate("1234567890");
-// Output: 37
-
-// Works with very large numbers
-int result2 = Modulo97Helper.Calculate("123456789012345678901234567890");
-// Returns correct modulo 97 result
-```
-
-## 🏗️ Architecture
-
-### Core Library (`BankingHelper.Core`)
-
-The core library provides:
-- `IPaymentReferenceGenerator` - Interface for payment reference generation
-- `IBankAccountValidator` - Interface for IBAN validation (future feature)
-- `Modulo97Helper` - ISO 7064 modulo 97 calculations
-- `IsoReferenceHelper` - ISO 11649 reference generation
-- `IsoReferenceValidator` - ISO 11649 reference validation
-- `PaymentReferenceFormat` - Enum for different format types
-
-### Belgian Implementation (`BankingHelper.Belgium`)
-
-The Belgian implementation includes:
-- `BelgianPaymentService` - Implements `IPaymentReferenceGenerator`
-  - OGM/VCS format (+++XXX/XXXX/XXXXX+++)
-  - ISO 11649 format support
-  - Complete validation logic
-- `ServiceCollectionExtensions` - DI registration helpers
-
-## 🧪 Testing
-
-The project includes comprehensive unit tests covering:
-- All payment reference generation scenarios
-- Edge cases and error handling
-- Format validation
-- Integration tests
-- Dependency injection setup
-
-Run tests with:
-```bash
-dotnet test
-```
-
-## 🔧 Supported Formats
-
-### Belgian OGM/VCS (Structured Communication)
-
-Format: `+++XXX/XXXX/XXXXX+++`
-- 12 digits total (10 data + 2 check digits)
-- Modulo 97 checksum
-- Common in Belgian banking for invoice payments
-
-### ISO 11649 (RF Creditor Reference)
-
-Format: `RFxxYYYY...`
-- Starts with "RF" prefix
-- 2 check digits (calculated using modulo 97)
-- Variable length reference body (up to 25 characters)
-- International standard for payment references
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. Here are some ways you can contribute:
-
-- Add support for other countries (IBAN validators, payment references)
-- Improve documentation
-- Add more test cases
-- Report bugs or suggest features
-
-### Development Setup
-
-1. Clone the repository
-```bash
-git clone https://github.com/yourusername/BankingHelper.git
-```
-
-2. Restore dependencies
-```bash
-dotnet restore
-```
-
-3. Build the solution
-```bash
-dotnet build
-```
-
-4. Run tests
-```bash
-dotnet test
-```
-
-## 📋 Requirements
-
-- .NET 10.0 or higher
-- For Belgium package: Microsoft.Extensions.DependencyInjection 10.0.0+
-
-## 🗺️ Roadmap
-
-- [ ] IBAN validation for multiple countries
-- [ ] Additional country implementations (France, Netherlands, Germany, etc.)
-- [ ] SEPA payment file generation
-- [ ] BIC/SWIFT code validation
-- [ ] Bank account number normalization
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- ISO 11649 Standard for RF Creditor Reference
-- ISO 7064 for modulo 97 checksum algorithm
-- Belgian banking standards for OGM/VCS format
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-- Open an issue on [GitHub](https://github.com/yourusername/BankingHelper/issues)
-- Check existing documentation and tests for examples
-- Review the API reference below
-
-## 📚 API Reference
-
-### IPaymentReferenceGenerator
-
-```csharp
-public interface IPaymentReferenceGenerator
-{
-    string CountryCode { get; }
-    string Generate(string rawReference, PaymentReferenceFormat format = PaymentReferenceFormat.Domestic);
-    bool IsValid(string communication);
-}
-```
-
-### BelgianPaymentService
-
-```csharp
-public class BelgianPaymentService : IPaymentReferenceGenerator
-{
-    public string CountryCode => "BE";
-    public string Generate(string rawReference, PaymentReferenceFormat format = PaymentReferenceFormat.Domestic);
-    public bool IsValid(string communication);
-}
-```
-
-### IsoReferenceHelper
-
-```csharp
-public static class IsoReferenceHelper
-{
-    public static string Generate(string rawReference);
-}
-```
-
-### IsoReferenceValidator
-
-```csharp
-public static class IsoReferenceValidator
-{
-    public static bool IsValid(string reference);
-}
-```
-
-### Modulo97Helper
-
-```csharp
-public static class Modulo97Helper
-{
-    public static int Calculate(string numericString);
-}
-```
+</div>
 
 ---
 
-Made with ❤️ for the .NET community
+## 🌟 About Finova
+
+**Finova** is a comprehensive **offline** financial validation library for .NET. It allows you to validate financial data (IBANs, VAT numbers, Payment References) using official checksum algorithms (Mod97, ISO 7064) and regex patterns directly on your server.
+
+### ⚡ Offline Validation Only
+
+> **Important:** Finova performs **100% offline validation**. It does **NOT** contact external services, APIs, or banking networks.
+
+**What Finova Does (Offline):**
+- ✅ Validates IBAN format and checksum (ISO 7064 Mod 97)
+- ✅ Generates and validates payment references (OGM/VCS, ISO 11649)
+- ✅ Validates KBO/BCE and VAT numbers (Syntax + Checksum)
+- ✅ Extracts bank codes from IBAN structure
+
+**What Finova Does NOT Do:**
+- ❌ Does NOT verify if an account/IBAN actually exists at the bank
+- ❌ Does NOT perform real-time VIES VAT lookups
+- ❌ Does NOT contact external APIs
+- ❌ Does NOT require an internet connection
+
+---
+
+## 🚀 Features
+
+### 💳 **IBAN Validation**
+Fast, offline regex and checksum validation for Benelux and International formats.
+- **Belgium (BE):** Format + Mod97 + Bank Code extraction.
+- **Netherlands (NL):** Format + Mod97 + Bank Code extraction (4-letter codes).
+- **Luxembourg (LU):** Format + Mod97 + Account number structure.
+- **Generic (ISO 13616):** Supports parsing and validating checksums for all ISO-compliant countries.
+
+### 🧾 **Payment References**
+- **Belgian OGM/VCS:** Generates and validates the `+++XXX/XXXX/XXXXX+++` format with automatic check digits.
+- **ISO 11649 (RF):** Generates and validates international `RF` creditor references.
+
+### 🏢 **Business Numbers**
+- **Enterprise Numbers (KBO/BCE):** Validates Belgian company numbers via Mod97.
+- **VAT Numbers:** Validates formatting and check digits.
+
+---
+
+## 📦 Installation
+
+Install via the NuGet Package Manager:
+
+```bash
+dotnet add package Finova
+````
+
+Or via the Package Manager Console:
+
+```powershell
+Install-Package Finova
+```
+
+-----
+
+## 📖 Quick Start
+
+### 1\. Validate an IBAN
+
+```csharp
+using Finova.Belgium.Validators;
+
+// Validates format and checksum (Does NOT check if account exists)
+bool isValid = BelgianBankAccountValidator.ValidateBelgianIban("BE68539007547034");
+
+if (isValid) 
+{
+    Console.WriteLine("Structure is valid");
+}
+```
+
+### 2\. Generate a Payment Reference
+
+```csharp
+using Finova.Belgium.Services;
+using Finova.Core.Models;
+
+var service = new BelgianPaymentReferenceService();
+
+// Generate Belgian OGM (+++000/0012/34569+++)
+string ogm = service.Generate("123456", PaymentReferenceFormat.Domestic);
+
+// Generate ISO RF (RF89INVOICE2024)
+string isoRef = service.Generate("INVOICE2024", PaymentReferenceFormat.IsoRf);
+```
+
+### 3\. Dependency Injection (ASP.NET Core)
+
+```csharp
+// Program.cs
+builder.Services.AddBelgianPaymentReference();
+
+// Service
+public class InvoiceService(IPaymentReferenceGenerator generator)
+{
+    public string CreateRef(string id) => generator.Generate(id);
+}
+```
+
+-----
+
+## 🗺️ Roadmap
+
+Finova is strictly offline. Future updates focus on **schema compliance**, **file generation**, and **mathematical validation**.
+
+### ✅ v1.0.0 - Foundation (Released)
+
+  - Belgian payment references (OGM/VCS)
+  - ISO 11649 international references
+  - Comprehensive testing and CI/CD
+
+### 🔄 v1.1.0 - European Banking (Q1 2026)
+
+  - IBAN validation rules (BE, NL, FR, DE, LU, UK)
+  - BIC/SWIFT format validation (Regex)
+  - Local Bank Code extraction logic
+  - Legacy account conversion algorithms
+
+### 📋 v1.2.0 - Tax & Business (Q2 2026)
+
+  - VAT number syntax & checksums (EU-27)
+  - **Offline** VIES syntax compliance checks
+  - Enterprise number validation (KBO/BCE)
+  - National Tax ID checksums
+
+### 📋 v1.3.0 - SEPA File Standards (Q3 2026)
+
+  - SEPA Credit Transfer (pain.001) **Schema Validation**
+  - SEPA Direct Debit (pain.008) **Structure Checks**
+  - Offline XML Builder (String Generation)
+  - Batch file structure verification
+
+### 📋 v1.4.0 - PEPPOL Compliance (Q4 2026)
+
+  - Participant ID syntax validation
+  - Document type identifier parsing
+  - PEPPOL BIS 3.0 **XSD Verification**
+  - Offline Scheme ID checks
+
+### 📋 v2.0.0 - E-Invoicing Suite (Q1 2027)
+
+  - UBL 2.1 invoice XML generation
+  - EN 16931 structure compliance
+  - Offline Credit & Debit note creation
+  - Cross Industry Invoice (CII) support
+
+### 📋 v2.1.0+ - Country Expansion (Q2+ 2027)
+
+  - Local E-Invoicing Formats (XRechnung, Factur-X)
+  - Expanded EU-27 Validation Rules
+  - Global ID Formats (US, AU, SG)
+
+-----
+
+## 🤝 Contributing
+
+We welcome contributions\! Please see [CONTRIBUTING.md](https://www.google.com/search?q=CONTRIBUTING.md) for details.
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+-----
+**Made with ❤️ for the .NET Community**
+
+[GitHub](https://github.com/fdivrusa/Finova) • [Issues](https://github.com/fdivrusa/Finova/issues)

@@ -4,11 +4,6 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version number (e.g., 1.0.0)'
-        required: true
-        type: string
 
 jobs:
   publish:
@@ -31,14 +26,34 @@ jobs:
     - name: Get version
       id: get_version
       run: |
+        # Base version from the project file
+        BASE_VERSION="1.0.0"
+        
         if [ "${{ github.event_name }}" = "release" ]; then
+          # Release from tag
           VERSION="${{ github.event.release.tag_name }}"
           VERSION="${VERSION#v}"  # Remove 'v' prefix if present
+          PACKAGE_VERSION="$VERSION"
         else
-          VERSION="${{ github.event.inputs.version }}"
+          # Auto-generate version based on current branch
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          BRANCH_NAME="${{ github.ref_name }}"
+          
+          if [ "$BRANCH_NAME" = "develop" ]; then
+            # Alpha version for develop branch
+            VERSION="${BASE_VERSION}-alpha.${COMMIT_COUNT}+${SHORT_SHA}"
+            # NuGet normalizes version by removing +metadata from filename
+            PACKAGE_VERSION="${BASE_VERSION}-alpha.${COMMIT_COUNT}"
+          else
+            # Release version for master branch
+            VERSION="${BASE_VERSION}.${COMMIT_COUNT}"
+            PACKAGE_VERSION="$VERSION"
+          fi
         fi
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "Building version: $VERSION"
+        echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION from branch ${{ github.ref_name }}"
 
     - name: Restore dependencies
       run: dotnet restore
@@ -49,30 +64,19 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release --no-build --verbosity normal
 
-    - name: Pack BankingHelper.Core
-      run: dotnet pack src/BankingHelper.Core/BankingHelper.Core.csproj --configuration Release --no-build --output ./packages -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
-
-    - name: Pack BankingHelper.Belgium
-      run: dotnet pack src/BankingHelper.Belgium/BankingHelper.Belgium.csproj --configuration Release --no-build --output ./packages -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
+    - name: Pack Finova
+      run: dotnet pack src/Finova/Finova.csproj --configuration Release --output ./packages -p:PackageVersion=${{ steps.get_version.outputs.VERSION }}
 
     - name: Publish to NuGet.org
       run: |
-        dotnet nuget push ./packages/BankingHelper.Core.${{ steps.get_version.outputs.VERSION }}.nupkg \
-          --api-key ${{ secrets.NUGET_API_KEY }} \
-          --source https://api.nuget.org/v3/index.json \
-          --skip-duplicate
-        dotnet nuget push ./packages/BankingHelper.Belgium.${{ steps.get_version.outputs.VERSION }}.nupkg \
+        dotnet nuget push ./packages/Finova.${{ steps.get_version.outputs.PACKAGE_VERSION }}.nupkg \
           --api-key ${{ secrets.NUGET_API_KEY }} \
           --source https://api.nuget.org/v3/index.json \
           --skip-duplicate
 
     - name: Publish to GitHub Packages
       run: |
-        dotnet nuget push ./packages/BankingHelper.Core.${{ steps.get_version.outputs.VERSION }}.nupkg \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
-          --skip-duplicate
-        dotnet nuget push ./packages/BankingHelper.Belgium.${{ steps.get_version.outputs.VERSION }}.nupkg \
+        dotnet nuget push ./packages/Finova.${{ steps.get_version.outputs.PACKAGE_VERSION }}.nupkg \
           --api-key ${{ secrets.GITHUB_TOKEN }} \
           --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
           --skip-duplicate
