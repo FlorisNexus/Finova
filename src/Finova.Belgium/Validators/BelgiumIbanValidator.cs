@@ -9,7 +9,7 @@ namespace Finova.Belgium.Validators
     /// Belgian IBAN format: BE + 2 check digits + 12 digits (16 characters total).
     /// Example: BE68539007547034 or formatted: BE68 5390 0754 7034
     /// </summary>
-    public class BelgianBankAccountValidator : IBankAccountValidator
+    public class BelgiumIbanValidator : IIbanValidator
     {
         public string CountryCode => "BE";
 
@@ -53,23 +53,16 @@ namespace Finova.Belgium.Validators
                 return false;
             }
 
-            // Validate structure and checksum
-            return IbanHelper.IsValidIban(normalized);
-        }
-
-        /// <summary>
-        /// Formats a Belgian IBAN with spaces for display.
-        /// </summary>
-        /// <param name="iban">The IBAN to format</param>
-        /// <returns>Formatted IBAN (e.g., "BE68 5390 0754 7034")</returns>
-        public static string FormatBelgianIban(string? iban)
-        {
-            if (!ValidateBelgianIban(iban))
+            for (int i = 2; i < 16; i++)
             {
-                throw new ArgumentException("Invalid Belgian IBAN", nameof(iban));
+                if (!char.IsDigit(normalized[i]))
+                {
+                    return false;
+                }
             }
 
-            return IbanHelper.FormatIban(iban);
+            // Validate structure and checksum
+            return IbanHelper.IsValidIban(normalized);
         }
 
         #endregion

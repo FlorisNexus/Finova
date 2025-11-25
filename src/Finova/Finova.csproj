@@ -10,9 +10,20 @@
     <Authors>Florian Di Vrusa</Authors>
     <Company>Finova</Company>
     <Product>Finova</Product>
-    <Description>Innovative financial toolkit for .NET - IBAN validation, payment references, VAT validation, PEPPOL, UBL generation, and SEPA. Comprehensive library for European and international financial operations including banking, tax, and e-invoicing capabilities. Supports Belgian OGM/VCS, ISO 11649 (RF) international references, with roadmap for multi-country IBAN, VAT, SEPA, and e-invoicing standards.</Description>
-    <PackageTags>finova;finance;banking;payments;iban;vat;sepa;peppol;ubl;e-invoicing;belgium;france;italy;payment-reference;ogm;vcs;ISO11649;modulo97;tax;financial;fintech;invoice;european-payments;multi-country</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<Description>
+	  The high-performance, 100% offline financial validation toolkit for .NET.
+
+	  Key Features:
+	  - IBAN Validation: Specific rules for Belgium, Netherlands, France, Germany, UK, and Luxembourg (plus generic ISO 13616).
+	  - Payment Cards: Zero-allocation Luhn algorithm check, brand detection (Visa, MC, Amex), and secure formatting.
+	  - Payment References: Generate and Validate Belgian OGM/VCS and International ISO 11649 (RF).
+	  - Corporate Identity: Foundation for VAT and Enterprise number validation.
+	  - Structure: BIC/SWIFT format validation (ISO 9362).
+
+	  Designed for FinTechs and SaaS: Zero dependencies, zero network latency, and privacy-first (no external API calls).
+	</Description>
+	<PackageTags>finova;finance;banking;offline;privacy;zero-dependency;iban;bic;swift;credit-card;luhn;payment-reference;ogm;vcs;iso11649;belgium;france;germany;uk;netherlands;fintech;validation;mod97</PackageTags> 
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/fdivrusa/Finova</PackageProjectUrl>
     <RepositoryUrl>https://github.com/fdivrusa/Finova</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -34,6 +45,9 @@
     <ProjectReference Include="..\Finova.Belgium\Finova.Belgium.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Finova.Netherlands\Finova.Netherlands.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Finova.Luxembourg\Finova.Luxembourg.csproj" PrivateAssets="all" />
+	<ProjectReference Include="..\Finova.France\Finova.France.csproj" PrivateAssets="all" />
+	<ProjectReference Include="..\Finova.Germany\Finova.Germany.csproj" PrivateAssets="all" />
+	<ProjectReference Include="..\Finova.UnitedKingdom\Finova.UnitedKingdom.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,7 +65,7 @@
   
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>
 

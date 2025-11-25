@@ -9,7 +9,7 @@ namespace Finova.Belgium.Services
     /// Service for generating and validating Belgian payment references.
     /// Supports both instance methods (for DI) and static methods (for direct usage).
     /// </summary>
-    public partial class BelgianPaymentReferenceService : IPaymentReferenceGenerator
+    public partial class BelgiumPaymentReferenceService : IPaymentReferenceGenerator
     {
         public string CountryCode => "BE";
 
@@ -20,12 +20,12 @@ namespace Finova.Belgium.Services
 
         #region Instance Methods (for Dependency Injection)
 
-        public string Generate(string rawReference, PaymentReferenceFormat format = PaymentReferenceFormat.Domestic)
+        public string Generate(string rawReference, PaymentReferenceFormat format = PaymentReferenceFormat.LocalBelgian)
         {
             return format switch
             {
                 // Domestic (OGM/VCS) - Specific to Belgium
-                PaymentReferenceFormat.Domestic => GenerateOgm(rawReference),
+                PaymentReferenceFormat.LocalBelgian => GenerateOgm(rawReference),
 
                 // ISO RF - Uses the international standard logic from Core
                 PaymentReferenceFormat.IsoRf => IsoReferenceHelper.Generate(rawReference),

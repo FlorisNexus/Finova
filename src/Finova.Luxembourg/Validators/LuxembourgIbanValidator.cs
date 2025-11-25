@@ -9,7 +9,7 @@ namespace Finova.Luxembourg.Validators
     /// Luxembourg IBAN format: LU + 2 check digits + 3 bank code + 13 account number (20 characters total).
     /// Example: LU280019400644750000 or formatted: LU28 0019 4006 4475 0000
     /// </summary>
-    public class LuxembourgBankAccountValidator : IBankAccountValidator
+    public class LuxembourgIbanValidator : IIbanValidator
     {
         public string CountryCode => "LU";
 
@@ -53,25 +53,18 @@ namespace Finova.Luxembourg.Validators
                 return false;
             }
 
+            // Bank Code (indices 4-6) must be numeric.
+            for (int i = 4; i < 7; i++)
+            {
+                if (!char.IsDigit(normalized[i]))
+                {
+                    return false;
+                }
+            }
+
             // Validate structure and checksum
             return IbanHelper.IsValidIban(normalized);
         }
-
-        /// <summary>
-        /// Formats a Luxembourg IBAN with spaces for display.
-        /// </summary>
-        /// <param name="iban">The IBAN to format</param>
-        /// <returns>Formatted IBAN (e.g., "LU28 0019 4006 4475 0000")</returns>
-        public static string FormatLuxembourgIban(string? iban)
-        {
-            if (!ValidateLuxembourgIban(iban))
-            {
-                throw new ArgumentException("Invalid Luxembourg IBAN", nameof(iban));
-            }
-
-            return IbanHelper.FormatIban(iban);
-        }
-
         #endregion
     }
 }

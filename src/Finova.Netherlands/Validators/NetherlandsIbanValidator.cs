@@ -9,7 +9,7 @@ namespace Finova.Netherlands.Validators
     /// Dutch IBAN format: NL + 2 check digits + 4 bank code + 10 account number (18 characters total).
     /// Example: NL91ABNA0417164300 or formatted: NL91 ABNA 0417 1643 00
     /// </summary>
-    public class DutchBankAccountValidator : IBankAccountValidator
+    public class NetherlandsIbanValidator : IIbanValidator
     {
         public string CountryCode => "NL";
 
@@ -53,57 +53,21 @@ namespace Finova.Netherlands.Validators
                 return false;
             }
 
-            // Check bank code format (4 letters after country code and check digits)
-            // Position 4-7 should be letters (bank code like ABNA, RABO, INGB, etc.)
-            var bankCode = normalized.Substring(4, 4);
-            if (!bankCode.All(char.IsLetter))
+            // Check Bank Code: Positions 4-7 must be letters (e.g., ABNA, INGB)
+            for (int i = 4; i < 8; i++)
             {
-                return false;
+                if (!char.IsLetter(normalized[i])) return false;
             }
 
-            // Check account number format (10 digits after bank code)
-            // Position 8-17 should be digits
-            var accountNumber = normalized.Substring(8, 10);
-            if (!accountNumber.All(char.IsDigit))
+            // Check Account Number: Positions 8-17 must be digits
+            for (int i = 8; i < 18; i++)
             {
-                return false;
+                if (!char.IsDigit(normalized[i])) return false;
             }
 
             // Validate IBAN checksum
             return IbanHelper.IsValidIban(normalized);
         }
-
-        /// <summary>
-        /// Extracts the bank code from a Dutch IBAN.
-        /// </summary>
-        /// <param name="iban">The IBAN to extract from</param>
-        /// <returns>The 4-character bank code (e.g., "ABNA", "RABO")</returns>
-        public static string? GetBankCode(string? iban)
-        {
-            if (!ValidateDutchIban(iban))
-            {
-                return null;
-            }
-
-            var normalized = IbanHelper.NormalizeIban(iban);
-            return normalized.Substring(4, 4);
-        }
-
-        /// <summary>
-        /// Formats a Dutch IBAN with spaces for display.
-        /// </summary>
-        /// <param name="iban">The IBAN to format</param>
-        /// <returns>Formatted IBAN (e.g., "NL91 ABNA 0417 1643 00")</returns>
-        public static string FormatDutchIban(string? iban)
-        {
-            if (!ValidateDutchIban(iban))
-            {
-                throw new ArgumentException("Invalid Dutch IBAN", nameof(iban));
-            }
-
-            return IbanHelper.FormatIban(iban);
-        }
-
         #endregion
     }
 }

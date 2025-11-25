@@ -8,7 +8,7 @@ namespace Finova.Belgium.Validators
     /// Format: BE0xxx.xxx.xxx or BE0xxxxxxxxx (10 digits total).
     /// Note: Belgian VAT numbers are essentially the same as Enterprise Numbers (KBO/BCE) with "BE" prefix.
     /// </summary>
-    public static partial class BelgianVatValidator
+    public static partial class BelgiumVatValidator
     {
         [GeneratedRegex(@"[^\d]")]
         private static partial Regex DigitsOnlyRegex();
@@ -37,7 +37,7 @@ namespace Finova.Belgium.Validators
             }
 
             // Delegate to Enterprise Number validator (VAT = KBO/BCE)
-            return BelgianEnterpriseValidator.IsValid(cleaned);
+            return BelgiumEnterpriseValidator.IsValid(cleaned);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Finova.Belgium.Validators
                 cleaned = cleaned[VatPrefix.Length..];
             }
 
-            return BelgianEnterpriseValidator.Normalize(cleaned);
+            return BelgiumEnterpriseValidator.Normalize(cleaned);
         }
     }
 }

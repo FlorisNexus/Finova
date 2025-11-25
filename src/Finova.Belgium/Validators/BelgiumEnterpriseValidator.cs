@@ -8,7 +8,7 @@ namespace Finova.Belgium.Validators
     /// Validator for Belgian Enterprise Numbers (KBO/BCE - Kruispuntbank van Ondernemingen / Banque-Carrefour des Entreprises).
     /// Format: 0xxx.xxx.xxx or BE0xxxxxxxxx (10 digits with check digit validation via modulo 97).
     /// </summary>
-    public static partial class BelgianEnterpriseValidator
+    public static partial class BelgiumEnterpriseValidator
     {
         [GeneratedRegex(@"[^\d]")]
         private static partial Regex DigitsOnlyRegex();
