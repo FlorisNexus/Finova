@@ -14,13 +14,13 @@ namespace Finova.Tests.Luxembourg.Validators
         [Theory]
         [InlineData("LU280019400644750000")]
         [InlineData("LU120010001234567891")]
-        public void IsValidIban_WithValidLuxembourgIbans_ReturnsTrue(string iban) 
+        public void IsValidIban_WithValidLuxembourgIbans_ReturnsTrue(string iban)
             => _validator.IsValidIban(iban).Should().BeTrue();
 
         [Theory]
         [InlineData("LU28 0019 4006 4475 0000")] // With spaces
         [InlineData("lu280019400644750000")] // Lowercase
-        public void IsValidIban_WithFormattedIbans_ReturnsTrue(string iban) 
+        public void IsValidIban_WithFormattedIbans_ReturnsTrue(string iban)
             => _validator.IsValidIban(iban).Should().BeTrue();
 
         [Theory]
@@ -30,12 +30,12 @@ namespace Finova.Tests.Luxembourg.Validators
         [InlineData("LU28001940064475000099")] // Too long
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string? iban) 
+        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string? iban)
             => _validator.IsValidIban(iban).Should().BeFalse();
 
         [Theory]
         [InlineData("LU280019400644750000")]
-        public void ValidateLuxembourgIban_WithValidIbans_ReturnsTrue(string iban) 
+        public void ValidateLuxembourgIban_WithValidIbans_ReturnsTrue(string iban)
             => LuxembourgIbanValidator.ValidateLuxembourgIban(iban).Should().BeTrue();
     }
 }

@@ -30,11 +30,11 @@ namespace Finova.Tests.Germany.Services
         [InlineData("DE00370400440532013000")] // Invalid
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void ParseIban_WithInvalidIban_ReturnsNull(string? iban) 
+        public void ParseIban_WithInvalidIban_ReturnsNull(string? iban)
             => _parser.ParseIban(iban).Should().BeNull();
 
         [Fact]
-        public void CreateDefault_ReturnsValidParser() 
+        public void CreateDefault_ReturnsValidParser()
             => GermanyIbanParser.CreateDefault().CountryCode.Should().Be("DE");
     }
 }

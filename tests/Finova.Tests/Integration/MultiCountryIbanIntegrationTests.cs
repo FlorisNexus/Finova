@@ -19,7 +19,7 @@ namespace Finova.Tests.Integration
         public MultiCountryIbanIntegrationTests()
         {
             var services = new ServiceCollection();
-            
+
             // Register all country services
             services.AddFinovaCoreServices();
             services.AddFinovaBelgium();
@@ -239,7 +239,7 @@ namespace Finova.Tests.Integration
 
             // Assert
             service1.Should().BeSameAs(service2);
-            
+
             for (int i = 0; i < validators1.Count; i++)
             {
                 validators1[i].Should().BeSameAs(validators2[i]);

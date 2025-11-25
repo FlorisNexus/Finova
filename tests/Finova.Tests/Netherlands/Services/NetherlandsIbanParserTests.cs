@@ -30,11 +30,11 @@ namespace Finova.Tests.Netherlands.Services
         [InlineData("NL00ABNA0417164300")] // Invalid
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void ParseIban_WithInvalidIban_ReturnsNull(string? iban) 
+        public void ParseIban_WithInvalidIban_ReturnsNull(string? iban)
             => _parser.ParseIban(iban).Should().BeNull();
 
         [Fact]
-        public void Create_ReturnsValidParser() 
+        public void Create_ReturnsValidParser()
             => NetherlandsIbanParser.Create().CountryCode.Should().Be("NL");
     }
 }

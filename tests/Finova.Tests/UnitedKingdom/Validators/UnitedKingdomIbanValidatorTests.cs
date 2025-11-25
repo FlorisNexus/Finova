@@ -14,13 +14,13 @@ namespace Finova.Tests.UnitedKingdom.Validators
         [Theory]
         [InlineData("GB29NWBK60161331926819")]
         [InlineData("GB82WEST12345698765432")]
-        public void IsValidIban_WithValidUKIbans_ReturnsTrue(string iban) 
+        public void IsValidIban_WithValidUKIbans_ReturnsTrue(string iban)
             => _validator.IsValidIban(iban).Should().BeTrue();
 
         [Theory]
         [InlineData("GB29 NWBK 6016 1331 9268 19")] // With spaces
         [InlineData("gb29nwbk60161331926819")] // Lowercase
-        public void IsValidIban_WithFormattedIbans_ReturnsTrue(string iban) 
+        public void IsValidIban_WithFormattedIbans_ReturnsTrue(string iban)
             => _validator.IsValidIban(iban).Should().BeTrue();
 
         [Theory]
@@ -32,12 +32,12 @@ namespace Finova.Tests.UnitedKingdom.Validators
         [InlineData("GB29NWBK6016133192681X")] // Letter in account
         [InlineData("")] // Empty
         [InlineData(null)] // Null
-        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string? iban) 
+        public void IsValidIban_WithInvalidIbans_ReturnsFalse(string? iban)
             => _validator.IsValidIban(iban).Should().BeFalse();
 
         [Theory]
         [InlineData("GB29NWBK60161331926819")]
-        public void ValidateUnitedKingdomIban_WithValidIbans_ReturnsTrue(string iban) 
+        public void ValidateUnitedKingdomIban_WithValidIbans_ReturnsTrue(string iban)
             => UnitedKingdomIbanValidator.ValidateUnitedKingdomIban(iban).Should().BeTrue();
 
         [Fact]
