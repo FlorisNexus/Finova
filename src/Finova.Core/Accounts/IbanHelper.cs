@@ -187,5 +187,11 @@ namespace Finova.Core.Accounts
 
             return sb.ToString();
         }
+
+        public static int CalculateMod97(string rearranged)
+        {
+            var numericString = ConvertLettersToDigits(rearranged);
+            return Modulo97Helper.Calculate(numericString);
+        }
     }
 }

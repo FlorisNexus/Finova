@@ -17,7 +17,7 @@ namespace Finova.France.Validators
         private const string FranceCountryCode = "FR";
 
         #region Instance Methods (for Dependency Injection)
-        public bool IsValidIban(string iban)
+        public bool IsValidIban([NotNullWhen(true)] string? iban)
         {
             return ValidateFranceIban(iban);
         }

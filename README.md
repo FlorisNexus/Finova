@@ -136,47 +136,57 @@ string isoRef = service.Generate("INVOICE2024", PaymentReferenceFormat.IsoRf);
 
 -----
 
-## 🗺️ Roadmap
+# 🗺️ Roadmap
 
-Finova is strictly offline. Future updates focus on **schema compliance**, **file generation**, and **mathematical validation**.
+Finova is strictly offline. Future updates focus on schema compliance, developer experience, and mathematical validation.
 
-### ✅ v1.0.0 - Foundation (Released)
+---
 
-  - Belgian payment references (OGM/VCS)
-  - ISO 11649 international references
-  - Comprehensive testing and CI/CD
+## ✅ v1.0.0 — Foundation *(Released)*
+- Belgian payment references (OGM/VCS)  
+- ISO 11649 international references  
+- Comprehensive testing and CI/CD  
 
-### 🔄 v1.1.0 - European Banking & Cards (In Progress)
+---
 
-  - **IBAN Expansion:** FR, DE, UK, IT, ES specific rules
-  - **BIC/SWIFT:** Structural format validation (ISO 9362)
-  - **Payment Cards:** Luhn Algorithm & Brand Detection (Visa/MC/Amex)
-  - **Secure Utilities:** PCI-DSS safe string masking helpers
+## ✅ v1.1.0 — Core Expansion *(Released)*
+- **IBAN Expansion:** Italy (IT) & Spain (ES) specific rules  
+- **BIC/SWIFT:** Structural format validation (ISO 9362)  
+- **Payment Cards:** Luhn Algorithm & Brand Detection (Visa/MC/Amex)  
+- **Reference Validator:** RF Creditor Reference (ISO 11649)  
 
-### 📋 v1.2.0 - Corporate Identity (Q3 2026)
+---
 
-  - **VAT Numbers:** Offline checksum validation for EU-27 countries
-  - **Enterprise Numbers:** French SIRET/SIREN, Belgian KBO/BCE
-  - **National IDs:** Spanish NIF/CIF, Italian Codice Fiscale
+## 🔄 v1.2.0 — European Unification *(In Progress)*
+- **Finova.Europe:** Unified wrapper package for all SEPA countries  
+- **Smart Routing:** Auto-detect country rules via `EuropeValidator`  
+- **Extensions:** FluentValidation integration package  
 
-### 📋 v1.3.0 - Modern Payment Strings (Q4 2026)
+---
 
-  - **EPC QR Code:** String builder for SEPA Credit Transfer QR codes
-  - **Payment Links:** SEPA Request-to-Pay URL generator
-  - **Swiss QR:** Reference line parsing logic
+## 📋 v1.3.0 — Corporate Identity *(Planned)*
+- **VAT Numbers:** EU VAT checksums (VIES offline syntax)  
+- **Enterprise Numbers:** French SIRET/SIREN, Belgian KBO/BCE  
+- **National IDs:** Netherlands KVK, Spain NIF/CIF  
 
-### 📋 v1.4.0 - Global Routing (Q1 2027)
+---
 
-  - **USA:** ABA Routing Number checksums
-  - **Canada:** Transit Number validation
-  - **Australia:** BSB Number validation
-  - **Nordics:** KID (NO) & Viitenumero (FI) generators
+## 🔮 v1.4.0 — Modern Payment Strings *(Future)*
+- **EPC QR Code:** Payload builder for SEPA Credit Transfer  
+- **Swiss QR:** Bill string parsing logic  
 
-### 📋 v1.5.0 - Security Suite (Q2 2027)
+---
 
-  - **Virtual IBAN Detection:** Heuristics to identify Neo-banks vs Traditional banks
-  - **Input Sanitization:** Financial-grade string cleaning utilities
-  - **Anomalies:** Basic pattern-based anomaly detection
+## 🔮 v1.5.0 — Global Routing *(Future)*
+- **USA:** ABA routing number checksums  
+- **Canada:** Transit number validation  
+- **Australia:** BSB number validation  
+
+---
+
+## 🔭 Horizon *(Undetermined)*
+- WASM support for Blazor  
+- AI-assisted anomaly detection  
 
 -----
 

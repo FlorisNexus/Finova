@@ -12,7 +12,7 @@ namespace Finova.Core.Services
         /// Parses an IBAN into generic details (no country-specific parsing).
         /// For country-specific details, use country-specific service implementations.
         /// </summary>
-        public IbanDetails? ParseIban(string? iban)
+        public static IbanDetails? Parse(string? iban)
         {
             if (!IbanHelper.IsValidIban(iban))
             {
@@ -28,6 +28,17 @@ namespace Finova.Core.Services
                 CheckDigits = normalized.Substring(2, 2),
                 IsValid = true
             };
+        }
+
+        /// <summary>
+        /// Parses an IBAN into generic details (no country-specific parsing).
+        /// </summary>
+        /// <param name="iban">The IBAN to parse.</param>
+        /// <returns>The parsed IBAN details, or null if invalid.</returns>
+
+        public IbanDetails? ParseIban(string? iban)
+        {
+            return Parse(iban);
         }
     }
 }

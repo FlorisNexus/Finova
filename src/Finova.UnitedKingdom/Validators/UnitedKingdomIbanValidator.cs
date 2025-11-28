@@ -1,5 +1,6 @@
 ﻿using Finova.Core.Accounts;
 using Finova.Core.Interfaces;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Finova.UnitedKingdom.Validators
 {
@@ -16,7 +17,7 @@ namespace Finova.UnitedKingdom.Validators
         private const string UnitedKingdomCountryCode = "GB";
 
         #region Instance Methods (for Dependency Injection)
-        public bool IsValidIban(string iban)
+        public bool IsValidIban([NotNullWhen(true)] string? iban)
         {
             return ValidateUnitedKingdomIban(iban);
         }

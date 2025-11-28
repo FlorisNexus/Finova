@@ -3,7 +3,7 @@
   <PropertyGroup>
 	<IsPackable>true</IsPackable>
 	<PackageId>Finova</PackageId>
-	<Title>Finova - Banking &amp; Payment Validation Toolkit (IBAN, BIC, Luhn)</Title>
+	<Title>Finova: IBAN Validator, Payment &amp; Financial Toolkit</Title>
 	<Product>Finova SDK</Product>
 	<Authors>Florian Di Vrusa</Authors>
 	<Company>Finova</Company>
@@ -20,7 +20,7 @@
 	  Compatible with .NET 8 and .NET 10.
 	</Description>
 
-	<PackageTags>finova;csharp;dotnet;iban;bic;swift;credit-card;luhn;payment;ogm;vcs;iso11649;validation;banking;fintech;offline</PackageTags>
+	<PackageTags>finova;iban;validator;parser;sepa;banking;finance;fintech;bic;swift;luhn;credit-card;payment;iso11649;ogm;vcs;offline;check-digits</PackageTags>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 
 	<ProjectUrl>https://finovapackage.netlify.app</ProjectUrl>
@@ -49,6 +49,8 @@
 	<ProjectReference Include="..\Finova.France\Finova.France.csproj" PrivateAssets="all" />
 	<ProjectReference Include="..\Finova.Germany\Finova.Germany.csproj" PrivateAssets="all" />
 	<ProjectReference Include="..\Finova.UnitedKingdom\Finova.UnitedKingdom.csproj" PrivateAssets="all" />
+	<ProjectReference Include="..\Finova.Spain\Finova.Spain.csproj" PrivateAssets="all" />
+	<ProjectReference Include="..\Finova.Italy\Finova.Italy.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
