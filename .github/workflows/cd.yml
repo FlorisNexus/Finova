@@ -3,15 +3,7 @@ name: CD - Publish NuGet Packages
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - develop
   workflow_dispatch:
-    inputs:
-      version_override:
-        description: 'Version override (leave empty for auto-detection)'
-        required: false
-        type: string
 
 jobs:
   publish:
@@ -30,54 +22,13 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    - name: Determine Version
+    - name: Extract Version from Tag
       id: get_version
       run: |
-        # Check if version override is provided (workflow_dispatch)
-        if [ -n "${{ inputs.version_override }}" ]; then
-          VERSION="${{ inputs.version_override }}"
-          echo "Using override version: $VERSION"
-        # Release event - use tag
-        elif [ "${{ github.event_name }}" == "release" ]; then
-          VERSION=${GITHUB_REF_NAME#v}
-          echo "Release version from tag: $VERSION"
-        # Develop branch - use alpha versioning
-        elif [ "${{ github.ref }}" == "refs/heads/develop" ]; then
-          # Get the latest tag
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          LATEST_TAG=${LATEST_TAG#v}
-
-          # Count commits since last tag
-          COMMIT_COUNT=$(git rev-list --count HEAD ^$(git describe --tags --abbrev=0 2>/dev/null || echo HEAD~100))
-
-          # Get short commit hash
-          COMMIT_HASH=$(git rev-parse --short HEAD)
-
-          # Parse version components (major.minor.patch)
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
-          PATCH=${PATCH:-0}
-
-          # Increment patch for alpha
-          NEXT_PATCH=$((PATCH + 1))
-
-          # Create alpha version: X.Y.Z-alpha.{commit_count}+{hash}
-          VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}-alpha.${COMMIT_COUNT}"
-          echo "Alpha version for develop: $VERSION"
-        else
-          # Fallback for manual dispatch without override
-          VERSION="0.0.1-dev"
-          echo "Fallback version: $VERSION"
-        fi
-
+        # Strip 'v' prefix if present (v1.1.0 -> 1.1.0)
+        VERSION=${GITHUB_REF_NAME#v}
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "Final Version: $VERSION"
-
-        # Determine if this is a prerelease
-        if [[ "$VERSION" == *"-"* ]]; then
-          echo "IS_PRERELEASE=true" >> $GITHUB_OUTPUT
-        else
-          echo "IS_PRERELEASE=false" >> $GITHUB_OUTPUT
-        fi
+        echo "Detected Version: $VERSION"
 
     - name: Restore
       run: dotnet restore
