@@ -1,70 +1,84 @@
 name: CD - Publish NuGet Packages
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
+    release:
+        types: [published]
+    workflow_dispatch:
 
 jobs:
-  publish:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    publish:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
 
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "10.0.x"
 
-    - name: Extract Version from Tag
-      id: get_version
-      run: |
-        # Strip 'v' prefix if present (v1.1.0 -> 1.1.0)
-        VERSION=${GITHUB_REF_NAME#v}
-        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-        echo "Detected Version: $VERSION"
+            - name: Extract Version
+              id: get_version
+              run: |
+                  VERSION=$GITHUB_REF_NAME
 
-    - name: Restore
-      run: dotnet restore
+                  # 1. Strip leading 'v' (e.g., v1.0.0 -> 1.0.0)
+                  VERSION=${VERSION#v}
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.get_version.outputs.VERSION }}
+                  # 2. Strip leading dot if present (Fixes the specific error you are seeing)
+                  # (e.g., .1.0.0 -> 1.0.0)
+                  VERSION=${VERSION#.}
 
-    - name: Test
-      run: dotnet test --configuration Release --no-build
+                  # 3. Handle Manual Runs (Workflow Dispatch)
+                  # If running on a branch (like 'main'), generate a dev version
+                  if [[ "$GITHUB_REF_TYPE" == "branch" ]]; then
+                    COMMIT_SHA=$(git rev-parse --short HEAD)
+                    VERSION="0.0.0-dev.$COMMIT_SHA"
+                  fi
 
-    - name: Pack All Libraries
-      run: |
-        dotnet pack Finova.sln \
-          --configuration Release \
-          --no-build \
-          --output ./nupkgs \
-          -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
-          -p:Version=${{ steps.get_version.outputs.VERSION }}
+                  echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+                  echo "Detected Version: $VERSION"
 
-    - name: Publish to NuGet.org
-      run: |
-        dotnet nuget push "./nupkgs/*.nupkg" \
-          --api-key ${{ secrets.NUGET_API_KEY }} \
-          --source https://api.nuget.org/v3/index.json \
-          --skip-duplicate
+            - name: Restore
+              run: dotnet restore
 
-    - name: Publish to GitHub Packages
-      run: |
-        dotnet nuget push "./nupkgs/*.nupkg" \
-          --api-key ${{ secrets.GITHUB_TOKEN }} \
-          --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
-          --skip-duplicate
+            - name: Build
+              run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.get_version.outputs.VERSION }}
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: nuget-packages
-        path: ./nupkgs/*.nupkg
-        retention-days: 7
+            - name: Test
+              run: dotnet test --configuration Release --no-build
+
+            - name: Pack All Libraries
+              run: |
+                  dotnet pack Finova.sln \
+                    --configuration Release \
+                    --no-build \
+                    --output ./nupkgs \
+                    -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+                    -p:Version=${{ steps.get_version.outputs.VERSION }}
+
+            - name: Publish to NuGet.org
+              run: |
+                  dotnet nuget push "./nupkgs/*.nupkg" \
+                    --api-key ${{ secrets.NUGET_API_KEY }} \
+                    --source https://api.nuget.org/v3/index.json \
+                    --skip-duplicate
+
+            - name: Publish to GitHub Packages
+              run: |
+                  dotnet nuget push "./nupkgs/*.nupkg" \
+                    --api-key ${{ secrets.GITHUB_TOKEN }} \
+                    --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
+                    --skip-duplicate
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: nuget-packages
+                  path: ./nupkgs/*.nupkg
+                  retention-days: 7
