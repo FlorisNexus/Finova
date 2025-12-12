@@ -21,6 +21,8 @@ public class IsoPaymentReferenceGenerator : IPaymentReferenceGenerator
     /// </summary>
     public virtual string Generate(string rawReference, PaymentReferenceFormat format = PaymentReferenceFormat.IsoRf)
     {
+        ArgumentNullException.ThrowIfNull(rawReference);
+
         if (format == PaymentReferenceFormat.IsoRf)
         {
             return IsoReferenceHelper.Generate(rawReference);

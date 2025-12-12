@@ -11,11 +11,9 @@
 [![Build Status](https://github.com/fdivrusa/Finova/actions/workflows/ci.yml/badge.svg)](https://github.com/fdivrusa/Finova/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**🇧🇪 Belgium · 🇳🇱 Netherlands · 🇱🇺 Luxembourg · 🇫🇷 France · 🇩🇪 Germany · 🇬🇧 UK**
-
 *100% Offline | Zero Dependencies | Lightning Fast*
 
-[**Visit the Official Website**](https://finovapackage.netlify.app/)
+[**Visit the Official Website**](https://finovasharp.com/)
 
 </div>
 
@@ -25,7 +23,7 @@
 
 **Finova** is a comprehensive **offline** financial validation library for .NET. It allows you to validate financial data (IBANs, Credit Cards, VAT numbers, Payment References) using official checksum algorithms (Luhn, Mod97, ISO 7064) and regex patterns directly on your server.
 
-👉 **Visit the [Official Website](https://finovapackage.netlify.app/) for full documentation and feature details.**
+👉 **Visit the [Official Website](https://finovasharp.com/) for full documentation and feature details.**
 
 ### ⚡ Offline Validation Only
 
@@ -51,21 +49,24 @@
 ### 💳 **Banking & Cards**
 Fast, offline regex and checksum validation for European and International formats.
 - **IBAN Validation:**
-    - **Belgium (BE):** Format + Mod97 + Bank Code extraction.
-    - **Netherlands (NL):** Format + Mod97 + Bank Code (4-letter).
-    - **France (FR):** Format + Mod97 + RIB Key + Bank Code.
-    - **Germany (DE):** Format + Mod97 + BLZ extraction.
-    - **UK (GB):** Format + Mod97 + Sort Code extraction.
-    - **Generic:** Supports parsing and validating checksums for all ISO-compliant countries.
+    - **Parsing & Validation:** Extracts country code, check digits, bank code, branch code, and account number.
+    - **Country Specific Rules:** Supports specific validation rules for **51 countries** (Belgium, France, Germany, Italy, Spain, UK, Netherlands, etc.).
+    - **Generic Validation:** Supports parsing and validating checksums for all ISO-compliant countries.
 - **Payment Cards:**
     - **Luhn Algorithm:** Mod 10 validation for PAN numbers.
-    - **Brand Detection:** Identifies Visa, Mastercard, Amex, Discover.
+    - **Brand Detection:** Identifies Visa, Mastercard, Amex, Discover, JCB, Maestro.
     - **Secure CVV Check:** Format-only validation (Safe for PCI-DSS).
 - **BIC/SWIFT:** Structural validation (ISO 9362) & Cross-check with IBAN country code.
 
 ### 🧾 **Payment References**
-- **Belgian OGM/VCS:** Generates and validates the `+++XXX/XXXX/XXXXX+++` format with automatic check digits.
 - **ISO 11649 (RF):** Generates and validates international `RF` creditor references.
+- **Local Formats:**
+    - **Belgium:** OGM/VCS (`+++XXX/XXXX/XXXXX+++`)
+    - **Finland:** Viitenumero
+    - **Norway:** KID
+    - **Sweden:** OCR
+    - **Switzerland:** QR Reference
+    - **Slovenia:** SI12
 
 ### 🏢 **Business Numbers**
 - **Enterprise Numbers:** Validates Belgian KBO/BCE (Mod97) & French SIRET/SIREN (Luhn).
@@ -83,7 +84,7 @@ Install via the NuGet Package Manager:
 
 ```bash
 dotnet add package Finova
-````
+```
 
 Or via the Package Manager Console:
 
@@ -98,14 +99,15 @@ Install-Package Finova
 ### 1\. Validate an IBAN
 
 ```csharp
-using Finova.Countries.Europe.Belgium.Validators;
+using Finova.Services;
 
-// Validates format and checksum (Does NOT check if account exists)
-bool isValid = BelgiumIbanValidator.ValidateBelgiumIban("BE68539007547034").IsValid;
+// Validates format, checksum, and country-specific rules
+// (Does NOT check if account exists)
+bool isValid = EuropeIbanValidator.ValidateIban("BE68539007547034").IsValid;
 
 if (isValid) 
 {
-    Console.WriteLine("Structure is valid");
+    Console.WriteLine("IBAN structure is valid");
 }
 ```
 
@@ -185,16 +187,15 @@ Finova is strictly offline. Future updates focus on schema compliance, developer
 
 ---
 
-## 📋 v1.3.0 — Corporate Identity *(Planned)*
+## 🚧 v1.3.0 — Corporate Identity *(Ongoing)*
 - **VAT Numbers:** EU VAT checksums (VIES offline syntax)  
 - **Enterprise Numbers:** French SIRET/SIREN, Belgian KBO/BCE  
-- **National IDs:** Netherlands KVK, Spain NIF/CIF  
 
 ---
 
-## 🔮 v1.4.0 — Modern Payment Strings *(Future)*
-- **EPC QR Code:** Payload builder for SEPA Credit Transfer  
-- **Swiss QR:** Bill string parsing logic  
+## 🔮 v1.4.0 — National Identifiers *(Planned)*
+- **National IDs:** Netherlands KVK, Spain NIF/CIF  
+- **Modern Payment Strings:** EPC QR Code payload builder, Swiss QR parsing  
 
 ---
 
@@ -206,14 +207,13 @@ Finova is strictly offline. Future updates focus on schema compliance, developer
 ---
 
 ## 🔭 Horizon *(Undetermined)*
-- WASM support for Blazor  
 - AI-assisted anomaly detection  
 
 -----
 
 ## 🤝 Contributing
 
-We welcome contributions\! Please see [CONTRIBUTING.md](https://www.google.com/search?q=CONTRIBUTING.md) for details.
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## 📄 License
 
