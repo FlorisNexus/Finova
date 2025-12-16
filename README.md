@@ -52,11 +52,21 @@ Fast, offline regex and checksum validation for European and International forma
     - **Parsing & Validation:** Extracts country code, check digits, bank code, branch code, and account number.
     - **Country Specific Rules:** Supports specific validation rules for **51 European countries and territories** (Belgium, France, Germany, Italy, Spain, UK, Netherlands, etc.).
     - **Generic Validation:** Supports parsing and validating checksums for all ISO-compliant countries.
+- **BBAN Validation (New in v1.5.0):**
+    - **Dedicated Validators:** Specific validators for **51 European countries** (e.g., `BelgiumBbanValidator`, `FranceBbanValidator`).
+    - **Zero Allocation:** High-performance static methods (`Validate(string)`) for critical paths.
+    - **Unified Interface:** `IBbanValidator` for dependency injection scenarios.
 - **Payment Cards:**
     - **Luhn Algorithm:** Mod 10 validation for PAN numbers.
     - **Brand Detection:** Identifies Visa, Mastercard, Amex, Discover, JCB, Maestro, RuPay, Mir, Verve, Troy.
     - **Secure CVV Check:** Format-only validation (Safe for PCI-DSS).
 - **BIC/SWIFT:** Structural validation (ISO 9362) & Cross-check with IBAN country code.
+- **Bank Routing Numbers:** Validates legacy bank codes for major European countries:
+    - **Germany:** Bankleitzahl (BLZ)
+    - **United Kingdom:** Sort Code
+    - **France:** Code Banque
+    - **Italy:** ABI Code
+    - **Spain:** Código de Entidad
 
 ### 🧾 **Payment References**
 - **ISO 11649 (RF):** Generates and validates international `RF` creditor references.

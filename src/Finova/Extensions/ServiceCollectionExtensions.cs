@@ -9,6 +9,7 @@ using Finova.Validators;
 using Finova.Core.Vat;
 using Finova.Extensions.DependencyInjection;
 using Finova.Core.Identifiers;
+using Finova.Services.Global;
 
 namespace Finova.Extensions;
 
@@ -21,22 +22,17 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddFinova(this IServiceCollection services)
     {
-        services.AddSingleton<IBicValidator, BicValidator>();
-        services.AddSingleton<IPaymentCardValidator, PaymentCardValidator>();
-
         services.AddSingleton<IPaymentReferenceValidator, PaymentReferenceValidator>();
         services.AddSingleton<IPaymentReferenceGenerator, PaymentReferenceGenerator>();
+        services.AddSingleton<IBicValidator, BicValidator>();
+        services.AddSingleton<IPaymentCardValidator, PaymentCardValidator>();
 
         // Register global composite services
         services.AddSingleton<ITaxIdService, TaxIdService>();
         services.AddSingleton<INationalIdService, NationalIdService>();
         services.AddSingleton<IBankRoutingService, BankRoutingService>();
         services.AddSingleton<IBankAccountService, BankAccountService>();
-
-        // Register Europe wrappers
-        services.AddSingleton<EuropeIbanValidator>();
-        services.AddSingleton<EuropeVatValidator>();
-        services.AddSingleton<EuropeIbanParser>();
+        services.AddSingleton<BatchValidationService>();
 
         // Register continent-specific validators
         services.AddFinovaEurope();

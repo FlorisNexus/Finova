@@ -1,11 +1,22 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Sweden.Validators;
 
-public static class SwedenBbanValidator
+public class SwedenBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "SE";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
         // BBAN format: 20 digits
         // Total length: 20 characters
 
@@ -24,5 +35,11 @@ public static class SwedenBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

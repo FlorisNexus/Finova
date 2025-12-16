@@ -1,12 +1,16 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Slovakia.Validators;
 
 /// <summary>
 /// Validator for Slovak BBAN (Basic Bank Account Number).
 /// </summary>
-public static class SlovakiaBbanValidator
+public class SlovakiaBbanValidator : IBbanValidator
 {
+    public string CountryCode => "SK";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     /// <summary>
     /// Validates the Slovak BBAN structure and checksum.
     /// Format: 4 Bank + 6 Prefix + 10 Account (Total 20 digits).
@@ -14,8 +18,10 @@ public static class SlovakiaBbanValidator
     /// </summary>
     /// <param name="bban">The BBAN string (20 digits).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -85,5 +91,11 @@ public static class SlovakiaBbanValidator
         }
 
         return sum % 11 == 0;
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

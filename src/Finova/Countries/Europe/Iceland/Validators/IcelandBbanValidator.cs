@@ -1,12 +1,16 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Iceland.Validators;
 
 /// <summary>
 /// Validator for Icelandic BBAN (Basic Bank Account Number).
 /// </summary>
-public static class IcelandBbanValidator
+public class IcelandBbanValidator : IBbanValidator
 {
+    public string CountryCode => "IS";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
     /// <summary>
     /// Validates the Icelandic National ID (Kennitala).
     /// Uses Modulo 11 with weights: 3, 2, 7, 6, 5, 4, 3, 2.
@@ -51,8 +55,10 @@ public static class IcelandBbanValidator
     /// </summary>
     /// <param name="bban">The BBAN to validate.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -80,5 +86,11 @@ public static class IcelandBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

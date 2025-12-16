@@ -1,11 +1,23 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.UnitedKingdom.Validators;
 
-public static class UnitedKingdomBbanValidator
+public class UnitedKingdomBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "GB";
+
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
         // BBAN format: 4 letters (Bank) + 6 digits (Sort Code) + 8 digits (Account)
         // Total length: 18 characters
 
@@ -49,5 +61,13 @@ public static class UnitedKingdomBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return null;
+        string sanitized = input.Replace(" ", "").Replace("-", "").Trim();
+        return Validate(sanitized).IsValid ? sanitized : null;
     }
 }

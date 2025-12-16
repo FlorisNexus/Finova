@@ -14,7 +14,14 @@ public class AustraliaBsbValidator : IBankRoutingValidator, IBankRoutingParser
     public string CountryCode => "AU";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
+    /// <summary>
+    /// Validates the BSB number.
+    /// </summary>
+    /// <param name="input">The BSB number to validate.</param>
+    /// <returns>A ValidationResult.</returns>
+    public static ValidationResult ValidateStatic(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {

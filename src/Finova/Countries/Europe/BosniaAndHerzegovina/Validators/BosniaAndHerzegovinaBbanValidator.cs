@@ -1,11 +1,21 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.BosniaAndHerzegovina.Validators;
 
-internal static class BosniaAndHerzegovinaBbanValidator
+public class BosniaAndHerzegovinaBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "BA";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
         // BBAN format: 16 digits
         // Total length: 16 characters
 
@@ -24,5 +34,11 @@ internal static class BosniaAndHerzegovinaBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

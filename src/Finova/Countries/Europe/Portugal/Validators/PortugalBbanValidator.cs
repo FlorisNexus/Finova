@@ -1,12 +1,16 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Portugal.Validators;
 
 /// <summary>
 /// Validator for Portuguese BBAN (NIB - Número de Identificação Bancária).
 /// </summary>
-public static class PortugalBbanValidator
+public class PortugalBbanValidator : IBbanValidator
 {
+    public string CountryCode => "PT";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     /// <summary>
     /// Validates the Portuguese BBAN (NIB) structure and checksum.
     /// Format: 4 Bank + 4 Branch + 11 Account + 2 Check (Total 21 digits).
@@ -14,8 +18,10 @@ public static class PortugalBbanValidator
     /// </summary>
     /// <param name="bban">The BBAN string (21 digits).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -63,5 +69,11 @@ public static class PortugalBbanValidator
         return checkValue == expectedCheckValue
             ? ValidationResult.Success()
             : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidNibKey);
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

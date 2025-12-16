@@ -1,19 +1,25 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Greece.Validators;
 
 /// <summary>
 /// Validator for Greece BBAN.
 /// </summary>
-public static class GreeceBbanValidator
+public class GreeceBbanValidator : IBbanValidator
 {
+    public string CountryCode => "GR";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     /// <summary>
     /// Validates the Greece BBAN.
     /// </summary>
     /// <param name="bban">The BBAN to validate.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -45,5 +51,11 @@ public static class GreeceBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

@@ -1,11 +1,28 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Malta.Validators;
 
-public static class MaltaBbanValidator
+public class MaltaBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "MT";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
     {
+        return Validate(input).IsValid ? input : null;
+    }
+
+    public static ValidationResult Validate(string? bban)
+    {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
         // BBAN format: 4 letters (Bank) + 5 digits (Sort Code) + 18 alphanumeric (Account)
         // Total length: 27 characters
 

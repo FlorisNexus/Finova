@@ -14,7 +14,14 @@ public class CanadaRoutingNumberValidator : IBankRoutingValidator, IBankRoutingP
     public string CountryCode => "CA";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
+    /// <summary>
+    /// Validates the Canadian Routing Number.
+    /// </summary>
+    /// <param name="input">The routing number to validate.</param>
+    /// <returns>A ValidationResult.</returns>
+    public static ValidationResult ValidateStatic(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {

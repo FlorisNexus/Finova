@@ -19,7 +19,7 @@ public static class FluentValidationScenario
 
     private static void RunExtensionMethodsOverview()
     {
-        ConsoleHelper.WriteSubHeader("12", "FluentValidation Extension Methods (Finova.Extensions.FluentValidation)");
+        ConsoleHelper.WriteSubHeader("15", "FluentValidation Extension Methods (Finova.Extensions.FluentValidation)");
 
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("      Available extension methods from FinovaValidators:");
@@ -42,6 +42,7 @@ public static class FluentValidationScenario
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine("      ► MustBeValidIban() - Validates IBAN format and checksum");
         Console.ResetColor();
+        ConsoleHelper.WriteCode("RuleFor(x => x).MustBeValidIban()");
 
         var ibanDemoValidator = new InlineValidator<string>();
         ibanDemoValidator.RuleFor(x => x).MustBeValidIban().WithMessage("Invalid IBAN");
@@ -58,6 +59,7 @@ public static class FluentValidationScenario
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine("      ► MustBeValidBic() - Validates BIC/SWIFT code format");
         Console.ResetColor();
+        ConsoleHelper.WriteCode("RuleFor(x => x).MustBeValidBic()");
 
         var bicDemoValidator = new InlineValidator<string>();
         bicDemoValidator.RuleFor(x => x).MustBeValidBic().WithMessage("Invalid BIC");
@@ -74,6 +76,7 @@ public static class FluentValidationScenario
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine("      ► MustBeValidPaymentCard() - Validates card using Luhn algorithm");
         Console.ResetColor();
+        ConsoleHelper.WriteCode("RuleFor(x => x).MustBeValidPaymentCard()");
 
         var cardDemoValidator = new InlineValidator<string>();
         cardDemoValidator.RuleFor(x => x).MustBeValidPaymentCard().WithMessage("Invalid card");
@@ -90,6 +93,7 @@ public static class FluentValidationScenario
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine("      ► MustMatchIbanCountry(iban) - Validates BIC country matches IBAN country");
         Console.ResetColor();
+        ConsoleHelper.WriteCode("RuleFor(x => x.Bic).MustMatchIbanCountry(x => x.Iban)");
 
         var bicCountryTests = new[]
         {
@@ -118,7 +122,8 @@ public static class FluentValidationScenario
 
     private static void RunSepaPaymentExample()
     {
-        ConsoleHelper.WriteSubHeader("13", "FluentValidation - SEPA Payment Example");
+        ConsoleHelper.WriteSubHeader("16", "FluentValidation - SEPA Payment Example");
+        ConsoleHelper.WriteCode("sepaValidator.Validate(validPayment)");
 
         Console.ForegroundColor = ConsoleColor.DarkCyan;
         Console.WriteLine("      Using validators in a real-world SEPA payment scenario:");
@@ -172,7 +177,8 @@ public static class FluentValidationScenario
 
     private static void RunCardPaymentExample()
     {
-        ConsoleHelper.WriteSubHeader("14", "FluentValidation - Card Payment");
+        ConsoleHelper.WriteSubHeader("17", "FluentValidation - Card Payment");
+        ConsoleHelper.WriteCode("cardPaymentValidator.Validate(validCard)");
 
         var validCard = new CardPaymentRequest
         {
@@ -220,7 +226,7 @@ public static class FluentValidationScenario
 
     private static void RunGlobalTaxIdExample()
     {
-        ConsoleHelper.WriteSubHeader("15", "FluentValidation - Global Tax IDs");
+        ConsoleHelper.WriteSubHeader("18", "FluentValidation - Global Tax IDs");
 
         var validator = new GlobalTaxIdValidator();
 
@@ -249,25 +255,47 @@ public static class FluentValidationScenario
 
     private static void RunBankValidationExample()
     {
-        ConsoleHelper.WriteSubHeader("16", "Bank Routing & Account Validation");
+        ConsoleHelper.WriteSubHeader("19", "Bank Routing & Account Validation");
 
-        Console.WriteLine("      Validating Bank Routing Numbers (US, CA) and Account Numbers (SG, JP).");
+        Console.WriteLine("      Validating Bank Routing Numbers (US, CA, GB, DE) and Account Numbers (SG, JP, GB).");
         Console.WriteLine();
 
         var validator = new BankDetailsValidator();
 
-        var validUS = new BankDetails { CountryCode = "US", RoutingNumber = "121000248", AccountNumber = "123456789" }; // Valid US Routing
-        var invalidUS = new BankDetails { CountryCode = "US", RoutingNumber = "123456789", AccountNumber = "123456789" }; // Invalid Checksum
+        // US: Only Routing Number is supported for validation in this library
+        var validUS = new BankDetails { CountryCode = "US", RoutingNumber = "121000248", AccountNumber = "" }; 
+        
+        // SG: Only Account Number is supported for validation in this library
+        var validSG = new BankDetails { CountryCode = "SG", RoutingNumber = "", AccountNumber = "0011234560" }; 
 
-        var validSG = new BankDetails { CountryCode = "SG", RoutingNumber = "7171", AccountNumber = "0011234560" }; // Valid SG Account (DBS)
-        var invalidSG = new BankDetails { CountryCode = "SG", RoutingNumber = "7171", AccountNumber = "123" }; // Too short
+        // GB: Both are supported
+        var validGB = new BankDetails { CountryCode = "GB", RoutingNumber = "20-04-15", AccountNumber = "32456789" }; // Barclays
 
-        var examples = new[] { validUS, invalidUS, validSG, invalidSG };
+        // DE: Routing Number (BLZ) is supported
+        var validDE = new BankDetails { CountryCode = "DE", RoutingNumber = "10070024", AccountNumber = "" }; // Deutsche Bank Berlin
+
+        // FR: Routing Number (Code Banque) is supported
+        var validFR = new BankDetails { CountryCode = "FR", RoutingNumber = "30004", AccountNumber = "" }; // BNP Paribas
+
+        // IT: Routing Number (ABI) is supported
+        var validIT = new BankDetails { CountryCode = "IT", RoutingNumber = "01030", AccountNumber = "" }; // Monte dei Paschi di Siena
+
+        // ES: Routing Number (Entidad) is supported
+        var validES = new BankDetails { CountryCode = "ES", RoutingNumber = "2100", AccountNumber = "" }; // CaixaBank
+
+        // Invalid Examples
+        var invalidUS = new BankDetails { CountryCode = "US", RoutingNumber = "123456789", AccountNumber = "" }; // Invalid Checksum
+        var invalidSG = new BankDetails { CountryCode = "SG", RoutingNumber = "", AccountNumber = "123" }; // Too short
+
+        var examples = new[] { validUS, validSG, validGB, validDE, validFR, validIT, validES, invalidUS, invalidSG };
 
         foreach (var example in examples)
         {
             var result = validator.Validate(example);
-            Console.Write($"      Country: {example.CountryCode}, Routing: {example.RoutingNumber}, Account: {example.AccountNumber} -> ");
+            string routingDisplay = string.IsNullOrEmpty(example.RoutingNumber) ? "(none)" : example.RoutingNumber;
+            string accountDisplay = string.IsNullOrEmpty(example.AccountNumber) ? "(none)" : example.AccountNumber;
+
+            Console.Write($"      Country: {example.CountryCode}, Routing: {routingDisplay}, Account: {accountDisplay} -> ");
             if (result.IsValid)
             {
                 Console.ForegroundColor = ConsoleColor.Green;

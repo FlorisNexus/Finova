@@ -1,4 +1,5 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Spain.Validators;
 
@@ -6,20 +7,26 @@ namespace Finova.Countries.Europe.Spain.Validators;
 /// Validator for Spanish BBAN (Basic Bank Account Number).
 /// Format: Entidad (4) + Oficina (4) + DC (2) + Cuenta (10).
 /// </summary>
-public static class SpainBbanValidator
+public class SpainBbanValidator : IBbanValidator
 {
     private const int SpainBbanLength = 20;
 
+    public string CountryCode => "ES";
+
     // Standard weights for Spanish Modulo 11 algorithm
     private static readonly int[] Weights = [1, 2, 4, 8, 5, 10, 9, 7, 3, 6];
+
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
 
     /// <summary>
     /// Validates the Spanish BBAN.
     /// </summary>
     /// <param name="bban">The BBAN string to validate.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -91,5 +98,13 @@ public static class SpainBbanValidator
         if (remainder == 11) return 0;
         if (remainder == 10) return 1;
         return remainder;
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return null;
+        string sanitized = input.Replace(" ", "").Replace("-", "").Trim();
+        return Validate(sanitized).IsValid ? sanitized : null;
     }
 }

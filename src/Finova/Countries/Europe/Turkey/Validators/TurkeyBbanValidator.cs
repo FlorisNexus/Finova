@@ -1,11 +1,22 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Turkey.Validators;
 
-public static class TurkeyBbanValidator
+public class TurkeyBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "TR";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
         // BBAN format: 5 digits (Bank) + 1 alphanumeric (Reserve) + 16 alphanumeric (Account)
         // Total length: 22 characters
 
@@ -39,5 +50,11 @@ public static class TurkeyBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

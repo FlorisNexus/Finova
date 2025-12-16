@@ -1,19 +1,25 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.FaroeIslands.Validators;
 
 /// <summary>
 /// Validator for Faroe Islands BBAN.
 /// </summary>
-public static class FaroeIslandsBbanValidator
+public class FaroeIslandsBbanValidator : IBbanValidator
 {
+    public string CountryCode => "FO";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     /// <summary>
     /// Validates the Faroe Islands BBAN.
     /// </summary>
     /// <param name="bban">The BBAN to validate.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -33,5 +39,11 @@ public static class FaroeIslandsBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

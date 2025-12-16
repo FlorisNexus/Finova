@@ -1,12 +1,16 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Netherlands.Validators;
 
 /// <summary>
 /// Validator for Dutch BBAN (Basic Bank Account Number).
 /// </summary>
-public static class NetherlandsBbanValidator
+public class NetherlandsBbanValidator : IBbanValidator
 {
+    public string CountryCode => "NL";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     /// <summary>
     /// Validates the Dutch BBAN structure and checksum (Elfproef).
     /// Format: 4 Bank (Letters) + 10 Account (Digits) (Total 14 chars).
@@ -14,8 +18,10 @@ public static class NetherlandsBbanValidator
     /// </summary>
     /// <param name="bban">The BBAN string (14 characters).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -78,5 +84,11 @@ public static class NetherlandsBbanValidator
         }
 
         return sum % 11 == 0;
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

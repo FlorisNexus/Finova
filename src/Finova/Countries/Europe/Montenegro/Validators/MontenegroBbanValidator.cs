@@ -1,11 +1,28 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Montenegro.Validators;
 
-public static class MontenegroBbanValidator
+public class MontenegroBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "ME";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
     {
+        return Validate(input).IsValid ? input : null;
+    }
+
+    public static ValidationResult Validate(string? bban)
+    {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
         // BBAN format: 3 digits (Bank) + 13 digits (Account) + 2 digits (Check)
         // Total length: 18 characters
 
@@ -23,7 +40,7 @@ public static class MontenegroBbanValidator
             }
         }
 
-        // 2. Account Number (Pos 3-16): 13 digits
+        // 2. Account Number (Pos 3-16: 13 digits
         for (int i = 3; i < 16; i++)
         {
             if (!char.IsDigit(bban[i]))

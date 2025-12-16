@@ -18,7 +18,10 @@ GlobalExpansionScenario.Run();
 // 5. Global Services Scenario (Tax ID & Bank Account Services)
 GlobalServicesScenario.Run();
 
-// 6. Capabilities Overview
+// 6. BBAN Validation Scenario
+BbanValidationScenario.Run();
+
+// 7. Capabilities Overview
 CapabilitiesScenario.Run();
 
 Console.WriteLine();

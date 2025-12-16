@@ -1,5 +1,6 @@
 using System.Text;
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.France.Validators;
 
@@ -7,17 +8,23 @@ namespace Finova.Countries.Europe.France.Validators;
 /// Validator for French BBAN (Basic Bank Account Number).
 /// Format: Bank (5) + Branch (5) + Account (11) + Key (2).
 /// </summary>
-public class FranceBbanValidator
+public class FranceBbanValidator : IBbanValidator
 {
     private const int FranceBbanLength = 23;
+
+    public string CountryCode => "FR";
+
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
 
     /// <summary>
     /// Validates the French BBAN.
     /// </summary>
     /// <param name="bban">The BBAN string to validate.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -109,5 +116,13 @@ public class FranceBbanValidator
         long calculatedKey = 97 - remainder;
 
         return calculatedKey == keyVal;
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return null;
+        string sanitized = input.Replace(" ", "").Replace("-", "").Trim();
+        return Validate(sanitized).IsValid ? sanitized : null;
     }
 }

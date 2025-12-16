@@ -1,11 +1,22 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Moldova.Validators;
 
-public static class MoldovaBbanValidator
+public class MoldovaBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "MD";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
         // BBAN format: 2 alphanumeric (Bank) + 18 alphanumeric (Account)
         // Total length: 20 characters
 
@@ -33,5 +44,11 @@ public static class MoldovaBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

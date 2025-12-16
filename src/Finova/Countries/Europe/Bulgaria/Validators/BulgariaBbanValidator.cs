@@ -1,11 +1,27 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Bulgaria.Validators;
 
-internal static class BulgariaBbanValidator
+public class BulgariaBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "BG";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
     {
+        return Validate(input).IsValid ? input : null;
+    }
+
+    public static ValidationResult Validate(string? bban)
+    {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
         // BBAN format: 4 letters (Bank) + 4 digits (Branch) + 2 digits (Account Type) + 8 alphanumeric (Account)
         // Total length: 18 characters
 

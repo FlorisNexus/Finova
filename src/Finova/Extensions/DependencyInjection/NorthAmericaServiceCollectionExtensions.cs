@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Finova.Core.Identifiers;
 using Finova.Countries.NorthAmerica.UnitedStates.Validators;
 using Finova.Countries.NorthAmerica.Canada.Validators;
+using Finova.Services;
 
 namespace Finova.Extensions.DependencyInjection;
 
@@ -12,6 +13,7 @@ public static class NorthAmericaServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddFinovaNorthAmerica(this IServiceCollection services)
     {
+        services.AddSingleton<NorthAmericaBankValidator>();
         AddUnitedStatesValidators(services);
         AddCanadaValidators(services);
         return services;

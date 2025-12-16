@@ -1,4 +1,5 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Finova.Countries.Europe.Italy.Validators;
@@ -6,8 +7,10 @@ namespace Finova.Countries.Europe.Italy.Validators;
 /// <summary>
 /// Validator for Italian BBAN (Basic Bank Account Number).
 /// </summary>
-public static class ItalyBbanValidator
+public class ItalyBbanValidator : IBbanValidator
 {
+    public string CountryCode => "IT";
+
     /// <summary>
     /// Table for Odd positions values in CIN calculation.
     /// Mapping: A=1, B=0, C=5, D=7 ... Z=23.
@@ -18,13 +21,17 @@ public static class ItalyBbanValidator
         1, 0, 5, 7, 9, 13, 15, 17, 19, 21, 2, 4, 18, 20, 11, 3, 6, 8, 12, 14, 16, 10, 22, 25, 24, 23
     ];
 
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
     /// <summary>
     /// Validates the Italian BBAN structure and checksum (CIN).
     /// </summary>
     /// <param name="bban">The BBAN string (23 characters: 1 CIN + 5 ABI + 5 CAB + 12 Account).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -136,5 +143,13 @@ public static class ItalyBbanValidator
         char calculatedCin = (char)('A' + remainder);
 
         return calculatedCin == expectedCin;
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return null;
+        string sanitized = input.Replace(" ", "").Replace("-", "").Trim();
+        return Validate(sanitized).IsValid ? sanitized : null;
     }
 }

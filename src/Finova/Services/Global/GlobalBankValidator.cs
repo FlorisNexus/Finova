@@ -1,10 +1,4 @@
 using Finova.Core.Common;
-using Finova.Countries.NorthAmerica.UnitedStates.Validators;
-using Finova.Countries.NorthAmerica.Canada.Validators;
-using Finova.Countries.Asia.Singapore.Validators;
-using Finova.Countries.Asia.Japan.Validators;
-using Finova.Countries.Europe.UnitedKingdom.Validators;
-using Finova.Countries.Oceania.Australia.Validators;
 
 namespace Finova.Services;
 
@@ -28,11 +22,21 @@ public static class GlobalBankValidator
 
         return countryCode.ToUpperInvariant() switch
         {
-            "US" => UnitedStatesRoutingNumberValidator.ValidateRoutingNumber(routingNumber),
-            "CA" => new CanadaRoutingNumberValidator().Validate(routingNumber),
-            "GB" => new UnitedKingdomSortCodeValidator().Validate(routingNumber),
-            "UK" => new UnitedKingdomSortCodeValidator().Validate(routingNumber), // Alias
-            "AU" => new AustraliaBsbValidator().Validate(routingNumber),
+            // Europe
+            "DE" or "FR" or "IT" or "ES" or "GB" or "UK" => EuropeBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
+
+            // North America
+            "US" or "CA" => NorthAmericaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
+
+            // Asia
+            "CN" or "IN" => AsiaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
+
+            // Oceania
+            "AU" => OceaniaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
+
+            // South America
+            "BR" => SouthAmericaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
+
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }
@@ -51,11 +55,33 @@ public static class GlobalBankValidator
 
         return countryCode.ToUpperInvariant() switch
         {
-            "SG" => new SingaporeBankAccountValidator().Validate(accountNumber),
-            "JP" => new JapanBankAccountValidator().Validate(accountNumber),
-            "GB" => new UnitedKingdomBankAccountValidator().Validate(accountNumber),
-            "UK" => new UnitedKingdomBankAccountValidator().Validate(accountNumber), // Alias
-            "AU" => new AustraliaBankAccountValidator().Validate(accountNumber),
+            // Europe
+            "GB" or "UK" => EuropeBankValidator.ValidateBankAccount(countryCode, accountNumber),
+
+            // Asia
+            "SG" or "JP" => AsiaBankValidator.ValidateBankAccount(countryCode, accountNumber),
+
+            // Oceania
+            "AU" => OceaniaBankValidator.ValidateBankAccount(countryCode, accountNumber),
+
+            _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
+        };
+    }
+
+    /// <summary>
+    /// Validates a BBAN (Basic Bank Account Number) for the specified country.
+    /// </summary>
+    public static ValidationResult ValidateBban(string countryCode, string? bban)
+    {
+        if (string.IsNullOrWhiteSpace(countryCode))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
+        return countryCode.ToUpperInvariant() switch
+        {
+            // Europe
+            "DE" or "FR" or "IT" or "ES" or "GB" or "UK" => EuropeBankValidator.ValidateBban(countryCode, bban),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }

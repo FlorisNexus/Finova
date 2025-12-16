@@ -1,11 +1,21 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Albania.Validators;
 
-internal static class AlbaniaBbanValidator
+public class AlbaniaBbanValidator : IBbanValidator
 {
-    public static ValidationResult Validate(string bban)
+    public string CountryCode => "AL";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
         // BBAN format: 3 digits (Bank) + 4 digits (Branch) + 1 alphanumeric (Control) + 16 alphanumeric (Account)
         // Total length: 24 characters
 
@@ -23,7 +33,7 @@ internal static class AlbaniaBbanValidator
             }
         }
 
-        // 2. Branch Code (Pos 3-7): 4 digits
+        // 2. Branch Code (Pos 3-7: 4 digits
         for (int i = 3; i < 7; i++)
         {
             if (!char.IsDigit(bban[i]))
@@ -48,5 +58,11 @@ internal static class AlbaniaBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

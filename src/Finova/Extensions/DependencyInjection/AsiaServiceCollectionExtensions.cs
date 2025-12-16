@@ -4,6 +4,7 @@ using Finova.Countries.Asia.China.Validators;
 using Finova.Countries.Asia.India.Validators;
 using Finova.Countries.Asia.Japan.Validators;
 using Finova.Countries.Asia.Singapore.Validators;
+using Finova.Services;
 
 namespace Finova.Extensions.DependencyInjection;
 
@@ -14,6 +15,7 @@ public static class AsiaServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddFinovaAsia(this IServiceCollection services)
     {
+        services.AddSingleton<AsiaBankValidator>();
         AddChinaValidators(services);
         AddIndiaValidators(services);
         AddJapanValidators(services);

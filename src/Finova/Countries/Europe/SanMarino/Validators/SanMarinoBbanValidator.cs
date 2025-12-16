@@ -1,12 +1,16 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.SanMarino.Validators;
 
 /// <summary>
 /// Validator for San Marino BBAN (Basic Bank Account Number).
 /// </summary>
-public static class SanMarinoBbanValidator
+public class SanMarinoBbanValidator : IBbanValidator
 {
+    public string CountryCode => "SM";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     // Same OddValues table as Italy
     private static readonly int[] OddValues =
     [
@@ -18,8 +22,10 @@ public static class SanMarinoBbanValidator
     /// </summary>
     /// <param name="bban">The BBAN string (23 characters: 1 CIN + 5 ABI + 5 CAB + 12 Account).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -98,5 +104,11 @@ public static class SanMarinoBbanValidator
             sum += charValue;
         }
         return (char)('A' + (sum % 26)) == expectedCin;
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

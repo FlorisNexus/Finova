@@ -1,19 +1,25 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Georgia.Validators;
 
 /// <summary>
 /// Validator for Georgia BBAN.
 /// </summary>
-public static class GeorgiaBbanValidator
+public class GeorgiaBbanValidator : IBbanValidator
 {
+    public string CountryCode => "GE";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     /// <summary>
     /// Validates the Georgia BBAN.
     /// </summary>
     /// <param name="bban">The BBAN to validate.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -43,5 +49,11 @@ public static class GeorgiaBbanValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

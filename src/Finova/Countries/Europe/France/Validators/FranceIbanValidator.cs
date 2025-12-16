@@ -39,7 +39,7 @@ public class FranceIbanValidator : IIbanValidator
         // Validate BBAN (Bank + Branch + Account + Key)
         // BBAN starts at index 4
         string bban = normalized.Substring(4);
-        var bbanResult = new FranceBbanValidator().Validate(bban);
+        var bbanResult = FranceBbanValidator.Validate(bban);
         if (!bbanResult.IsValid)
         {
             return bbanResult;

@@ -73,6 +73,15 @@ public static class ConsoleHelper
         Console.WriteLine();
     }
 
+    public static void WriteCode(string code)
+    {
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.Write("      Code: ");
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
+        Console.WriteLine(code);
+        Console.ResetColor();
+    }
+
     public static void WriteSimpleResult(string value, bool isValid, string? extra = null)
     {
         Console.ForegroundColor = ConsoleColor.White;

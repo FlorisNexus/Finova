@@ -83,6 +83,7 @@ public static class StaticValidationScenario
     private static void RunBicValidation()
     {
         ConsoleHelper.WriteSubHeader("1", "BIC/SWIFT Code Validation (ISO 9362)");
+        ConsoleHelper.WriteCode("BicValidator.Validate(bic).IsValid");
 
         string[] bicCodes =
         [
@@ -114,6 +115,7 @@ public static class StaticValidationScenario
     private static void RunMultiCountryIbanValidation()
     {
         ConsoleHelper.WriteSubHeader("2", "Multi-Country IBAN Validation");
+        ConsoleHelper.WriteCode("CountrySpecificValidator.Validate(iban)");
 
         var ibansToCheck = new (string Country, string Iban, Func<string, ValidationResult> Validator)[]
         {
@@ -181,7 +183,8 @@ public static class StaticValidationScenario
 
     private static void RunEuropeIbanValidation()
     {
-        ConsoleHelper.WriteSubHeader("3", "EuropeIbanValidator (Auto-Detects Country)");
+        ConsoleHelper.WriteSubHeader("3", "Europe-Wide IBAN Validation (Wrapper)");
+        ConsoleHelper.WriteCode("EuropeIbanValidator.ValidateIban(iban).IsValid");
 
         string[] europeanIbans =
         [
@@ -221,6 +224,7 @@ public static class StaticValidationScenario
     private static void RunPaymentCardValidation()
     {
         ConsoleHelper.WriteSubHeader("4", "Payment Card Validation (Luhn Algorithm)");
+        ConsoleHelper.WriteCode("PaymentCardValidator.Validate(number).IsValid");
 
         var testCards = new (string Number, string Description)[]
         {
@@ -272,6 +276,7 @@ public static class StaticValidationScenario
         // 5. ISO 11649 Payment Reference (RF)
         // ─────────────────────────────────────────
         ConsoleHelper.WriteSubHeader("5", "ISO 11649 Payment Reference (RF)");
+        ConsoleHelper.WriteCode("PaymentReferenceValidator.Validate(reference).IsValid");
 
         // Generate valid RF references for testing
         string validRf1 = IsoReferenceHelper.Generate("539007547034");
@@ -307,6 +312,7 @@ public static class StaticValidationScenario
         // 5b. PaymentReferenceValidator Facade (Static with Format)
         // ─────────────────────────────────────────
         ConsoleHelper.WriteSubHeader("5b", "PaymentReferenceValidator Facade (Static with Format)");
+        ConsoleHelper.WriteCode("PaymentReferenceValidator.Validate(reference, format)");
 
         var facadeExamples = new (string Ref, PaymentReferenceFormat Format)[]
         {
@@ -327,6 +333,7 @@ public static class StaticValidationScenario
         // 6. Belgian Structured Payment Reference (OGM/VCS)
         // ─────────────────────────────────────────
         ConsoleHelper.WriteSubHeader("6", "Belgian Structured Payment Reference (OGM/VCS)");
+        ConsoleHelper.WriteCode("BelgiumPaymentReferenceService.ValidateStatic(ogm1).IsValid");
 
         Console.ForegroundColor = ConsoleColor.DarkCyan;
         Console.WriteLine("      Generate Belgian OGM from communication number:");
@@ -359,6 +366,7 @@ public static class StaticValidationScenario
         // 7. Denmark Payment Reference (FIK/GIK)
         // ─────────────────────────────────────────
         ConsoleHelper.WriteSubHeader("7", "Denmark Payment Reference (FIK/GIK)");
+        ConsoleHelper.WriteCode("DenmarkPaymentReferenceService.ValidateStatic(item.Ref)");
 
         try
         {
@@ -389,6 +397,7 @@ public static class StaticValidationScenario
         // 8. Italy Payment Reference (CBILL/PagoPA)
         // ─────────────────────────────────────────
         ConsoleHelper.WriteSubHeader("8", "Italy Payment Reference (CBILL/PagoPA)");
+        ConsoleHelper.WriteCode("ItalyPaymentReferenceService.ValidateStatic(validCbill).IsValid");
 
         try
         {
@@ -412,6 +421,7 @@ public static class StaticValidationScenario
         // 9. Portugal Payment Reference (Multibanco)
         // ─────────────────────────────────────────
         ConsoleHelper.WriteSubHeader("9", "Portugal Payment Reference (Multibanco)");
+        ConsoleHelper.WriteCode("PortugalPaymentReferenceService.ValidateStatic(multibanco).IsValid");
 
         try
         {
@@ -430,6 +440,7 @@ public static class StaticValidationScenario
     private static void RunVatValidation()
     {
         ConsoleHelper.WriteSubHeader("10", "European VAT & Enterprise Number Validation");
+        ConsoleHelper.WriteCode("EuropeVatValidator.ValidateVat(vat)");
 
         var vatExamples = new (string Country, string Vat)[]
         {

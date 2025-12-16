@@ -1,12 +1,16 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Norway.Validators;
 
 /// <summary>
 /// Validator for Norwegian BBAN (Basic Bank Account Number).
 /// </summary>
-public static class NorwayBbanValidator
+public class NorwayBbanValidator : IBbanValidator
 {
+    public string CountryCode => "NO";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input ?? "");
+
     /// <summary>
     /// Validates the Norwegian BBAN structure and checksum.
     /// Format: 4 Bank + 6 Account + 1 Check (Total 11 digits).
@@ -14,8 +18,10 @@ public static class NorwayBbanValidator
     /// </summary>
     /// <param name="bban">The BBAN string (11 digits).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
         if (string.IsNullOrWhiteSpace(bban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -76,5 +82,11 @@ public static class NorwayBbanValidator
         }
 
         return checkDigit == (bban[10] - '0');
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

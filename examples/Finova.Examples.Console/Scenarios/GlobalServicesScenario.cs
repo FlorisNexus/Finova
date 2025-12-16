@@ -2,6 +2,7 @@ using Finova.Core.Identifiers;
 using Finova.Examples.ConsoleApp.Helpers;
 using Finova.Extensions;
 using Finova.Services;
+using Finova.Core.Iban;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Finova.Examples.ConsoleApp.Scenarios;
@@ -10,7 +11,7 @@ public static class GlobalServicesScenario
 {
     public static void Run()
     {
-        ConsoleHelper.WriteSectionHeader("PART 3: DEPENDENCY INJECTION & GLOBAL SERVICES");
+        ConsoleHelper.WriteSectionHeader("PART 5: GLOBAL SERVICES (Tax ID & Bank Account Services)");
 
         // Setup DI Container
         var services = new ServiceCollection();
@@ -21,12 +22,14 @@ public static class GlobalServicesScenario
         RunGlobalBankAccountService(serviceProvider);
         RunEuropeIbanValidator(serviceProvider);
         RunGlobalAdaptersForEurope(serviceProvider);
+        RunRegionalBankValidators(serviceProvider);
         RunGlobalBankValidatorFacade();
     }
 
     private static void RunGlobalTaxIdService(ServiceProvider provider)
     {
-        ConsoleHelper.WriteSubHeader("1", "Global Tax ID Service (ITaxIdService)");
+        ConsoleHelper.WriteSubHeader("24", "Global Tax ID Service (ITaxIdService)");
+        ConsoleHelper.WriteCode("taxIdService.Validate(country, id)");
         var taxIdService = provider.GetRequiredService<ITaxIdService>();
 
         string[] taxIds = [
@@ -48,7 +51,8 @@ public static class GlobalServicesScenario
 
     private static void RunGlobalBankAccountService(ServiceProvider provider)
     {
-        ConsoleHelper.WriteSubHeader("2", "Global Bank Account Service (IBankAccountService)");
+        ConsoleHelper.WriteSubHeader("25", "Global Bank Account Service (IBankAccountService)");
+        ConsoleHelper.WriteCode("bankAccountService.Validate(country, acc)");
         var bankAccountService = provider.GetRequiredService<IBankAccountService>();
 
         string[] bankAccounts = [
@@ -69,16 +73,25 @@ public static class GlobalServicesScenario
 
     private static void RunEuropeIbanValidator(ServiceProvider provider)
     {
-        ConsoleHelper.WriteSubHeader("3", "Europe IBAN Validator (via DI)");
-        var europeValidator = provider.GetRequiredService<EuropeIbanValidator>();
+        ConsoleHelper.WriteSubHeader("26", "Europe IBAN Validator (via DI)");
+        ConsoleHelper.WriteCode("europeValidator.Validate(iban)");
+        // EuropeIbanValidator is registered as IIbanValidator
+        var europeValidator = provider.GetServices<IIbanValidator>().OfType<EuropeIbanValidator>().FirstOrDefault();
 
-        var europeResult = europeValidator.Validate("BE68539007547034");
-        ConsoleHelper.WriteSimpleResult("BE68539007547034", europeResult.IsValid, "Validated via DI (EuropeIbanValidator)");
+        if (europeValidator != null)
+        {
+            var europeResult = europeValidator.Validate("BE68539007547034");
+            ConsoleHelper.WriteSimpleResult("BE68539007547034", europeResult.IsValid, "Validated via DI (EuropeIbanValidator)");
+        }
+        else
+        {
+            Console.WriteLine("EuropeIbanValidator not found in DI.");
+        }
     }
 
     private static void RunGlobalAdaptersForEurope(ServiceProvider provider)
     {
-        ConsoleHelper.WriteSubHeader("17", "Global Adapters for Europe");
+        ConsoleHelper.WriteSubHeader("27", "Global Adapters for Europe");
 
         Console.ForegroundColor = ConsoleColor.DarkCyan;
         Console.WriteLine("      Demonstrating usage of Global Services (ITaxIdService) for European identifiers:");
@@ -89,6 +102,7 @@ public static class GlobalServicesScenario
 
         // 1. Validate French VAT using ITaxIdService
         string frVat = "FR44732829320"; // Valid VAT (BNP Paribas)
+        ConsoleHelper.WriteCode("taxIdService.Validate(\"FR\", frVat)");
         var frVatResult = taxIdService.Validate("FR", frVat);
         ConsoleHelper.WriteInfo("Validate French VAT via ITaxIdService", $"Input: {frVat}");
         if (frVatResult.IsValid)
@@ -102,6 +116,7 @@ public static class GlobalServicesScenario
 
         // 2. Validate French SIREN using ITaxIdService
         string frSiren = "732 829 320"; // Valid SIREN (BNP Paribas)
+        ConsoleHelper.WriteCode("taxIdService.Validate(\"FR\", frSiren)");
         var frSirenResult = taxIdService.Validate("FR", frSiren);
         ConsoleHelper.WriteInfo("Validate French SIREN via ITaxIdService", $"Input: {frSiren}");
         if (frSirenResult.IsValid)
@@ -115,6 +130,7 @@ public static class GlobalServicesScenario
 
         // 3. Validate Belgian IBAN using IBankAccountService
         string beIban = "BE68539007547034";
+        ConsoleHelper.WriteCode("bankAccountService.Validate(\"BE\", beIban)");
         var beIbanResult = bankAccountService.Validate("BE", beIban);
         ConsoleHelper.WriteInfo("Validate Belgian IBAN via IBankAccountService", $"Input: {beIban}");
         if (beIbanResult.IsValid)
@@ -131,7 +147,7 @@ public static class GlobalServicesScenario
 
     private static void RunGlobalBankValidatorFacade()
     {
-        ConsoleHelper.WriteSubHeader("4", "Global Bank Validator Facade (Static)");
+        ConsoleHelper.WriteSubHeader("29", "Global Bank Validator Facade (Static)");
 
         Console.WriteLine("      Demonstrating usage of GlobalBankValidator (Static Facade):");
         Console.WriteLine();
@@ -144,6 +160,7 @@ public static class GlobalServicesScenario
             new { Country = "US", Routing = "123456789", Desc = "Invalid US Checksum" }
         };
 
+        ConsoleHelper.WriteCode("GlobalBankValidator.ValidateRoutingNumber(country, routing)");
         foreach (var test in routingTests)
         {
             var result = GlobalBankValidator.ValidateRoutingNumber(test.Country, test.Routing);
@@ -159,11 +176,35 @@ public static class GlobalServicesScenario
             new { Country = "SG", Account = "123", Desc = "Invalid SG Length" }
         };
 
+        ConsoleHelper.WriteCode("GlobalBankValidator.ValidateBankAccount(country, account)");
         foreach (var test in accountTests)
         {
             var result = GlobalBankValidator.ValidateBankAccount(test.Country, test.Account);
             ConsoleHelper.WriteSimpleResult($"{test.Country} Account: {test.Account}", result.IsValid, test.Desc);
         }
         Console.WriteLine();
+    }
+
+    private static void RunRegionalBankValidators(ServiceProvider provider)
+    {
+        ConsoleHelper.WriteSubHeader("28", "Regional Bank Validators (DI)");
+
+        // Europe
+        var europeValidator = provider.GetRequiredService<EuropeBankValidator>();
+        ConsoleHelper.WriteCode("europeValidator.ValidateRouting(\"DE\", \"10070024\")");
+        var deResult = europeValidator.ValidateRouting("DE", "10070024");
+        ConsoleHelper.WriteSimpleResult("Europe (DE BLZ)", deResult.IsValid, deResult.IsValid ? "Valid" : "Invalid");
+
+        // North America
+        var naValidator = provider.GetRequiredService<NorthAmericaBankValidator>();
+        ConsoleHelper.WriteCode("naValidator.ValidateRouting(\"US\", \"121000248\")");
+        var usResult = naValidator.ValidateRouting("US", "121000248");
+        ConsoleHelper.WriteSimpleResult("North America (US ABA)", usResult.IsValid, usResult.IsValid ? "Valid" : "Invalid");
+
+        // Asia
+        var asiaValidator = provider.GetRequiredService<AsiaBankValidator>();
+        ConsoleHelper.WriteCode("asiaValidator.ValidateRouting(\"CN\", \"102100099996\")");
+        var cnResult = asiaValidator.ValidateRouting("CN", "102100099996");
+        ConsoleHelper.WriteSimpleResult("Asia (CN CNAPS)", cnResult.IsValid, cnResult.IsValid ? "Valid" : "Invalid");
     }
 }

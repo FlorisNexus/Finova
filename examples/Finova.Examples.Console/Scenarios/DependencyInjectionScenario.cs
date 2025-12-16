@@ -29,7 +29,8 @@ public static class DependencyInjectionScenario
 
     private static void RunBicValidator(ServiceProvider serviceProvider)
     {
-        ConsoleHelper.WriteSubHeader("8", "IBicValidator via DI");
+        ConsoleHelper.WriteSubHeader("11", "IBicValidator via DI");
+        ConsoleHelper.WriteCode("bicValidator.Validate(bic).IsValid");
 
         var bicValidator = serviceProvider.GetRequiredService<IBicValidator>();
         string[] testBics = ["GEBABEBB", "BNPAFRPP", "NWBKGB2L", "INVALID"];
@@ -44,7 +45,8 @@ public static class DependencyInjectionScenario
 
     private static void RunPaymentCardValidator(ServiceProvider serviceProvider)
     {
-        ConsoleHelper.WriteSubHeader("9", "IPaymentCardValidator via DI");
+        ConsoleHelper.WriteSubHeader("12", "IPaymentCardValidator via DI");
+        ConsoleHelper.WriteCode("cardValidator.ValidateLuhn(card).IsValid");
 
         var cardValidator = serviceProvider.GetRequiredService<IPaymentCardValidator>();
 
@@ -77,7 +79,8 @@ public static class DependencyInjectionScenario
 
     private static void RunIbanValidator(ServiceProvider serviceProvider)
     {
-        ConsoleHelper.WriteSubHeader("10", "IIbanValidator via DI (EuropeIbanValidator)");
+        ConsoleHelper.WriteSubHeader("13", "IIbanValidator via DI (EuropeIbanValidator)");
+        ConsoleHelper.WriteCode("ibanValidator.Validate(iban).IsValid");
 
         var ibanValidator = serviceProvider.GetRequiredService<IIbanValidator>();
 
@@ -112,7 +115,8 @@ public static class DependencyInjectionScenario
 
     private static void RunPaymentReferenceValidator(ServiceProvider serviceProvider)
     {
-        ConsoleHelper.WriteSubHeader("11", "IPaymentReferenceValidator via DI");
+        ConsoleHelper.WriteSubHeader("14", "IPaymentReferenceValidator via DI");
+        ConsoleHelper.WriteCode("refValidator.Validate(reference, PaymentReferenceFormat.IsoRf).IsValid");
 
         var refValidator = serviceProvider.GetRequiredService<IPaymentReferenceValidator>();
 
@@ -128,6 +132,7 @@ public static class DependencyInjectionScenario
         Console.ForegroundColor = ConsoleColor.DarkCyan;
         Console.WriteLine("      Validate with specific format (DI):");
         Console.ResetColor();
+        ConsoleHelper.WriteCode("refValidator.Validate(reference, format)");
 
         var formatExamples = new (string Ref, PaymentReferenceFormat Format)[]
         {

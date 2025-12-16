@@ -1,20 +1,31 @@
 using System.Text;
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Monaco.Validators;
 
 /// <summary>
 /// Validator for Monaco BBAN (Basic Bank Account Number).
 /// </summary>
-public static class MonacoBbanValidator
+public class MonacoBbanValidator : IBbanValidator
 {
+    public string CountryCode => "MC";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
+
     /// <summary>
     /// Validates the Monaco BBAN structure and RIB Key.
     /// </summary>
     /// <param name="bban">The BBAN string (23 characters).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string bban)
+    public static ValidationResult Validate(string? bban)
     {
+        bban = InputSanitizer.Sanitize(bban);
+
+        if (string.IsNullOrWhiteSpace(bban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
         // BBAN format: 5 digits (Bank) + 5 digits (Branch) + 11 alphanumeric (Account) + 2 digits (RIB Key)
         // Total length: 23 characters
 
@@ -41,7 +52,7 @@ public static class MonacoBbanValidator
             }
         }
 
-        // 3. Account Number (Pos 10-21): 11 alphanumeric characters
+        // 3. Account Number (Pos 10-21: 11 alphanumeric characters
         // (Already implicitly checked by RIB calculation, but good to be explicit if needed)
         // The original code didn't explicitly check alphanumeric for account, but RIB calculation handles letters.
 
@@ -103,5 +114,11 @@ public static class MonacoBbanValidator
         long calculatedKey = 97 - remainder;
 
         return calculatedKey == k;
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        return Validate(input).IsValid ? input : null;
     }
 }

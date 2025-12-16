@@ -14,7 +14,14 @@ public class UnitedKingdomSortCodeValidator : IBankRoutingValidator, IBankRoutin
     public string CountryCode => "GB";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
+    /// <summary>
+    /// Validates the UK Sort Code.
+    /// </summary>
+    /// <param name="input">The sort code to validate.</param>
+    /// <returns>A ValidationResult.</returns>
+    public static ValidationResult ValidateStatic(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {

@@ -69,10 +69,12 @@ public static class EuropeServiceCollectionExtensions
         services.AddSingleton<IIbanParser, EuropeIbanParser>();
         services.AddSingleton<IIbanValidator, EuropeIbanValidator>();
         services.AddSingleton<IVatValidator, EuropeVatValidator>();
+        services.AddSingleton<EuropeBankValidator>();
 
         AddIbanValidators(services);
         AddVatValidators(services);
         AddEnterpriseValidators(services);
+        AddBankValidators(services);
         return services;
     }
 
@@ -112,8 +114,12 @@ public static class EuropeServiceCollectionExtensions
         AddIbanValidator<FaroeIslandsIbanValidator>(services);
         AddIbanValidator<FinlandIbanValidator>(services);
         AddIbanValidator<FranceIbanValidator>(services);
+        services.AddSingleton<IBankRoutingValidator, FranceBankCodeValidator>();
+        services.AddSingleton<FranceBankCodeValidator>();
         AddIbanValidator<GeorgiaIbanValidator>(services);
         AddIbanValidator<GermanyIbanValidator>(services);
+        services.AddSingleton<IBankRoutingValidator, GermanyBankleitzahlValidator>();
+        services.AddSingleton<GermanyBankleitzahlValidator>();
         AddIbanValidator<GibraltarIbanValidator>(services);
         AddIbanValidator<GreeceIbanValidator>(services);
         AddIbanValidator<GreenlandIbanValidator>(services);
@@ -121,6 +127,8 @@ public static class EuropeServiceCollectionExtensions
         AddIbanValidator<IcelandIbanValidator>(services);
         AddIbanValidator<IrelandIbanValidator>(services);
         AddIbanValidator<ItalyIbanValidator>(services);
+        services.AddSingleton<IBankRoutingValidator, ItalyBankCodeValidator>();
+        services.AddSingleton<ItalyBankCodeValidator>();
         AddIbanValidator<KosovoIbanValidator>(services);
         AddIbanValidator<LatviaIbanValidator>(services);
         AddIbanValidator<LiechtensteinIbanValidator>(services);
@@ -141,6 +149,8 @@ public static class EuropeServiceCollectionExtensions
         AddIbanValidator<SlovakiaIbanValidator>(services);
         AddIbanValidator<SloveniaIbanValidator>(services);
         AddIbanValidator<SpainIbanValidator>(services);
+        services.AddSingleton<IBankRoutingValidator, SpainBankCodeValidator>();
+        services.AddSingleton<SpainBankCodeValidator>();
         AddIbanValidator<SwedenIbanValidator>(services);
         AddIbanValidator<SwitzerlandIbanValidator>(services);
         AddIbanValidator<TurkeyIbanValidator>(services);
@@ -222,5 +232,74 @@ public static class EuropeServiceCollectionExtensions
         AddEnterpriseValidator<CzechRepublicIcoValidator>(services);
         AddEnterpriseValidator<DenmarkCvrValidator>(services);
         AddEnterpriseValidator<EstoniaRegistrikoodValidator>(services);
+    }
+
+    private static void AddBankValidators(IServiceCollection services)
+    {
+        services.AddSingleton<GermanyBankleitzahlValidator>();
+        services.AddSingleton<FranceBankCodeValidator>();
+        services.AddSingleton<ItalyBankCodeValidator>();
+        services.AddSingleton<SpainBankCodeValidator>();
+        services.AddSingleton<UnitedKingdomSortCodeValidator>();
+        services.AddSingleton<UnitedKingdomBankAccountValidator>();
+
+        // BBAN Validators
+        AddBbanValidator<AlbaniaBbanValidator>(services);
+        AddBbanValidator<AndorraBbanValidator>(services);
+        AddBbanValidator<AustriaBbanValidator>(services);
+        AddBbanValidator<AzerbaijanBbanValidator>(services);
+        AddBbanValidator<BelarusBbanValidator>(services);
+        AddBbanValidator<BelgiumBbanValidator>(services);
+        AddBbanValidator<BosniaAndHerzegovinaBbanValidator>(services);
+        AddBbanValidator<BulgariaBbanValidator>(services);
+        AddBbanValidator<CroatiaBbanValidator>(services);
+        AddBbanValidator<CyprusBbanValidator>(services);
+        AddBbanValidator<CzechRepublicBbanValidator>(services);
+        AddBbanValidator<DenmarkBbanValidator>(services);
+        AddBbanValidator<EstoniaBbanValidator>(services);
+        AddBbanValidator<FaroeIslandsBbanValidator>(services);
+        AddBbanValidator<FinlandBbanValidator>(services);
+        AddBbanValidator<FranceBbanValidator>(services);
+        AddBbanValidator<GeorgiaBbanValidator>(services);
+        AddBbanValidator<GermanyBbanValidator>(services);
+        AddBbanValidator<GibraltarBbanValidator>(services);
+        AddBbanValidator<GreeceBbanValidator>(services);
+        AddBbanValidator<GreenlandBbanValidator>(services);
+        AddBbanValidator<HungaryBbanValidator>(services);
+        AddBbanValidator<IcelandBbanValidator>(services);
+        AddBbanValidator<IrelandBbanValidator>(services);
+        AddBbanValidator<ItalyBbanValidator>(services);
+        AddBbanValidator<KosovoBbanValidator>(services);
+        AddBbanValidator<LatviaBbanValidator>(services);
+        AddBbanValidator<LiechtensteinBbanValidator>(services);
+        AddBbanValidator<LithuaniaBbanValidator>(services);
+        AddBbanValidator<LuxembourgBbanValidator>(services);
+        AddBbanValidator<MaltaBbanValidator>(services);
+        AddBbanValidator<MoldovaBbanValidator>(services);
+        AddBbanValidator<MonacoBbanValidator>(services);
+        AddBbanValidator<MontenegroBbanValidator>(services);
+        AddBbanValidator<NetherlandsBbanValidator>(services);
+        AddBbanValidator<NorthMacedoniaBbanValidator>(services);
+        AddBbanValidator<NorwayBbanValidator>(services);
+        AddBbanValidator<PolandBbanValidator>(services);
+        AddBbanValidator<PortugalBbanValidator>(services);
+        AddBbanValidator<RomaniaBbanValidator>(services);
+        AddBbanValidator<SanMarinoBbanValidator>(services);
+        AddBbanValidator<SerbiaBbanValidator>(services);
+        AddBbanValidator<SlovakiaBbanValidator>(services);
+        AddBbanValidator<SloveniaBbanValidator>(services);
+        AddBbanValidator<SpainBbanValidator>(services);
+        AddBbanValidator<SwedenBbanValidator>(services);
+        AddBbanValidator<SwitzerlandBbanValidator>(services);
+        AddBbanValidator<TurkeyBbanValidator>(services);
+        AddBbanValidator<UkraineBbanValidator>(services);
+        AddBbanValidator<UnitedKingdomBbanValidator>(services);
+        AddBbanValidator<VaticanBbanValidator>(services);
+    }
+
+    private static void AddBbanValidator<T>(IServiceCollection services) where T : class, IBbanValidator
+    {
+        services.AddSingleton<IBbanValidator, T>();
+        services.AddSingleton<T>();
     }
 }
