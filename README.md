@@ -88,7 +88,7 @@ Fast, offline regex and checksum validation for European and International forma
     - **Portugal:** Multibanco
 
 ### 🏢 **Business Numbers**
-- **Enterprise Numbers:** Validates business registration numbers for **51 European countries** (e.g., Belgian KBO, French SIREN, Italian P.IVA, etc.).
+- **Tax IDs:** Validates business registration numbers for **51 European countries** (e.g., Belgian KBO, French SIREN, Italian P.IVA, etc.).
 - **VAT Numbers:** Validates formatting and check digits for **European countries** (EU + UK, Norway, Switzerland, etc.).
 
 ### � **National Identity (New in v1.6.0)**
@@ -121,7 +121,7 @@ Finova now supports major economies across North America, South America, Asia, a
 <details>
 <summary><strong>View Full List of Supported Countries (51)</strong></summary>
 
-| Country | Code | IBAN | VAT | Enterprise | Payment Ref |
+| Country | Code | IBAN | VAT | Tax ID | Payment Ref |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | Albania | AL | ✅ | ✅ | ✅ | - |
 | Andorra | AD | ✅ | ✅ | ✅ | - |
@@ -321,20 +321,20 @@ Inject and use the validators in your services:
 
 ```csharp
 using Finova.Core.Vat;
-using Finova.Core.Enterprise;
+using Finova.Services;
 
 public class BusinessService
 {
     private readonly IVatValidator _vatValidator;
-    private readonly IEnterpriseValidator _enterpriseValidator;
+    private readonly ITaxIdService _taxIdService;
 
-    public BusinessService(IVatValidator vatValidator, IEnterpriseValidator enterpriseValidator)
+    public BusinessService(IVatValidator vatValidator, ITaxIdService taxIdService)
     {
         _vatValidator = vatValidator;
-        _enterpriseValidator = enterpriseValidator;
+        _taxIdService = taxIdService;
     }
 
-    public void RegisterCompany(string vatNumber, string enterpriseNumber)
+    public void RegisterCompany(string countryCode, string vatNumber, string taxId)
     {
         // Validates VAT format and checksum for any EU country
         if (!_vatValidator.Validate(vatNumber).IsValid)
@@ -342,10 +342,10 @@ public class BusinessService
             throw new Exception("Invalid VAT Number");
         }
 
-        // Validates Enterprise Number (e.g., SIRET, KBO)
-        if (!_enterpriseValidator.Validate(enterpriseNumber).IsValid)
+        // Validates Tax ID (e.g., SIRET, KBO, EIN)
+        if (!_taxIdService.Validate(countryCode, taxId).IsValid)
         {
-            throw new Exception("Invalid Enterprise Number");
+            throw new Exception("Invalid Tax ID");
         }
     }
 }
@@ -357,53 +357,32 @@ You can also use the static helpers directly without DI:
 
 ```csharp
 using Finova.Services;
-using Finova.Core.Enterprise;
 
 // 1. Validate VAT Number (Auto-detects country)
-bool isVatValid = EuropeVatValidator.Validate("FR12345678901").IsValid;
+bool isVatValid = EuropeVatValidator.ValidateVat("FR12345678901").IsValid;
 
-// 2. Validate Enterprise Number (Auto-detects country)
-bool isEntValid = EuropeEnterpriseValidator.ValidateEnterpriseNumber("BE0123456789").IsValid;
-
-// 3. Validate Specific Enterprise Type
-bool isSiretValid = EuropeEnterpriseValidator.ValidateEnterpriseNumber(
-    "73282932000074",
-    EnterpriseNumberType.FranceSiret
-).IsValid;
+// 2. Validate Tax ID (Requires Country Code)
+bool isTaxIdValid = GlobalIdentityValidator.ValidateTaxId("BE", "0123456789").IsValid;
 ```
 
-### 5. Enterprise Validator Usage
+### 5. Tax ID Validator Usage
 
-Finova provides a unified validator for European Enterprise and Business Registration Numbers, supporting **51 countries**.
+Finova provides a unified validator for Global Tax IDs (including European Enterprise Numbers), supporting **51+ countries**.
 
 ```csharp
 using Finova.Services;
-using Finova.Core.Enterprise;
 
-// 1. Auto-detect Country from Code
-// Validates based on the country code provided (e.g., "DE", "FR", "GB")
-var result = EuropeEnterpriseValidator.ValidateEnterpriseNumber("12345678", "GB");
+// 1. Validate Tax ID
+// Validates based on the country code provided (e.g., "DE", "FR", "US")
+var result = GlobalIdentityValidator.ValidateTaxId("GB", "12345678");
 if (result.IsValid)
 {
-    Console.WriteLine("Valid UK Company Number");
+    Console.WriteLine("Valid UK Tax ID");
 }
 
-// 2. Validate Specific Type
-// Explicitly validate against a specific enterprise number type
-var vatResult = EuropeEnterpriseValidator.ValidateEnterpriseNumber(
-    "DE123456789",
-    EnterpriseNumberType.GermanySteuernummer
-);
-
-// 3. Normalize Number
-// Removes formatting characters (spaces, dots, hyphens) and country prefixes
-string? normalized = EuropeEnterpriseValidator.GetNormalizedNumber("BE 0456.789.123");
-// Output: "0456789123"
-
-// 4. Country-Specific Logic (e.g., Germany)
-// Automatically distinguishes between Handelsregisternummer (HRA/HRB) and Steuernummer
-var deResult = EuropeEnterpriseValidator.ValidateEnterpriseNumber("HRB 12345", "DE");
-// Validates as GermanyHandelsregisternummer
+// 2. Validate Non-European Tax IDs
+// Supports global formats like US EIN, Brazil CNPJ, etc.
+var usResult = GlobalIdentityValidator.ValidateTaxId("US", "12-3456789");
 ```
 
 ### 6. Advanced Usage (Custom Validators)
@@ -473,7 +452,7 @@ Finova is strictly offline. Future updates focus on schema compliance, developer
 
 ## ✅ v1.3.0 — Corporate Identity *(Released)*
 - **VAT Numbers:** EU VAT checksums (VIES offline syntax)
-- **Enterprise Numbers:** French SIRET/SIREN, Belgian KBO/BCE
+- **Tax IDs:** French SIRET/SIREN, Belgian KBO/BCE
 
 ---
 

@@ -12,6 +12,7 @@
             Features:
             ✔️ Universal IBAN Parser: Auto-detects and validates rules for Europe (DE, IT, ES, FR,
             BE, NL, UK) and Global formats.
+            ✔️ National IDs: Validates National ID / Citizen ID numbers for 51 European countries (e.g., France NIR, Italy Codice Fiscale, UK NINO).
             ✔️ Enterprise Numbers: Validates French SIRET/SIREN, Belgian KBO/BCE, German
             Steuernummer, and more (51 countries).
             ✔️ VAT Numbers: Validates EU VAT formats and checksums (VIES offline syntax).
@@ -23,7 +24,7 @@
             Designed for FinTechs and SaaS. Zero dependencies.
         </Description>
         <PackageTags>
-            finova;iban;validator;parser;sepa;banking;finance;fintech;bic;swift;luhn;credit-card;payment;iso11649;ogm;vcs;offline;check-digits;vat;enterprise;siret;kbo;steuernummer;business;usa;canada;brazil;mexico;china;japan;india;singapore;australia;global;routing-number;ein;sin;cpf;cnpj;curp;rfc;aadhaar;pan;nric;uen;tfn;abn</PackageTags>
+            finova;iban;validator;parser;sepa;banking;finance;fintech;bic;swift;luhn;credit-card;payment;iso11649;ogm;vcs;offline;check-digits;vat;enterprise;siret;kbo;steuernummer;business;usa;canada;brazil;mexico;china;japan;india;singapore;australia;global;routing-number;ein;sin;cpf;cnpj;curp;rfc;aadhaar;pan;nric;uen;tfn;abn;national-id;citizen-id;ssn;nino;personnummer;codice-fiscale;dni;nir;steuer-id;identity;kyc</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
         <ProjectUrl>https://finovasharp.com</ProjectUrl>
