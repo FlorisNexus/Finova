@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Malta.Validators;
 
-public partial class MaltaVatValidator : IVatValidator, IEnterpriseValidator
+public partial class MaltaVatValidator : IVatValidator, ITaxIdValidator
 {
     [GeneratedRegex(@"^MT\d{8}$")]
     private static partial Regex VatRegex();

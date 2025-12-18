@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Slovenia.Validators;
@@ -10,7 +11,7 @@ namespace Finova.Countries.Europe.Slovenia.Validators;
 /// Format: SI + 8 digits.
 /// Algorithm: Weighted Modulo 11.
 /// </summary>
-public partial class SloveniaVatValidator : IVatValidator, IEnterpriseValidator
+public partial class SloveniaVatValidator : IVatValidator, ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex VatRegex();

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Germany.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Germany.Validators;
 /// Validator for German Commercial Register Number (Handelsregisternummer).
 /// Format: HRA or HRB followed by digits (e.g., HRB 12345).
 /// </summary>
-public partial class GermanyHandelsregisternummerValidator : IEnterpriseValidator
+public partial class GermanyHandelsregisternummerValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^(HRA|HRB)\s?\d+$", RegexOptions.IgnoreCase)]
     private static partial Regex FormatRegex();

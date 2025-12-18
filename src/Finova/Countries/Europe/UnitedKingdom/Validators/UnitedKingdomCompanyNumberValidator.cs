@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.UnitedKingdom.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.UnitedKingdom.Validators;
 /// Validator for United Kingdom Company Registration Number (CRN) from Companies House.
 /// Format: 8 characters (usually 8 digits, or 2 letters + 6 digits).
 /// </summary>
-public partial class UnitedKingdomCompanyNumberValidator : IEnterpriseValidator
+public partial class UnitedKingdomCompanyNumberValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^([A-Z]{2}\d{6}|\d{8})$")]
     private static partial Regex CrnRegex();

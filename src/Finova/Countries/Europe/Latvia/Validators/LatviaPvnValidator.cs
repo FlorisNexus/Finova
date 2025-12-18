@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Latvia.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Latvia.Validators;
 /// Validator for Latvia PVN (VAT Number).
 /// Format: 11 digits.
 /// </summary>
-public partial class LatviaPvnValidator : IEnterpriseValidator
+public partial class LatviaPvnValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

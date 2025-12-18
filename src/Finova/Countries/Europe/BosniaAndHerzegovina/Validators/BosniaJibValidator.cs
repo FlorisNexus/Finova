@@ -1,5 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.BosniaAndHerzegovina.Validators;
 
@@ -7,7 +8,7 @@ namespace Finova.Countries.Europe.BosniaAndHerzegovina.Validators;
 /// Validator for Bosnia and Herzegovina JIB (Jedinstveni Identifikacioni Broj).
 /// Wraps the existing BosniaAndHerzegovinaVatValidator.
 /// </summary>
-public class BosniaJibValidator : IEnterpriseValidator
+public class BosniaJibValidator : ITaxIdValidator
 {
     public string CountryCode => "BA";
 

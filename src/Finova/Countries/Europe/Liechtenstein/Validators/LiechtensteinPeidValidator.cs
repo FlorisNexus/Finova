@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Liechtenstein.Validators;
 
@@ -9,7 +9,7 @@ namespace Finova.Countries.Europe.Liechtenstein.Validators;
 /// Format: CHE-123.456.789 or similar, but sanitized for CHE or LI prefix.
 /// Logic: Same as Swiss UID.
 /// </summary>
-public partial class LiechtensteinPeidValidator : IEnterpriseValidator
+public partial class LiechtensteinPeidValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

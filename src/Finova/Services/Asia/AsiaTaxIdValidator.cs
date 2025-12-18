@@ -27,8 +27,8 @@ public static class AsiaTaxIdValidator
         return countryCode.ToUpperInvariant() switch
         {
             "CN" => ChinaUnifiedSocialCreditCodeValidator.ValidateUscc(taxId),
-            "JP" => JapanCorporateNumberValidator.Validate(taxId),
-            "SG" => SingaporeUenValidator.Validate(taxId),
+            "JP" => JapanCorporateNumberValidator.ValidateStatic(taxId),
+            "SG" => SingaporeUenValidator.ValidateStatic(taxId),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }

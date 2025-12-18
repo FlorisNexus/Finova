@@ -47,6 +47,10 @@
 - **Inline Comments**: **Forbidden** for obvious logic. Allowed only for complex business rules or specific algorithm explanations (e.g., "Mod97 algorithm step 3").
 - **Markdown Files**: Update `README.md`, `ARCHITECTURE.md`, etc., if your changes affect the project structure or usage.
 
+### 3.4. Localization & Resources
+- **No Hardcoded Strings**: Validation error messages must NOT be hardcoded strings.
+- **Resource Files**: Use `ValidationMessages` (backed by `.resx`) for all user-facing strings.
+
 ## 4. Testing Strategy
 
 ### 4.1. Mandatory Unit Tests

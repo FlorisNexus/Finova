@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Finland.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Finland.Validators;
 /// Validator for Finland Business ID (Y-tunnus).
 /// Format: 7 digits + hyphen + 1 check digit (Total 8 numeric digits).
 /// </summary>
-public partial class FinlandBusinessIdValidator : IEnterpriseValidator
+public partial class FinlandBusinessIdValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

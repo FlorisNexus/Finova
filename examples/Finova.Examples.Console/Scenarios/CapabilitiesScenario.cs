@@ -13,7 +13,7 @@ public static class CapabilitiesScenario
         Console.WriteLine("  Legend: ✓ = Supported, - = Not Applicable/Not Implemented");
         Console.WriteLine();
         Console.WriteLine("  ┌──────────────────────┬──────┬──────┬──────┬──────┬──────────┐");
-        Console.WriteLine("  │ Country              │ Code │ IBAN │ VAT  │ Ent. │ Pay. Ref │");
+        Console.WriteLine("  │ Country              │ Code │ IBAN │ VAT  │ TaxID│ Pay. Ref │");
         Console.WriteLine("  ├──────────────────────┼──────┼──────┼──────┼──────┼──────────┤");
 
         var capabilities = new[]

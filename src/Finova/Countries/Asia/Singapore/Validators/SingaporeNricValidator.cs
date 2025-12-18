@@ -1,25 +1,36 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Asia.Singapore.Validators;
 
 /// <summary>
 /// Validates Singapore NRIC (National Registration Identity Card) and FIN (Foreign Identification Number).
 /// </summary>
-public static class SingaporeNricValidator
+public class SingaporeNricValidator : INationalIdValidator
 {
+    /// <inheritdoc/>
+    public string CountryCode => "SG";
+
+    /// <inheritdoc/>
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
     /// <summary>
     /// Validates a Singapore NRIC or FIN.
     /// </summary>
     /// <param name="nric">The NRIC/FIN string (e.g., "S1234567A").</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? nric)
+    public static ValidationResult ValidateStatic(string? nric)
     {
         if (string.IsNullOrWhiteSpace(nric))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = nric.Trim().ToUpperInvariant();
+        var clean = InputSanitizer.Sanitize(nric);
+        if (string.IsNullOrEmpty(clean))
+        {
+             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
 
         if (clean.Length != 9)
         {
@@ -82,5 +93,12 @@ public static class SingaporeNricValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        var result = Validate(input);
+        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
     }
 }

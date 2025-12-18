@@ -1,13 +1,14 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Iceland.Validators;
 
 /// <summary>
 /// Validator for Iceland Kennitala (National ID).
 /// </summary>
-public partial class IcelandKennitalaValidator : IEnterpriseValidator
+public partial class IcelandKennitalaValidator : ITaxIdValidator, INationalIdValidator
 {
     [GeneratedRegex(@"^\d{6}-?\d{4}$")]
     private static partial Regex FormatRegex();
@@ -16,12 +17,24 @@ public partial class IcelandKennitalaValidator : IEnterpriseValidator
 
     public ValidationResult Validate(string? number)
     {
+        return ValidateStatic(number);
+    }
+
+    /// <summary>
+    /// Validates the Iceland Kennitala (Static).
+    /// </summary>
+    /// <param name="number">The ID to validate.</param>
+    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
+    public static ValidationResult ValidateStatic(string? number)
+    {
         return ValidateKennitala(number);
     }
 
-    public string? Parse(string? number)
+    /// <inheritdoc/>
+    public string? Parse(string? input)
     {
-        return EnterpriseNumberNormalizer.Normalize(number, CountryCode);
+        var result = Validate(input);
+        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
     }
 
     public static ValidationResult ValidateKennitala(string? kennitala)

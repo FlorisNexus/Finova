@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Vatican.Validators;
 
-public partial class VaticanCityVatValidator : IVatValidator, IEnterpriseValidator
+public partial class VaticanCityVatValidator : IVatValidator, ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{11}$")]
     private static partial Regex VatRegex();

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Austria.Validators;
 
@@ -9,7 +9,7 @@ namespace Finova.Countries.Europe.Austria.Validators;
 /// Format: 1-6 digits followed by a check letter (e.g., 123456x).
 /// Often prefixed with FN (e.g., FN 123456x).
 /// </summary>
-public partial class AustriaFirmenbuchValidator : IEnterpriseValidator
+public partial class AustriaFirmenbuchValidator : ITaxIdValidator
 {
     private const string CountryCodePrefix = "AT";
     [GeneratedRegex(@"^(?:FN\s?)?(\d{1,6})([a-zA-Z])$")]

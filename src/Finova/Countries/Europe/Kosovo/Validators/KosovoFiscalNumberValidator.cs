@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Kosovo.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Kosovo.Validators;
 /// Validator for Kosovo Fiscal Number (Numri Fiskal).
 /// Format: 9 digits.
 /// </summary>
-public partial class KosovoFiscalNumberValidator : IEnterpriseValidator
+public partial class KosovoFiscalNumberValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

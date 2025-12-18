@@ -1,25 +1,36 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Asia.Japan.Validators;
 
 /// <summary>
 /// Validates Japanese My Number (Individual Number).
 /// </summary>
-public static class JapanMyNumberValidator
+public class JapanMyNumberValidator : INationalIdValidator
 {
+    /// <inheritdoc/>
+    public string CountryCode => "JP";
+
+    /// <inheritdoc/>
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
     /// <summary>
     /// Validates a Japanese My Number.
     /// </summary>
     /// <param name="myNumber">The My Number string (12 digits).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? myNumber)
+    public static ValidationResult ValidateStatic(string? myNumber)
     {
         if (string.IsNullOrWhiteSpace(myNumber))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = myNumber.Replace(" ", "").Replace("-", "");
+        var clean = InputSanitizer.Sanitize(myNumber);
+        if (string.IsNullOrEmpty(clean))
+        {
+             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
 
         if (clean.Length != 12)
         {
@@ -50,5 +61,12 @@ public static class JapanMyNumberValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        var result = Validate(input);
+        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
     }
 }

@@ -1,5 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Ireland.Validators;
 
@@ -7,7 +8,7 @@ namespace Finova.Countries.Europe.Ireland.Validators;
 /// Validator for Ireland VAT Number (Enterprise Number).
 /// Wraps the existing IrelandVatValidator as the Enterprise Number format is identical to the VAT format.
 /// </summary>
-public class IrelandVatNumberValidator : IEnterpriseValidator
+public class IrelandVatNumberValidator : ITaxIdValidator
 {
     public string CountryCode => "IE";
 

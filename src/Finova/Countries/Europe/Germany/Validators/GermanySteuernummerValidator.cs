@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Germany.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Germany.Validators;
 /// Validator for German Tax ID (Steuernummer).
 /// Validates the Unified Federal Format (13 digits).
 /// </summary>
-public partial class GermanySteuernummerValidator : IEnterpriseValidator
+public partial class GermanySteuernummerValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{13}$")]
     private static partial Regex UnifiedFormatRegex();

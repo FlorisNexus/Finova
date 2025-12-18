@@ -1,10 +1,10 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Ukraine.Validators;
 
-public partial class UkraineEdrpouValidator : IEnterpriseValidator
+public partial class UkraineEdrpouValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex EdrpouRegex();

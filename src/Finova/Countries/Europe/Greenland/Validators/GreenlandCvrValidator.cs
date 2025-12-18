@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Greenland.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Greenland.Validators;
 /// Validator for Greenland CVR (Centrale Virksomhedsregister).
 /// Format: 8 digits.
 /// </summary>
-public partial class GreenlandCvrValidator : IEnterpriseValidator
+public partial class GreenlandCvrValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

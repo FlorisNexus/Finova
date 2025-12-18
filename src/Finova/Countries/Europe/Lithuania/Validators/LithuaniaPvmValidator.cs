@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Lithuania.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Lithuania.Validators;
 /// Validator for Lithuania PVM (VAT) / Įmonės kodas.
 /// Format: 9 digits (Entities).
 /// </summary>
-public partial class LithuaniaPvmValidator : IEnterpriseValidator
+public partial class LithuaniaPvmValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

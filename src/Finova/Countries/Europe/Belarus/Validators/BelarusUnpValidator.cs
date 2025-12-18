@@ -1,5 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Belarus.Validators;
 
@@ -7,7 +8,7 @@ namespace Finova.Countries.Europe.Belarus.Validators;
 /// Validator for Belarus UNP (Payer's Account Number).
 /// Wraps the existing BelarusVatValidator.
 /// </summary>
-public class BelarusUnpValidator : IEnterpriseValidator
+public class BelarusUnpValidator : ITaxIdValidator
 {
     public string CountryCode => "BY";
 

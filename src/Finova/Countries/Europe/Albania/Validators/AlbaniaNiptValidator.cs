@@ -1,5 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Albania.Validators;
 
@@ -7,7 +8,7 @@ namespace Finova.Countries.Europe.Albania.Validators;
 /// Validator for Albania NIPT (Numri i Identifikimit për Personin e Tatueshëm).
 /// Wraps the existing AlbaniaVatValidator.
 /// </summary>
-public class AlbaniaNiptValidator : IEnterpriseValidator
+public class AlbaniaNiptValidator : ITaxIdValidator
 {
     public string CountryCode => "AL";
 

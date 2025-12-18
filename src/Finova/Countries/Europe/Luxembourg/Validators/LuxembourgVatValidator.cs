@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Luxembourg.Validators;
 
-public partial class LuxembourgVatValidator : IVatValidator, IEnterpriseValidator
+public partial class LuxembourgVatValidator : IVatValidator, ITaxIdValidator
 {
     private const string VatPrefix = "LU";
 

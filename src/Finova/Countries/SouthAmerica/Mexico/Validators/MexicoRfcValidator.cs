@@ -1,13 +1,27 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.SouthAmerica.Mexico.Validators;
 
 /// <summary>
 /// Validates Mexican RFC (Registro Federal de Contribuyentes).
 /// </summary>
-public static partial class MexicoRfcValidator
+public partial class MexicoRfcValidator : ITaxIdValidator
 {
+    /// <inheritdoc/>
+    public string CountryCode => "MX";
+
+    /// <inheritdoc/>
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        var result = Validate(input);
+        return result.IsValid ? input?.ToUpperInvariant().Replace(" ", "").Replace("-", "") : null;
+    }
+
     // Regex for Person (13 chars) and Company (12 chars)
     // Person: 4 letters, 6 digits (YYMMDD), 3 alphanumeric (Homoclave)
     // Company: 3 letters, 6 digits (YYMMDD), 3 alphanumeric (Homoclave)
@@ -19,7 +33,7 @@ public static partial class MexicoRfcValidator
     /// </summary>
     /// <param name="rfc">The RFC string.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? rfc)
+    public static ValidationResult ValidateStatic(string? rfc)
     {
         if (string.IsNullOrWhiteSpace(rfc))
         {

@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Poland.Validators;
 
-public partial class PolandNipValidator : IEnterpriseValidator
+public partial class PolandNipValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex NipRegex();

@@ -21,7 +21,10 @@ GlobalServicesScenario.Run();
 // 6. BBAN Validation Scenario
 BbanValidationScenario.Run();
 
-// 7. Capabilities Overview
+// 7. National ID Scenario
+NationalIdScenario.Run();
+
+// 8. Capabilities Overview
 CapabilitiesScenario.Run();
 
 Console.WriteLine();

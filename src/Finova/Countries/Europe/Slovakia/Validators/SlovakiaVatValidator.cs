@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Slovakia.Validators;
 
-public partial class SlovakiaVatValidator : IVatValidator, IEnterpriseValidator
+public partial class SlovakiaVatValidator : IVatValidator, ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex VatRegex();

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Monaco.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Monaco.Validators;
 /// Validator for Monaco RCI (Répertoire du Commerce et de l'Industrie).
 /// Format: XX S XXXXX (Year + Sequence type + Number).
 /// </summary>
-public partial class MonacoRciValidator : IEnterpriseValidator
+public partial class MonacoRciValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{2}[SP]\d{5}$")]
     private static partial Regex RciRegex();

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.France.Validators;
 
@@ -9,7 +9,7 @@ namespace Finova.Countries.Europe.France.Validators;
 /// Format: 14 digits (9 digits SIREN + 5 digits NIC).
 /// Checksum: Luhn algorithm.
 /// </summary>
-public partial class FranceSiretValidator : IEnterpriseValidator
+public partial class FranceSiretValidator : ITaxIdValidator
 {
     private const string CountryCodePrefix = "FR";
 

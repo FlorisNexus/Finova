@@ -114,7 +114,7 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
             EnterpriseNumberType.HungaryAdoszam => HungaryAdoszamValidator.ValidateAdoszam(number),
             EnterpriseNumberType.IcelandKennitala => IcelandKennitalaValidator.ValidateKennitala(number),
             EnterpriseNumberType.IrelandVat => IrelandVatNumberValidator.ValidateVatNumber(number),
-            EnterpriseNumberType.ItalyCodiceFiscale => ItalyCodiceFiscaleValidator.ValidateItalianIdentifier(number),
+            EnterpriseNumberType.ItalyCodiceFiscale => ItalyPartitaIvaValidator.ValidatePartitaIvaStatic(number),
             EnterpriseNumberType.KosovoFiscalNumber => KosovoFiscalNumberValidator.ValidateFiscalNumber(number),
             EnterpriseNumberType.LatviaPvn => LatviaPvnValidator.ValidatePvn(number),
             EnterpriseNumberType.LiechtensteinPeid => LiechtensteinPeidValidator.ValidatePeid(number),
@@ -319,7 +319,7 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
             "HU" => new HungaryAdoszamValidator().Parse(number),
             "IS" => new IcelandKennitalaValidator().Parse(number),
             "IE" => new IrelandVatNumberValidator().Parse(number),
-            "IT" => ItalyCodiceFiscaleValidator.Normalize(number),
+            "IT" => ItalyPartitaIvaValidator.Normalize(number),
             "XK" => new KosovoFiscalNumberValidator().Parse(number),
             "LV" => new LatviaPvnValidator().Parse(number),
             "LI" => new LiechtensteinPeidValidator().Parse(number),
@@ -380,7 +380,7 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
             EnterpriseNumberType.HungaryAdoszam => new HungaryAdoszamValidator().Parse(number),
             EnterpriseNumberType.IcelandKennitala => new IcelandKennitalaValidator().Parse(number),
             EnterpriseNumberType.IrelandVat => new IrelandVatNumberValidator().Parse(number),
-            EnterpriseNumberType.ItalyCodiceFiscale => ItalyCodiceFiscaleValidator.Normalize(number),
+            EnterpriseNumberType.ItalyCodiceFiscale => ItalyPartitaIvaValidator.Normalize(number),
             EnterpriseNumberType.KosovoFiscalNumber => new KosovoFiscalNumberValidator().Parse(number),
             EnterpriseNumberType.LatviaPvn => new LatviaPvnValidator().Parse(number),
             EnterpriseNumberType.LiechtensteinPeid => new LiechtensteinPeidValidator().Parse(number),
@@ -414,15 +414,15 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
     private static string? ParseFranceNumber(string? number)
     {
         if (number == null) return null;
-        
+
         string cleanNumber = number;
         if (number.StartsWith("FR", StringComparison.OrdinalIgnoreCase) && number.Length > 2)
         {
             cleanNumber = number[2..];
         }
 
-        return cleanNumber.Length == 9 
-            ? new FranceSirenValidator().Parse(cleanNumber) 
+        return cleanNumber.Length == 9
+            ? new FranceSirenValidator().Parse(cleanNumber)
             : new FranceSiretValidator().Parse(cleanNumber);
     }
 }

@@ -1,5 +1,6 @@
 using Finova.Core.Bic;
 using Finova.Core.Iban;
+using Finova.Core.Identifiers;
 using Finova.Core.PaymentCard;
 using Finova.Core.PaymentReference;
 using Finova.Core.PaymentReference.Internals;
@@ -25,6 +26,7 @@ public static class DependencyInjectionScenario
         RunPaymentCardValidator(serviceProvider);
         RunIbanValidator(serviceProvider);
         RunPaymentReferenceValidator(serviceProvider);
+        RunNationalIdValidator(serviceProvider);
     }
 
     private static void RunBicValidator(ServiceProvider serviceProvider)
@@ -144,6 +146,36 @@ public static class DependencyInjectionScenario
         {
             var result = refValidator.Validate(reference, format);
             ConsoleHelper.WriteSimpleResult($"{format}", result.IsValid, reference);
+        }
+
+        Console.WriteLine();
+    }
+
+    private static void RunNationalIdValidator(ServiceProvider serviceProvider)
+    {
+        ConsoleHelper.WriteSubHeader("15", "INationalIdService via DI");
+        ConsoleHelper.WriteCode("nationalIdService.Validate(countryCode, id).IsValid");
+
+        var nationalIdService = serviceProvider.GetRequiredService<INationalIdService>();
+
+        var examples = new (string Country, string Id, bool Expected, string Description)[]
+        {
+            ("BE", "72020290081", true, "Belgium NN (Valid)"),
+            ("BE", "72020290082", false, "Belgium NN (Invalid Checksum)"),
+            ("FR", "1 80 01 45 000 000 69", true, "France NIR (Valid)"),
+            ("DE", "T22000124", true, "Germany Steuer-ID (Valid)"),
+            ("IT", "RSSMRA80A01H501U", true, "Italy CF (Valid)"),
+            ("ES", "12345678Z", true, "Spain DNI (Valid)"),
+            ("SE", "8112189876", true, "Sweden PN (Valid)"),
+            ("GB", "QQ123456A", true, "UK NINO (Valid)"),
+            ("NO", "01010012356", true, "Norway Fodselsnummer (Valid)"),
+            ("FI", "131052-308T", true, "Finland Henkilotunnus (Valid)")
+        };
+
+        foreach (var (country, id, expected, desc) in examples)
+        {
+            var result = nationalIdService.Validate(country, id);
+            ConsoleHelper.WriteSimpleResult($"{desc}", result.IsValid, result.IsValid ? "Valid" : result.Errors.FirstOrDefault()?.Message);
         }
 
         Console.WriteLine();

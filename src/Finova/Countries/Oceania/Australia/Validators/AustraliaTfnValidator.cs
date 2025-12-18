@@ -14,7 +14,7 @@ public class AustraliaTfnValidator : ITaxIdValidator
     /// <inheritdoc/>
     public ValidationResult Validate(string? input)
     {
-        return ValidateTfn(input);
+        return ValidateStatic(input);
     }
 
     /// <inheritdoc/>
@@ -25,6 +25,16 @@ public class AustraliaTfnValidator : ITaxIdValidator
             return input?.Replace(" ", "").Replace("-", "");
         }
         return null;
+    }
+
+    /// <summary>
+    /// Validates an Australian TFN (Static).
+    /// </summary>
+    /// <param name="tfn">The TFN string (8 or 9 digits).</param>
+    /// <returns>A ValidationResult indicating success or failure.</returns>
+    public static ValidationResult ValidateStatic(string? tfn)
+    {
+        return ValidateTfn(tfn);
     }
 
     /// <summary>

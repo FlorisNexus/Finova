@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.NorthMacedonia.Validators;
 
-public partial class NorthMacedoniaEdbValidator : IEnterpriseValidator
+public partial class NorthMacedoniaEdbValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{13}$")]
     private static partial Regex EdbRegex();

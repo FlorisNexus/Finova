@@ -1,13 +1,27 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.SouthAmerica.Mexico.Validators;
 
 /// <summary>
 /// Validates Mexican CURP (Clave Única de Registro de Población).
 /// </summary>
-public static partial class MexicoCurpValidator
+public partial class MexicoCurpValidator : INationalIdValidator
 {
+    /// <inheritdoc/>
+    public string CountryCode => "MX";
+
+    /// <inheritdoc/>
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        var result = Validate(input);
+        return result.IsValid ? input?.ToUpperInvariant().Trim() : null;
+    }
+
     [GeneratedRegex(@"^[A-Z]{4}\d{6}[HM][A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[A-Z0-9]\d$")]
     private static partial Regex CurpRegex();
 
@@ -16,7 +30,7 @@ public static partial class MexicoCurpValidator
     /// </summary>
     /// <param name="curp">The CURP string.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? curp)
+    public static ValidationResult ValidateStatic(string? curp)
     {
         if (string.IsNullOrWhiteSpace(curp))
         {

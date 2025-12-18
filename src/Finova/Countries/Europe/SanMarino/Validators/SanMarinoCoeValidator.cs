@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.SanMarino.Validators;
 
-public partial class SanMarinoCoeValidator : IEnterpriseValidator
+public partial class SanMarinoCoeValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{5}$")]
     private static partial Regex CoeRegex();

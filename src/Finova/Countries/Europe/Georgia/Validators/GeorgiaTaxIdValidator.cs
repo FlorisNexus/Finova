@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Georgia.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Georgia.Validators;
 /// Validator for Georgia Tax Identification Number (Saidentifikatsio kodi).
 /// Format: 9 digits.
 /// </summary>
-public partial class GeorgiaTaxIdValidator : IEnterpriseValidator
+public partial class GeorgiaTaxIdValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

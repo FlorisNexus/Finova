@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Bulgaria.Validators;
 
@@ -8,7 +9,7 @@ namespace Finova.Countries.Europe.Bulgaria.Validators;
 /// Validator for Bulgaria UIC / EIK (Unified Identity Code).
 /// Supports 9 digits (Legal Entities) and 13 digits (Branches/Sole Traders).
 /// </summary>
-public partial class BulgariaUicValidator : IEnterpriseValidator
+public partial class BulgariaUicValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^(\d{9}|\d{13})$")]
     private static partial Regex FormatRegex();

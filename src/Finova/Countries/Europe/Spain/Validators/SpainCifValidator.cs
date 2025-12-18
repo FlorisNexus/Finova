@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Spain.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Spain.Validators;
 /// Validator for Spanish CIF (Certificado de Identificación Fiscal).
 /// Format: 1 Letter + 7 Digits + 1 Control Character (Digit or Letter).
 /// </summary>
-public partial class SpainCifValidator : IEnterpriseValidator
+public partial class SpainCifValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^[ABCDEFGHJKLMNPQRSUVW]\d{7}[0-9A-J]$")]
     private static partial Regex CifRegex();

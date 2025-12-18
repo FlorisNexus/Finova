@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Romania.Validators;
 
-public partial class RomaniaCifValidator : IEnterpriseValidator
+public partial class RomaniaCifValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{2,10}$")]
     private static partial Regex CifRegex();

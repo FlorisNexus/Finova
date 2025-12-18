@@ -14,7 +14,7 @@ public class ChinaResidentIdentityCardValidator : INationalIdValidator
     /// <inheritdoc/>
     public ValidationResult Validate(string? input)
     {
-        return ValidateRic(input);
+        return ValidateStatic(input);
     }
 
     /// <inheritdoc/>
@@ -25,6 +25,16 @@ public class ChinaResidentIdentityCardValidator : INationalIdValidator
             return input?.Trim().ToUpperInvariant();
         }
         return null;
+    }
+
+    /// <summary>
+    /// Validates a Chinese Resident Identity Card number (Static).
+    /// </summary>
+    /// <param name="idCard">The ID card number (18 characters).</param>
+    /// <returns>A ValidationResult indicating success or failure.</returns>
+    public static ValidationResult ValidateStatic(string? idCard)
+    {
+        return ValidateRic(idCard);
     }
 
     /// <summary>

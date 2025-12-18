@@ -2,9 +2,15 @@
 
 <div align="center">
 
-**The Offline Financial Validation Toolkit for .NET**
+**The Offline Financial Validation Toolkit for .NET### 🆔 **National Identity (New in v1.4.0)**
+- **Full European Coverage:** Validates National ID / Citizen ID numbers for **all 51 European countries and territories**.
+    - **Western Europe:** Belgium (NN), France (NIR), Germany (Steuer-ID), Netherlands (BSN), UK (NINO), etc.
+    - **Northern Europe:** Sweden (Personnummer), Norway (Fødselsnummer), Denmark (CPR), Finland (HETU), Iceland (Kennitala).
+    - **Southern Europe:** Italy (Codice Fiscale), Spain (DNI/NIE), Portugal (NIF), Greece (AMKA), Turkey (TC Kimlik).
+    - **Eastern Europe:** Poland (PESEL), Romania (CNP), Ukraine (RNTRC), Bulgaria (EGN), etc.
+    - **Microstates:** Andorra, Liechtenstein, Monaco, San Marino, Vatican.
 
-*IBAN · Payment References · Cards · VAT · Business Numbers*
+### 🌍 **Global Expansion (New in v1.4.0)**AN · Payment References · Cards · VAT · Business Numbers*
 
 [![NuGet Version](https://img.shields.io/nuget/v/Finova.svg?style=flat&logo=nuget)](https://www.nuget.org/packages/Finova/)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/Finova.svg?style=flat&logo=nuget)](https://www.nuget.org/packages/Finova/)
@@ -85,7 +91,15 @@ Fast, offline regex and checksum validation for European and International forma
 - **Enterprise Numbers:** Validates business registration numbers for **51 European countries** (e.g., Belgian KBO, French SIREN, Italian P.IVA, etc.).
 - **VAT Numbers:** Validates formatting and check digits for **European countries** (EU + UK, Norway, Switzerland, etc.).
 
-### 🌍 **Global Expansion (New in v1.4.0)**
+### � **National Identity (New in v1.6.0)**
+- **Full European Coverage:** Validates National ID / Citizen ID numbers for **all 51 European countries and territories**.
+    - **Western Europe:** Belgium (NN), France (NIR), Germany (Steuer-ID), Netherlands (BSN), UK (NINO), etc.
+    - **Northern Europe:** Sweden (Personnummer), Norway (Fødselsnummer), Denmark (CPR), Finland (HETU), Iceland (Kennitala).
+    - **Southern Europe:** Italy (Codice Fiscale), Spain (DNI/NIE), Portugal (NIF), Greece (AMKA), Turkey (TC Kimlik).
+    - **Eastern Europe:** Poland (PESEL), Romania (CNP), Ukraine (RNTRC), Bulgaria (EGN), etc.
+    - **Microstates:** Andorra, Liechtenstein, Monaco, San Marino, Vatican.
+
+### �🌍 **Global Expansion (New in v1.4.0)**
 Finova now supports major economies across North America, South America, Asia, and Oceania.
 
 | Region | Country | Validators |
@@ -297,7 +311,7 @@ using Finova.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Registers all validators (IBAN, VAT, Enterprise, PaymentReference, etc.)
+// Registers all validators (IBAN, VAT, TaxID, PaymentReference, etc.)
 builder.Services.AddFinova();
 
 var app = builder.Build();
@@ -424,7 +438,10 @@ Finova is strictly offline. Future updates focus on schema compliance, developer
 - **North America**: Support for USA (Routing Numbers, EIN) and Canada (Business Numbers).
 - **Asia**: Support for major Asian economies (Japan, Singapore, etc.).
 - **South America**: Support for Brazil (CNPJ/CPF) and others.
+- **Oceania**: Support for Australia (TFN, ABN, BSB).
+- **National IDs**: Added support for UK (NINO), Sweden, Norway, Finland, Denmark.
 - **Architecture**: Introduction of `Finova.Countries.NorthAmerica`, `Finova.Countries.Asia`, etc.
+- **Dependency Injection**: Enhanced auto-registration via Assembly Scanning.
 
 #### v1.5.0 - EPC QR Code Support 📱
 - **EPC QR String Generation**: Generate the raw payload string for European Payments Council (EPC) QR codes.

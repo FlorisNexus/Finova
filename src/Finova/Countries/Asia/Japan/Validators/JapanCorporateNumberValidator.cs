@@ -1,25 +1,36 @@
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Asia.Japan.Validators;
 
 /// <summary>
 /// Validates Japanese Corporate Number.
 /// </summary>
-public static class JapanCorporateNumberValidator
+public class JapanCorporateNumberValidator : ITaxIdValidator
 {
+    /// <inheritdoc/>
+    public string CountryCode => "JP";
+
+    /// <inheritdoc/>
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
     /// <summary>
     /// Validates a Japanese Corporate Number.
     /// </summary>
     /// <param name="corporateNumber">The Corporate Number string (13 digits).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? corporateNumber)
+    public static ValidationResult ValidateStatic(string? corporateNumber)
     {
         if (string.IsNullOrWhiteSpace(corporateNumber))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = corporateNumber.Replace(" ", "").Replace("-", "");
+        var clean = InputSanitizer.Sanitize(corporateNumber);
+        if (string.IsNullOrEmpty(clean))
+        {
+             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
 
         if (clean.Length != 13)
         {
@@ -37,7 +48,7 @@ public static class JapanCorporateNumberValidator
         for (int i = 1; i <= 12; i++)
         {
             int digit = clean[i] - '0';
-            int weight = (i % 2 == 0) ? 2 : 1; 
+            int weight = (i % 2 == 0) ? 2 : 1;
             sum += digit * weight;
         }
 
@@ -50,5 +61,12 @@ public static class JapanCorporateNumberValidator
         }
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        var result = Validate(input);
+        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
     }
 }

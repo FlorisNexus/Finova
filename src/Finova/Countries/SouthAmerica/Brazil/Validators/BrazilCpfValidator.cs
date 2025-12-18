@@ -14,7 +14,7 @@ public class BrazilCpfValidator : INationalIdValidator
     /// <inheritdoc/>
     public ValidationResult Validate(string? input)
     {
-        return ValidateCpf(input);
+        return ValidateStatic(input);
     }
 
     /// <inheritdoc/>
@@ -25,6 +25,16 @@ public class BrazilCpfValidator : INationalIdValidator
             return input?.Replace(".", "").Replace("-", "").Replace(" ", "");
         }
         return null;
+    }
+
+    /// <summary>
+    /// Validates a Brazilian CPF (Static).
+    /// </summary>
+    /// <param name="cpf">The CPF string (e.g., "123.456.789-00").</param>
+    /// <returns>A ValidationResult indicating success or failure.</returns>
+    public static ValidationResult ValidateStatic(string? cpf)
+    {
+        return ValidateCpf(cpf);
     }
 
     /// <summary>

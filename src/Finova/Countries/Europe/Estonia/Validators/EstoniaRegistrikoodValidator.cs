@@ -1,13 +1,14 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Estonia.Validators;
 
 /// <summary>
 /// Validator for Estonia Registrikood (Commercial Register Code).
 /// </summary>
-public partial class EstoniaRegistrikoodValidator : IEnterpriseValidator
+public partial class EstoniaRegistrikoodValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex RegistrikoodRegex();

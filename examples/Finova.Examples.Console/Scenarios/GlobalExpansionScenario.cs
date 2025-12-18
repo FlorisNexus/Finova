@@ -86,9 +86,9 @@ public static class GlobalExpansionScenario
         ConsoleHelper.WriteResult("Bank Code", "001", new BrazilBankCodeValidator().Validate("001").IsValid);
 
         ConsoleHelper.WriteCountryHeader("🇲🇽", "Mexico");
-        ConsoleHelper.WriteCode("MexicoCurpValidator.Validate(val) [Static Only]");
-        ConsoleHelper.WriteResult("CURP", "HEGT760825HDFRXX03", MexicoCurpValidator.Validate("HEGT760825HDFRXX03").IsValid);
-        ConsoleHelper.WriteResult("RFC", "XAXX010101000", MexicoRfcValidator.Validate("XAXX010101000").IsValid);
+        ConsoleHelper.WriteCode("new MexicoCurpValidator().Validate(val)");
+        ConsoleHelper.WriteResult("CURP", "HEGT760825HDFRXX03", new MexicoCurpValidator().Validate("HEGT760825HDFRXX03").IsValid);
+        ConsoleHelper.WriteResult("RFC", "XAXX010101000", new MexicoRfcValidator().Validate("XAXX010101000").IsValid);
     }
 
     private static void RunAsia(ServiceProvider provider)
@@ -113,9 +113,9 @@ public static class GlobalExpansionScenario
         ConsoleHelper.WriteResult("CNAPS", "102100099996", new ChinaCnapsValidator().Validate("102100099996").IsValid);
 
         ConsoleHelper.WriteCountryHeader("🇯🇵", "Japan");
-        ConsoleHelper.WriteCode("JapanMyNumberValidator.Validate(val) [Static Only]");
-        ConsoleHelper.WriteResult("My Number", "123456789012", JapanMyNumberValidator.Validate("123456789012").IsValid, "Invalid (Expected)");
-        ConsoleHelper.WriteResult("Corporate Number", "3835600000001", JapanCorporateNumberValidator.Validate("3835600000001").IsValid);
+        ConsoleHelper.WriteCode("new JapanMyNumberValidator().Validate(val)");
+        ConsoleHelper.WriteResult("My Number", "123456789012", new JapanMyNumberValidator().Validate("123456789012").IsValid, "Invalid (Expected)");
+        ConsoleHelper.WriteResult("Corporate Number", "3835600000001", new JapanCorporateNumberValidator().Validate("3835600000001").IsValid);
         
         // Japan Bank Account (DI Only available)
         var jpBankValidator = provider.GetRequiredService<JapanBankAccountValidator>();
@@ -131,9 +131,9 @@ public static class GlobalExpansionScenario
         ConsoleHelper.WriteResult("IFSC", "SBIN0001234", new IndiaIfscValidator().Validate("SBIN0001234").IsValid);
 
         ConsoleHelper.WriteCountryHeader("🇸🇬", "Singapore");
-        ConsoleHelper.WriteCode("SingaporeNricValidator.Validate(val) [Static Only]");
-        ConsoleHelper.WriteResult("NRIC", "S1234567D", SingaporeNricValidator.Validate("S1234567D").IsValid);
-        ConsoleHelper.WriteResult("UEN", "200812345M", SingaporeUenValidator.Validate("200812345M").IsValid);
+        ConsoleHelper.WriteCode("new SingaporeNricValidator().Validate(val)");
+        ConsoleHelper.WriteResult("NRIC", "S1234567D", new SingaporeNricValidator().Validate("S1234567D").IsValid);
+        ConsoleHelper.WriteResult("UEN", "200812345M", new SingaporeUenValidator().Validate("200812345M").IsValid);
         
         // Singapore Bank Account (DI Only available)
         var sgBankValidator = provider.GetRequiredService<SingaporeBankAccountValidator>();

@@ -1,7 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 using Finova.Core.Identifiers;
-using Finova.Countries.NorthAmerica.UnitedStates.Validators;
-using Finova.Countries.NorthAmerica.Canada.Validators;
 using Finova.Services;
 
 namespace Finova.Extensions.DependencyInjection;
@@ -14,29 +12,17 @@ public static class NorthAmericaServiceCollectionExtensions
     public static IServiceCollection AddFinovaNorthAmerica(this IServiceCollection services)
     {
         services.AddSingleton<NorthAmericaBankValidator>();
-        AddUnitedStatesValidators(services);
-        AddCanadaValidators(services);
+
+        services.RegisterValidatorsFromNamespace(
+            typeof(NorthAmericaServiceCollectionExtensions).Assembly,
+            "Finova.Countries.NorthAmerica",
+            null, // No special adapters needed beyond standard interfaces
+            typeof(ITaxIdValidator),
+            typeof(INationalIdValidator),
+            typeof(IBankRoutingValidator),
+            typeof(IBankRoutingParser)
+        );
+
         return services;
-    }
-
-    private static void AddUnitedStatesValidators(IServiceCollection services)
-    {
-        services.AddSingleton<ITaxIdValidator, UnitedStatesEinValidator>();
-        services.AddSingleton<UnitedStatesEinValidator>();
-        
-        // Register UnitedStatesRoutingNumberValidator as both Validator and Parser
-        services.AddSingleton<UnitedStatesRoutingNumberValidator>();
-        services.AddSingleton<IBankRoutingValidator>(sp => sp.GetRequiredService<UnitedStatesRoutingNumberValidator>());
-        services.AddSingleton<IBankRoutingParser>(sp => sp.GetRequiredService<UnitedStatesRoutingNumberValidator>());
-    }
-
-    private static void AddCanadaValidators(IServiceCollection services)
-    {
-        services.AddSingleton<INationalIdValidator, CanadaSinValidator>();
-        services.AddSingleton<CanadaSinValidator>();
-        services.AddSingleton<ITaxIdValidator, CanadaBusinessNumberValidator>();
-        services.AddSingleton<CanadaBusinessNumberValidator>();
-        services.AddSingleton<IBankRoutingValidator, CanadaRoutingNumberValidator>();
-        services.AddSingleton<CanadaRoutingNumberValidator>();
     }
 }

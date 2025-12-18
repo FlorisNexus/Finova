@@ -1,13 +1,20 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Asia.Singapore.Validators;
 
 /// <summary>
 /// Validates Singapore Unique Entity Number (UEN).
 /// </summary>
-public static partial class SingaporeUenValidator
+public partial class SingaporeUenValidator : ITaxIdValidator
 {
+    /// <inheritdoc/>
+    public string CountryCode => "SG";
+
+    /// <inheritdoc/>
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
     // Business: 8 digits + 1 letter (e.g., 12345678A)
     [GeneratedRegex(@"^\d{8}[A-Z]$")]
     private static partial Regex BusinessUenRegex();
@@ -25,14 +32,18 @@ public static partial class SingaporeUenValidator
     /// </summary>
     /// <param name="uen">The UEN string.</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? uen)
+    public static ValidationResult ValidateStatic(string? uen)
     {
         if (string.IsNullOrWhiteSpace(uen))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = uen.Trim().ToUpperInvariant();
+        var clean = InputSanitizer.Sanitize(uen);
+        if (string.IsNullOrEmpty(clean))
+        {
+             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
 
         if (clean.Length != 9 && clean.Length != 10)
         {
@@ -53,5 +64,12 @@ public static partial class SingaporeUenValidator
         // we rely on strict format validation.
 
         return ValidationResult.Success();
+    }
+
+    /// <inheritdoc/>
+    public string? Parse(string? input)
+    {
+        var result = Validate(input);
+        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
     }
 }

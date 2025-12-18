@@ -1,5 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Azerbaijan.Validators;
 
@@ -7,7 +8,7 @@ namespace Finova.Countries.Europe.Azerbaijan.Validators;
 /// Validator for Azerbaijan VÖEN (Tax ID).
 /// Wraps the existing AzerbaijanVatValidator and adds additional checks.
 /// </summary>
-public class AzerbaijanVoenValidator : IEnterpriseValidator
+public class AzerbaijanVoenValidator : ITaxIdValidator
 {
     public string CountryCode => "AZ";
 

@@ -78,6 +78,7 @@ public static class StaticValidationScenario
         RunPaymentCardValidation();
         RunPaymentReferenceValidation();
         RunVatValidation();
+        RunNationalIdValidation();
     }
 
     private static void RunBicValidation()
@@ -514,5 +515,34 @@ public static class StaticValidationScenario
         {
             ConsoleHelper.WriteError(ex.Message);
         }
+    }
+
+    private static void RunNationalIdValidation()
+    {
+        ConsoleHelper.WriteSubHeader("7", "National ID Validation (Static)");
+        ConsoleHelper.WriteCode("EuropeNationalIdValidator.Validate(country, id).IsValid");
+
+        var examples = new[]
+        {
+            ("Belgium", "BE", "72020290081", true, "Valid NN"),
+            ("Belgium", "BE", "72020290082", false, "Invalid Checksum"),
+            ("France", "FR", "1 80 01 45 000 000 69", true, "Valid NIR"),
+            ("France", "FR", "1 80 01 45 000 000 00", false, "Invalid Checksum"),
+            ("Germany", "DE", "T22000124", true, "Valid Steuer-ID"),
+            ("Italy", "IT", "RSSMRA80A01H501U", true, "Valid Codice Fiscale"),
+            ("Spain", "ES", "12345678Z", true, "Valid DNI"),
+            ("Sweden", "SE", "8112189876", true, "Valid Personnummer"),
+            ("UK", "GB", "QQ123456A", true, "Valid NINO"),
+            ("Norway", "NO", "01010012356", true, "Valid Fodselsnummer"),
+            ("Finland", "FI", "131052-308T", true, "Valid Henkilotunnus")
+        };
+
+        foreach (var (country, code, id, expected, desc) in examples)
+        {
+            var result = EuropeNationalIdValidator.Validate(code, id);
+            ConsoleHelper.WriteSimpleResult($"{country} ({id})", result.IsValid, result.IsValid ? "Valid" : result.Errors.FirstOrDefault()?.Message);
+        }
+
+        Console.WriteLine();
     }
 }

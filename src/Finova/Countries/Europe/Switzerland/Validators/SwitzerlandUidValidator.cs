@@ -1,5 +1,5 @@
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Countries.Europe.Switzerland.Validators;
 
 namespace Finova.Countries.Europe.Switzerland.Validators;
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Switzerland.Validators;
 /// Validator for Switzerland UID (Unternehmens-Identifikationsnummer).
 /// Wraps the existing SwitzerlandVatValidator as the UID format is identical to the VAT format.
 /// </summary>
-public class SwitzerlandUidValidator : IEnterpriseValidator
+public class SwitzerlandUidValidator : ITaxIdValidator
 {
     public string CountryCode => "CH";
 

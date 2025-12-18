@@ -14,7 +14,7 @@ public class CanadaSinValidator : INationalIdValidator
     /// <inheritdoc/>
     public ValidationResult Validate(string? input)
     {
-        return ValidateSin(input);
+        return ValidateStatic(input);
     }
 
     /// <inheritdoc/>
@@ -25,6 +25,16 @@ public class CanadaSinValidator : INationalIdValidator
             return input?.Replace("-", "").Replace(" ", "");
         }
         return null;
+    }
+
+    /// <summary>
+    /// Validates a Canadian Social Insurance Number (SIN) (Static).
+    /// </summary>
+    /// <param name="sin">The SIN string (e.g., "123-456-789").</param>
+    /// <returns>A ValidationResult indicating success or failure.</returns>
+    public static ValidationResult ValidateStatic(string? sin)
+    {
+        return ValidateSin(sin);
     }
 
     /// <summary>

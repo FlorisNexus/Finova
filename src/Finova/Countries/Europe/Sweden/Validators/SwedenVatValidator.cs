@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Sweden.Validators;
 
-public partial class SwedenVatValidator : IVatValidator, IEnterpriseValidator
+public partial class SwedenVatValidator : IVatValidator, ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{12}$")]
     private static partial Regex VatRegex();

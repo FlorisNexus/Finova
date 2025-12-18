@@ -1,13 +1,14 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.CzechRepublic.Validators;
 
 /// <summary>
 /// Validator for Czech Republic IČO (Identifikační číslo osoby).
 /// </summary>
-public partial class CzechRepublicIcoValidator : IEnterpriseValidator
+public partial class CzechRepublicIcoValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex IcoRegex();

@@ -14,6 +14,7 @@ public static class FluentValidationScenario
         RunCardPaymentExample();
         RunGlobalTaxIdExample();
         RunBankValidationExample();
+        RunNationalIdExample();
         // RunBicIbanConsistencyExample();
     }
 
@@ -401,6 +402,45 @@ public static class FluentValidationScenario
                 .MustBeValidAsiaTaxId(x => x.Country).When(x => x.Country == "CN" || x.Country == "IN" || x.Country == "JP" || x.Country == "SG")
                 .MustBeValidOceaniaTaxId(x => x.Country).When(x => x.Country == "AU");
         }
+    }
+
+    private static void RunNationalIdExample()
+    {
+        ConsoleHelper.WriteSubHeader("16", "National ID Validation (FluentValidation)");
+        ConsoleHelper.WriteCode("RuleFor(x => x).MustBeValidNationalId(countryCode)");
+
+        var validator = new InlineValidator<string>();
+        validator.RuleFor(x => x).MustBeValidNationalId("BE").WithMessage("Invalid Belgium NN");
+
+        string[] examples = ["72020290081", "72020290082"];
+        foreach (var id in examples)
+        {
+            var result = validator.Validate(id);
+            ConsoleHelper.WriteSimpleResult($"Belgium NN '{id}'", result.IsValid, result.IsValid ? "Valid" : result.Errors.FirstOrDefault()?.ErrorMessage);
+        }
+
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.DarkCyan;
+        Console.WriteLine("      Dynamic Country Code:");
+        Console.ResetColor();
+        ConsoleHelper.WriteCode("RuleFor(x => x.Id).MustBeValidNationalId(x => x.Country)");
+
+        var dynamicValidator = new InlineValidator<(string Country, string Id)>();
+        dynamicValidator.RuleFor(x => x.Id).MustBeValidNationalId(x => x.Country);
+
+        var dynamicExamples = new[]
+        {
+            ("BE", "72020290081"),
+            ("FR", "1 80 01 45 000 000 69"),
+            ("IT", "INVALID_CF")
+        };
+
+        foreach (var (country, id) in dynamicExamples)
+        {
+            var result = dynamicValidator.Validate((country, id));
+            ConsoleHelper.WriteSimpleResult($"{country} ID '{id}'", result.IsValid);
+        }
+        Console.WriteLine();
     }
 
     public class InternationalTransfer

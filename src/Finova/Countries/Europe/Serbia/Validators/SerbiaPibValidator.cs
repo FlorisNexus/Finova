@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Serbia.Validators;
 
-public partial class SerbiaPibValidator : IEnterpriseValidator
+public partial class SerbiaPibValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex PibRegex();

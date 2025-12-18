@@ -1,5 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Denmark.Validators;
 
@@ -7,7 +8,7 @@ namespace Finova.Countries.Europe.Denmark.Validators;
 /// Validator for Denmark CVR (Centrale Virksomhedsregister).
 /// Wraps the existing DenmarkVatValidator.
 /// </summary>
-public class DenmarkCvrValidator : IEnterpriseValidator
+public class DenmarkCvrValidator : ITaxIdValidator
 {
     public string CountryCode => "DK";
 

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Montenegro.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Montenegro.Validators;
 /// Validator for Montenegro PIB (Poreski Identifikacioni Broj).
 /// Format: 8 digits.
 /// </summary>
-public partial class MontenegroPibValidator : IEnterpriseValidator
+public partial class MontenegroPibValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

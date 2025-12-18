@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Netherlands.Validators;
 
-public partial class NetherlandsVatValidator : IVatValidator, IEnterpriseValidator
+public partial class NetherlandsVatValidator : IVatValidator, ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{9}B\d{2}$")]
     private static partial Regex VatRegex();

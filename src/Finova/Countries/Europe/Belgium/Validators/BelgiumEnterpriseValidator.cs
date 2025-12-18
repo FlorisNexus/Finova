@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.PaymentReference.Internals;
 
 namespace Finova.Countries.Europe.Belgium.Validators;
@@ -9,7 +9,7 @@ namespace Finova.Countries.Europe.Belgium.Validators;
 /// Validator for Belgian Enterprise Numbers (KBO/BCE - Kruispuntbank van Ondernemingen / Banque-Carrefour des Entreprises).
 /// Format: 0xxx.xxx.xxx or BE0xxxxxxxxx (10 digits with check digit validation via modulo 97).
 /// </summary>
-public partial class BelgiumEnterpriseValidator : IEnterpriseValidator
+public partial class BelgiumEnterpriseValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

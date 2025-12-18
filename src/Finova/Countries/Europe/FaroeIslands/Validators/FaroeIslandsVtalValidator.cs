@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.FaroeIslands.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.FaroeIslands.Validators;
 /// Validator for Faroe Islands V-tal (Virdiskanummur).
 /// Format: 6 digits.
 /// </summary>
-public partial class FaroeIslandsVtalValidator : IEnterpriseValidator
+public partial class FaroeIslandsVtalValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

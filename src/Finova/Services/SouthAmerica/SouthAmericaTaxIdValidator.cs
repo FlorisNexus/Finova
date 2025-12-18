@@ -25,7 +25,7 @@ public static class SouthAmericaTaxIdValidator
         return countryCode.ToUpperInvariant() switch
         {
             "BR" => BrazilCnpjValidator.ValidateCnpj(taxId),
-            "MX" => MexicoRfcValidator.Validate(taxId),
+            "MX" => MexicoRfcValidator.ValidateStatic(taxId),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }

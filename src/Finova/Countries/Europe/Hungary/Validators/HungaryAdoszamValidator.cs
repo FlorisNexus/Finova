@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Hungary.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Hungary.Validators;
 /// Validator for Hungary Adószám (Tax ID).
 /// Format: 11 digits (Format 12345678-S-CC).
 /// </summary>
-public partial class HungaryAdoszamValidator : IEnterpriseValidator
+public partial class HungaryAdoszamValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

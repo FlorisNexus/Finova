@@ -1,13 +1,14 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Cyprus.Validators;
 
 /// <summary>
 /// Validator for Cyprus TIC (Tax Identification Code).
 /// </summary>
-public partial class CyprusTicValidator : IEnterpriseValidator
+public partial class CyprusTicValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{8}[A-Z]$")]
     private static partial Regex TicRegex();

@@ -14,7 +14,7 @@ public class IndiaAadhaarValidator : INationalIdValidator
     /// <inheritdoc/>
     public ValidationResult Validate(string? input)
     {
-        return ValidateAadhaar(input);
+        return ValidateStatic(input);
     }
 
     /// <inheritdoc/>
@@ -25,6 +25,16 @@ public class IndiaAadhaarValidator : INationalIdValidator
             return input?.Replace(" ", "").Replace("-", "");
         }
         return null;
+    }
+
+    /// <summary>
+    /// Validates an Indian Aadhaar number (Static).
+    /// </summary>
+    /// <param name="aadhaar">The Aadhaar number (12 digits).</param>
+    /// <returns>A ValidationResult indicating success or failure.</returns>
+    public static ValidationResult ValidateStatic(string? aadhaar)
+    {
+        return ValidateAadhaar(aadhaar);
     }
 
     /// <summary>

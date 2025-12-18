@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Norway.Validators;
 
-public partial class NorwayOrgNumberValidator : IEnterpriseValidator
+public partial class NorwayOrgNumberValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex OrgRegex();

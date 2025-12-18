@@ -1,11 +1,12 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Turkey.Validators;
 
-public partial class TurkeyVknValidator : IVatValidator, IEnterpriseValidator
+public partial class TurkeyVknValidator : IVatValidator, ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex VknRegex();

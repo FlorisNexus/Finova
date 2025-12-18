@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Greece.Validators;
 
@@ -8,7 +8,7 @@ namespace Finova.Countries.Europe.Greece.Validators;
 /// Validator for Greece AFM (Arithmos Forologikou Mitroou).
 /// Format: 9 digits.
 /// </summary>
-public partial class GreeceAfmValidator : IEnterpriseValidator
+public partial class GreeceAfmValidator : ITaxIdValidator
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();

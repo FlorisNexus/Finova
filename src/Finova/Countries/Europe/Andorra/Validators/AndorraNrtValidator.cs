@@ -1,5 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
+using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Andorra.Validators;
 
@@ -7,7 +8,7 @@ namespace Finova.Countries.Europe.Andorra.Validators;
 /// Validator for Andorra NRT (Número de Registre Tributari).
 /// Wraps the existing AndorraVatValidator.
 /// </summary>
-public class AndorraNrtValidator : IEnterpriseValidator
+public class AndorraNrtValidator : ITaxIdValidator
 {
     public string CountryCode => "AD";
 
