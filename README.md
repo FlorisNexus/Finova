@@ -91,7 +91,7 @@ Fast, offline regex and checksum validation for European and International forma
 - **Tax IDs:** Validates business registration numbers for **51 European countries** (e.g., Belgian KBO, French SIREN, Italian P.IVA, etc.).
 - **VAT Numbers:** Validates formatting and check digits for **European countries** (EU + UK, Norway, Switzerland, etc.).
 
-### � **National Identity (New in v1.6.0)**
+### � **National Identity (New in v1.4.0)**
 - **Full European Coverage:** Validates National ID / Citizen ID numbers for **all 51 European countries and territories**.
     - **Western Europe:** Belgium (NN), France (NIR), Germany (Steuer-ID), Netherlands (BSN), UK (NINO), etc.
     - **Northern Europe:** Sweden (Personnummer), Norway (Fødselsnummer), Denmark (CPR), Finland (HETU), Iceland (Kennitala).
