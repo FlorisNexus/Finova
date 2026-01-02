@@ -64,7 +64,7 @@ public interface ICurrencyValidator
 /// {
 ///     Console.WriteLine("Valid currency");
 /// }
-/// 
+///
 /// // Parse a currency code
 /// var details = CurrencyValidator.Parse("USD");
 /// Console.WriteLine($"Name: {details?.Name}"); // US Dollar
@@ -97,7 +97,7 @@ public class CurrencyValidator : ICurrencyValidator
         ["ZAR"] = ("Rand", "710", 2),
         ["TRY"] = ("Turkish Lira", "949", 2),
         ["BRL"] = ("Brazilian Real", "986", 2),
-        
+
         // European currencies
         ["DKK"] = ("Danish Krone", "208", 2),
         ["PLN"] = ("Zloty", "985", 2),
@@ -117,7 +117,7 @@ public class CurrencyValidator : ICurrencyValidator
         ["AMD"] = ("Armenian Dram", "051", 2),
         ["AZN"] = ("Azerbaijan Manat", "944", 2),
         ["BYN"] = ("Belarusian Ruble", "933", 2),
-        
+
         // Middle East currencies
         ["AED"] = ("UAE Dirham", "784", 2),
         ["SAR"] = ("Saudi Riyal", "682", 2),
@@ -129,7 +129,7 @@ public class CurrencyValidator : ICurrencyValidator
         ["JOD"] = ("Jordanian Dinar", "400", 3),
         ["LBP"] = ("Lebanese Pound", "422", 2),
         ["EGP"] = ("Egyptian Pound", "818", 2),
-        
+
         // Asian currencies
         ["THB"] = ("Baht", "764", 2),
         ["MYR"] = ("Malaysian Ringgit", "458", 2),
@@ -147,7 +147,7 @@ public class CurrencyValidator : ICurrencyValidator
         ["MNT"] = ("Tugrik", "496", 2),
         ["KZT"] = ("Tenge", "398", 2),
         ["UZS"] = ("Uzbekistan Sum", "860", 2),
-        
+
         // African currencies
         ["NGN"] = ("Naira", "566", 2),
         ["KES"] = ("Kenyan Shilling", "404", 2),
@@ -159,7 +159,7 @@ public class CurrencyValidator : ICurrencyValidator
         ["TND"] = ("Tunisian Dinar", "788", 3),
         ["XOF"] = ("CFA Franc BCEAO", "952", 0),
         ["XAF"] = ("CFA Franc BEAC", "950", 0),
-        
+
         // Americas currencies
         ["ARS"] = ("Argentine Peso", "032", 2),
         ["CLP"] = ("Chilean Peso", "152", 0),
@@ -177,7 +177,7 @@ public class CurrencyValidator : ICurrencyValidator
         ["PAB"] = ("Balboa", "590", 2),
         ["JMD"] = ("Jamaican Dollar", "388", 2),
         ["TTD"] = ("Trinidad and Tobago Dollar", "780", 2),
-        
+
         // Oceania currencies
         ["FJD"] = ("Fiji Dollar", "242", 2),
         ["PGK"] = ("Kina", "598", 2),
@@ -185,18 +185,18 @@ public class CurrencyValidator : ICurrencyValidator
         ["VUV"] = ("Vatu", "548", 0),
         ["SBD"] = ("Solomon Islands Dollar", "090", 2),
         ["TOP"] = ("Pa'anga", "776", 2),
-        
+
         // Precious metals (per troy ounce)
         ["XAU"] = ("Gold", "959", -1),
         ["XAG"] = ("Silver", "961", -1),
         ["XPT"] = ("Platinum", "962", -1),
         ["XPD"] = ("Palladium", "964", -1),
-        
+
         // Special currencies
         ["XDR"] = ("SDR (Special Drawing Right)", "960", -1),
         ["XXX"] = ("No currency", "999", -1),
         ["XTS"] = ("Testing", "963", -1),
-        
+
         // Cryptocurrency placeholders (not official ISO 4217 but commonly used)
         ["BTC"] = ("Bitcoin", "---", 8),
         ["ETH"] = ("Ether", "---", 18),

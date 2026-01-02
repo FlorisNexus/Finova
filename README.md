@@ -209,7 +209,7 @@ public class PaymentService
 
     public bool ValidatePaymentDetails(string iban, string vatNumber)
     {
-        return _ibanService.Validate(iban).IsValid 
+        return _ibanService.Validate(iban).IsValid
             && _vatValidator.Validate(vatNumber).IsValid;
     }
 }

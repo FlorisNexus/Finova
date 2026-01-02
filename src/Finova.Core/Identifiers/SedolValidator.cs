@@ -62,7 +62,7 @@ public interface ISedolValidator
 /// {
 ///     Console.WriteLine("Valid SEDOL");
 /// }
-/// 
+///
 /// // Parse a SEDOL
 /// var details = SedolValidator.Parse("0263494");
 /// Console.WriteLine($"Base: {details?.BaseCode}"); // 026349

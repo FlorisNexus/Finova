@@ -66,7 +66,7 @@ public interface ICusipValidator
 /// {
 ///     Console.WriteLine("Valid CUSIP");
 /// }
-/// 
+///
 /// // Parse a CUSIP
 /// var details = CusipValidator.Parse("037833100");
 /// Console.WriteLine($"Issuer: {details?.IssuerNumber}"); // 037833

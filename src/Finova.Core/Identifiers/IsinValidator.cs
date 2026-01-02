@@ -67,7 +67,7 @@ public interface IIsinValidator
 /// {
 ///     Console.WriteLine("Valid ISIN");
 /// }
-/// 
+///
 /// // Parse an ISIN
 /// var details = IsinValidator.Parse("US0378331005");
 /// Console.WriteLine($"Country: {details?.CountryCode}"); // US
