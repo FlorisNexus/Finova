@@ -213,10 +213,22 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
                 return ValidateEnterpriseNumber(number, EnterpriseNumberType.GeorgiaTaxId);
             case "DE":
                 // Try Handelsregisternummer first (HRA/HRB prefix)
-                if (GermanyHandelsregisternummerValidator.ValidateHandelsregisternummer(number).IsValid)
+                var hrResult = GermanyHandelsregisternummerValidator.ValidateHandelsregisternummer(number);
+                if (hrResult.IsValid)
                 {
                     return ValidateEnterpriseNumber(number, EnterpriseNumberType.GermanyHandelsregisternummer);
                 }
+
+                // If it clearly looks like a Handelsregisternummer (has prefix), return that error
+                var trimmed = number?.Trim().ToUpperInvariant() ?? "";
+                if (trimmed.StartsWith("HRA") || trimmed.StartsWith("HRB") || 
+                    trimmed.StartsWith("PR") || trimmed.StartsWith("GNR") || 
+                    trimmed.StartsWith("VR"))
+                {
+                    return hrResult;
+                }
+
+                // Otherwise, try Steuernummer
                 return ValidateEnterpriseNumber(number, EnterpriseNumberType.GermanySteuernummer);
             case "GI":
                 return ValidateEnterpriseNumber(number, EnterpriseNumberType.GibraltarCompanyNumber);

@@ -5,12 +5,13 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Europe.Germany.Validators;
 
 /// <summary>
-/// Validator for German Commercial Register Number (Handelsregisternummer).
-/// Format: HRA or HRB followed by digits (e.g., HRB 12345).
+/// Validator for German Register Numbers.
+/// Supports HRA, HRB (Commercial), PR (Partnership), GNR (Cooperative), and VR (Association) followed by digits.
+/// Format: [Prefix] followed by 1-9 digits (e.g., HRB 12345).
 /// </summary>
 public partial class GermanyHandelsregisternummerValidator : ITaxIdValidator
 {
-    [GeneratedRegex(@"^(HRA|HRB)\s?\d+$", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"^(HRA|HRB|PR|GNR|VR)\s?\d{1,9}$", RegexOptions.IgnoreCase)]
     private static partial Regex FormatRegex();
 
     [GeneratedRegex(@"\s+")]
@@ -52,19 +53,31 @@ public partial class GermanyHandelsregisternummerValidator : ITaxIdValidator
     }
 
     /// <summary>
-    /// Formats a German Handelsregisternummer.
-    /// Ensures a space between HRA/HRB and the digits (e.g., "HRB 12345").
+    /// Formats a German register number.
+    /// Ensures a space between the prefix and the digits (e.g., "HRB 12345").
     /// </summary>
     public static string Format(string? number)
     {
         if (!ValidateHandelsregisternummer(number).IsValid)
         {
-            throw new ArgumentException("Invalid Handelsregisternummer", nameof(number));
+            throw new ArgumentException("Invalid register number", nameof(number));
         }
 
         var normalized = Normalize(number);
-        // Insert space after HRA/HRB
-        return normalized.Insert(3, " ");
+        
+        // Find the split point between prefix and digits
+        int splitPoint = 0;
+        while (splitPoint < normalized.Length && !char.IsDigit(normalized[splitPoint]))
+        {
+            splitPoint++;
+        }
+
+        if (splitPoint > 0 && splitPoint < normalized.Length)
+        {
+            return normalized.Insert(splitPoint, " ");
+        }
+
+        return normalized;
     }
 
     /// <summary>
