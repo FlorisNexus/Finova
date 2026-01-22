@@ -118,10 +118,13 @@ public class AsiaVatValidator : IVatValidator
         {
             "CN" => ChinaVatValidator.Validate(vat),
             "ID" => new Finova.Countries.SoutheastAsia.Indonesia.Validators.IndonesiaVatValidator().Validate(vat),
+            "IN" => IndiaGstinValidator.Validate(vat),
             "JP" => JapanVatValidator.Validate(vat),
             "KR" => SouthKoreaVatValidator.Validate(vat),
             "PH" => new Finova.Countries.SoutheastAsia.Philippines.Validators.PhilippinesVatValidator().Validate(vat),
+            "SG" => SingaporeGstValidator.Validate(vat),
             "VN" => new Finova.Countries.SoutheastAsia.Vietnam.Validators.VietnamVatValidator().Validate(vat),
+            "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator().Validate(vat),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }

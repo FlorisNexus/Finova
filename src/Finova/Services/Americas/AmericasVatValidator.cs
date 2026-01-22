@@ -133,6 +133,7 @@ public class AmericasVatValidator : IVatValidator
             "GT" => GuatemalaNitValidator.ValidateNit(vat),
             "HN" => HondurasRtnValidator.ValidateRtn(vat),
             "NI" => NicaraguaRucValidator.ValidateRuc(vat),
+            "VG" or "VP" => ValidationResult.Success(), // British Virgin Islands has no VAT system, but we support the identifier
             _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
         };
     }
@@ -174,6 +175,7 @@ public class AmericasVatValidator : IVatValidator
             "GT" => new VatDetails { VatNumber = vat!, CountryCode = "GT", IsValid = true, IdentifierKind = "NIT" },
             "HN" => new VatDetails { VatNumber = vat!, CountryCode = "HN", IsValid = true, IdentifierKind = "RTN" },
             "NI" => new VatDetails { VatNumber = vat!, CountryCode = "NI", IsValid = true, IdentifierKind = "RUC" },
+            "VG" or "VP" => new VatDetails { VatNumber = vat!, CountryCode = "VG", IsValid = true, IdentifierKind = "None" },
             _ => null
         };
     }

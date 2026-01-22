@@ -65,6 +65,12 @@ public class GlobalVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        // Strip prefix if it exists and matches countryCode
+        if (vat.StartsWith(countryCode) && vat.Length > countryCode.Length)
+        {
+            vat = vat[countryCode.Length..];
+        }
+
         return countryCode switch
         {
             // Europe
@@ -72,7 +78,7 @@ public class GlobalVatValidator : IVatValidator
                 => EuropeVatValidator.ValidateVat(vat, countryCode),
 
             // Middle East
-            "AE" or "BH" or "IL" or "OM" or "SA"
+            "AE" or "BH" or "IL" or "OM" or "QA" or "SA"
                 => MiddleEastVatValidator.ValidateVat(vat, countryCode),
 
             // Africa
@@ -84,7 +90,7 @@ public class GlobalVatValidator : IVatValidator
                 => AsiaVatValidator.ValidateVat(vat, countryCode),
 
             // Americas
-            "AR" or "BR" or "CA" or "CL" or "CO" or "MX" or "CR" or "DO" or "SV" or "GT" or "HN" or "NI"
+            "AR" or "BR" or "CA" or "CL" or "CO" or "MX" or "CR" or "DO" or "SV" or "GT" or "HN" or "NI" or "VG" or "VP"
                 => AmericasVatValidator.ValidateVat(vat, countryCode),
 
             // Oceania
@@ -118,6 +124,12 @@ public class GlobalVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        // Strip prefix if it exists and matches countryCode
+        if (vat.StartsWith(countryCode) && vat.Length > countryCode.Length)
+        {
+            vat = vat[countryCode.Length..];
+        }
+
         return countryCode switch
         {
             // Europe
@@ -125,7 +137,7 @@ public class GlobalVatValidator : IVatValidator
                 => EuropeVatValidator.GetVatDetails(vat, countryCode),
 
             // Middle East
-            "AE" or "BH" or "IL" or "OM" or "SA"
+            "AE" or "BH" or "IL" or "OM" or "QA" or "SA"
                 => MiddleEastVatValidator.GetVatDetails(vat, countryCode),
 
             // Africa
@@ -137,7 +149,7 @@ public class GlobalVatValidator : IVatValidator
                 => AsiaVatValidator.GetVatDetails(vat, countryCode),
 
             // Americas
-            "AR" or "BR" or "CA" or "CL" or "CO" or "MX" or "CR" or "DO" or "SV" or "GT" or "HN" or "NI"
+            "AR" or "BR" or "CA" or "CL" or "CO" or "MX" or "CR" or "DO" or "SV" or "GT" or "HN" or "NI" or "VG" or "VP"
                 => AmericasVatValidator.GetVatDetails(vat, countryCode),
 
             // Oceania
