@@ -200,13 +200,13 @@ public class EuropeVatValidator : IVatValidator
             "PT" => PortugalVatValidator.Validate(vat),
             "RO" => RomaniaVatValidator.Validate(vat),
             "RS" => SerbiaVatValidator.Validate(vat),
-            "SE" => SwedenVatValidator.ValidateVat(vat),
-            "SI" => SloveniaVatValidator.ValidateVat(vat),
-            "SK" => SlovakiaVatValidator.ValidateVat(vat),
+            "RU" => new Finova.Countries.Europe.Russia.Validators.RussiaVatValidator().Validate(vat),
+            "SE" => new SwedenVatValidator().Validate(vat),
+            "SI" => new SloveniaVatValidator().Validate(vat),
+            "SK" => new SlovakiaVatValidator().Validate(vat),
             "SM" => SanMarinoVatValidator.Validate(vat),
-            "TR" => TurkeyVknValidator.ValidateVkn(vat),
+            "TR" => new Finova.Countries.Europe.Turkey.Validators.TurkeyVatValidator().Validate(vat),
             "UA" => UkraineVatValidator.Validate(vat),
-            "RU" => new Finova.Countries.Europe.Russia.Validators.RussiaInnValidator().Validate(vat),
 
 
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, $"Country code {countryCode} is not supported.")

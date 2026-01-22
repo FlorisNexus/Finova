@@ -27,10 +27,12 @@ public static class AsiaTaxIdValidator
         return countryCode.ToUpperInvariant() switch
         {
             "CN" => ChinaUnifiedSocialCreditCodeValidator.ValidateUscc(taxId),
+            "ID" => new Finova.Countries.SoutheastAsia.Indonesia.Validators.IndonesiaNpwpValidator().Validate(taxId),
             "IN" => new IndiaPanValidator().Validate(taxId),
             "JP" => JapanCorporateNumberValidator.ValidateStatic(taxId),
-            "SG" => SingaporeUenValidator.ValidateStatic(taxId),
             "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator().Validate(taxId),
+            "PK" => new Finova.Countries.Asia.Pakistan.Validators.PakistanNtnValidator().Validate(taxId),
+            "SG" => SingaporeUenValidator.ValidateStatic(taxId),
             "VN" => new Finova.Countries.SoutheastAsia.Vietnam.Validators.VietnamTaxIdValidator().Validate(taxId),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };

@@ -35,11 +35,13 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
         return country switch
         {
             // Africa
-            "DZ" or "AO" or "CI" or "EG" or "MA" or "NG" or "SN" or "TN" or "ZA"
+            "DZ" or "AO" or "CI" or "EG" or "KE" or "MA" or "NG" or "SN" or "TN"
                 => AfricaTaxIdValidator.Validate(number, country),
+            
+            "ZA" => new Finova.Countries.Africa.SouthAfrica.Validators.SouthAfricaCompanyValidator().Validate(number),
 
             // Asia
-            "CN" or "IN" or "JP" or "KR" or "SG" or "VN" or "KZ"
+            "CN" or "ID" or "IN" or "JP" or "KR" or "PK" or "SG" or "VN" or "KZ"
                 => AsiaTaxIdValidator.Validate(number, country),
 
             // North America
@@ -49,6 +51,10 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
             // South America
             "AR" or "BR" or "CL" or "CO" or "MX"
                 => SouthAmericaTaxIdValidator.Validate(number, country),
+
+            // Oceania
+            "AU" or "NZ" 
+                => Finova.Services.Oceania.OceaniaTaxIdValidator.Validate(number, country),
 
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, $"Country code {countryCode} is not supported for enterprise validation.")
         };
