@@ -13,8 +13,8 @@ public partial class GermanySteuernummerValidator : ITaxIdValidator
     [GeneratedRegex(@"^\d{13}$")]
     private static partial Regex UnifiedFormatRegex();
 
-    [GeneratedRegex(@"[^\d]")]
-    private static partial Regex DigitsOnlyRegex();
+    [GeneratedRegex(@"[\s\.\/\-]", RegexOptions.IgnoreCase)]
+    private static partial Regex SeparatorRegex();
 
     public string CountryCode => "DE";
 
@@ -65,7 +65,7 @@ public partial class GermanySteuernummerValidator : ITaxIdValidator
     }
 
     /// <summary>
-    /// Normalizes a German Steuernummer by removing non-digit characters.
+    /// Normalizes a German Steuernummer by removing common separators.
     /// </summary>
     public static string Normalize(string? number)
     {
@@ -73,6 +73,6 @@ public partial class GermanySteuernummerValidator : ITaxIdValidator
         {
             return string.Empty;
         }
-        return DigitsOnlyRegex().Replace(number, "");
+        return SeparatorRegex().Replace(number, "");
     }
 }
