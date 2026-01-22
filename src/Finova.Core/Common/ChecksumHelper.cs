@@ -36,6 +36,29 @@ public static class ChecksumHelper
     };
 
     /// <summary>
+    /// Validates a number string using the EAN-13 (GS1) checksum algorithm (Modulo 10 with weights 1, 3).
+    /// </summary>
+    /// <param name="input">The numeric string to validate (13 digits).</param>
+    /// <returns>True if valid, false otherwise.</returns>
+    public static bool ValidateEan13(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input) || input.Length != 13 || !input.All(char.IsDigit))
+        {
+            return false;
+        }
+
+        int sum = 0;
+        for (int i = 0; i < 12; i++)
+        {
+            int digit = input[i] - '0';
+            sum += digit * (i % 2 == 0 ? 1 : 3);
+        }
+
+        int checkDigit = (10 - (sum % 10)) % 10;
+        return checkDigit == (input[12] - '0');
+    }
+
+    /// <summary>
     /// Validates a number string using the Luhn algorithm (Modulo 10).
     /// </summary>
     /// <param name="input">The numeric string to validate.</param>

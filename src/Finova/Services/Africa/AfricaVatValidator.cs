@@ -115,13 +115,14 @@ public class AfricaVatValidator : IVatValidator
             "AO" => new AngolaNifValidator().Validate(vat),
             "CI" => new IvoryCoastNccValidator().Validate(vat),
             "DZ" => new AlgeriaNifValidator().Validate(vat),
-            "EG" => new EgyptTaxRegistrationNumberValidator().Validate(vat),
+            "EG" => new Finova.Countries.Africa.Egypt.Validators.EgyptVatValidator().Validate(vat),
+            "KE" => new Finova.Countries.Africa.Kenya.Validators.KenyaVatValidator().Validate(vat),
             "MA" => new MoroccoIceValidator().Validate(vat),
             "NG" => new NigeriaTinValidator().Validate(vat),
             "SN" => new SenegalNineaValidator().Validate(vat),
             "TN" => new TunisiaMatriculeFiscalValidator().Validate(vat),
             "ZA" => SouthAfricaVatValidator.Validate(vat),
-            _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
+            _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }
 

@@ -14,7 +14,7 @@
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
 
-        <ProjectUrl>https://finovasharp.com</ProjectUrl>
+        <ProjectUrl>https://www.finovasharp.com</ProjectUrl>
         <RepositoryUrl>https://github.com/fdivrusa/Finova</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageProjectUrl>https://github.com/fdivrusa/Finova</PackageProjectUrl>

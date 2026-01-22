@@ -34,6 +34,7 @@ public static class AfricaTaxIdValidator
             "CI" => new IvoryCoastNccValidator().Validate(taxId),
             "DZ" => new AlgeriaNifValidator().Validate(taxId),
             "EG" => new EgyptTaxRegistrationNumberValidator().Validate(taxId),
+            "KE" => new Finova.Countries.Africa.Kenya.Validators.KenyaPinValidator().Validate(taxId),
             "MA" => new MoroccoIceValidator().Validate(taxId),
             "NG" => new NigeriaTinValidator().Validate(taxId),
             "SN" => new SenegalNineaValidator().Validate(taxId),

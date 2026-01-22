@@ -97,6 +97,48 @@
   <data name="InvalidLengthExpectedXGotY" xml:space="preserve">
     <value>Invalid length. Expected {0}, got {1}.</value>
   </data>
+  <data name="InvalidSouthAfricaCompanyNumberLength" xml:space="preserve">
+    <value>Invalid length for South Africa Company Number (CIPC). Expected format: YYYY/NNNNNN/NN.</value>
+  </data>
+  <data name="InvalidSouthAfricaCompanyNumberFormat" xml:space="preserve">
+    <value>Invalid format for South Africa Company Number. Expected YYYY/NNNNNN/NN.</value>
+  </data>
+  <data name="InvalidSouthAfricaCompanyNumberChecksum" xml:space="preserve">
+    <value>Invalid checksum for South Africa Company Number.</value>
+  </data>
+  <data name="InvalidNewZealandNzbnLength" xml:space="preserve">
+    <value>Invalid length for New Zealand Business Number (NZBN). Expected 13 digits.</value>
+  </data>
+  <data name="InvalidNewZealandNzbnChecksum" xml:space="preserve">
+    <value>Invalid checksum for New Zealand Business Number (NZBN).</value>
+  </data>
+  <data name="InvalidIndonesiaNpwpLength" xml:space="preserve">
+    <value>Invalid length for Indonesia NPWP. Expected 15 or 16 digits.</value>
+  </data>
+  <data name="InvalidIndonesiaNpwpFormat" xml:space="preserve">
+    <value>Invalid format for Indonesia NPWP.</value>
+  </data>
+  <data name="InvalidIndonesiaNpwpChecksum" xml:space="preserve">
+    <value>Invalid checksum for Indonesia NPWP.</value>
+  </data>
+  <data name="InvalidKenyaPinLength" xml:space="preserve">
+    <value>Invalid length for Kenya PIN. Expected 11 characters.</value>
+  </data>
+  <data name="InvalidKenyaPinFormat" xml:space="preserve">
+    <value>Invalid format for Kenya PIN. Expected A000000000A.</value>
+  </data>
+  <data name="InvalidKenyaPinChecksum" xml:space="preserve">
+    <value>Invalid checksum for Kenya PIN.</value>
+  </data>
+  <data name="InvalidPakistanNtnLength" xml:space="preserve">
+    <value>Invalid length for Pakistan NTN. Expected 7 or 8 digits.</value>
+  </data>
+  <data name="InvalidPakistanNtnFormat" xml:space="preserve">
+    <value>Invalid format for Pakistan NTN.</value>
+  </data>
+  <data name="InvalidPakistanNtnChecksum" xml:space="preserve">
+    <value>Invalid checksum for Pakistan NTN.</value>
+  </data>
   <data name="InvalidVatFormat" xml:space="preserve">
     <value>Invalid {0} VAT format.</value>
   </data>

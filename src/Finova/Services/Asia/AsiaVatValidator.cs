@@ -117,13 +117,12 @@ public class AsiaVatValidator : IVatValidator
         return countryCode switch
         {
             "CN" => ChinaVatValidator.Validate(vat),
-            "IN" => IndiaGstinValidator.Validate(vat),
+            "ID" => new Finova.Countries.SoutheastAsia.Indonesia.Validators.IndonesiaVatValidator().Validate(vat),
             "JP" => JapanVatValidator.Validate(vat),
             "KR" => SouthKoreaVatValidator.Validate(vat),
-            "SG" => SingaporeGstValidator.Validate(vat),
-            "VN" => VietnamTaxIdValidator.ValidateMst(vat),
-            "KZ" => KazakhstanBinValidator.ValidateBin(vat),
-            _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
+            "PH" => new Finova.Countries.SoutheastAsia.Philippines.Validators.PhilippinesVatValidator().Validate(vat),
+            "VN" => new Finova.Countries.SoutheastAsia.Vietnam.Validators.VietnamVatValidator().Validate(vat),
+            _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }
 

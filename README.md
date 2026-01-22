@@ -14,7 +14,7 @@
 
 *100% Offline · Zero Dependencies · Lightning Fast*
 
-[**🌐 Visit the Official Website**](https://finovasharp.com/)
+[**🌐 Visit the Official Website**](https://www.finovasharp.com/)
 
 </div>
 
@@ -76,8 +76,8 @@ dotnet add package Finova.Extensions.FluentValidation
 
 | Validator | Description | Countries |
 |-----------|-------------|-----------|
-| **VAT Number** | Value Added Tax ID | 69 countries: All 27 EU + UK, CH, NO, Middle East (AE, BH, IL, OM, SA), Asia (CN, JP, KR, KZ, VN), Americas (AR, BR, CA, CL, CO, MX, US), Africa (ZA), and more |
-| **Enterprise Number** | Business registration | 🇧🇪 Belgium (BCE/KBO), 🇱🇺 Luxembourg (RCS), 🇳🇱 Netherlands (KvK), 🇮🇪 Ireland (CRO), 🇲🇹 Malta (Company No.), 🇸🇰 Slovakia (IČO), 🇸🇮 Slovenia (Matična), 🇸🇪 Sweden (Org.nr) |
+| **VAT Number** | Value Added Tax ID | 69 countries: All 27 EU + UK, CH, NO, Middle East (AE, BH, IL, OM, SA), Asia (CN, JP, KR, KZ, VN, PK, ID), Americas (AR, BR, CA, CL, CO, MX, US), Africa (ZA, KE), Oceania (NZ) and more |
+| **Enterprise Number** | Business registration | 🇧🇪 Belgium (BCE/KBO), 🇱🇺 Luxembourg (RCS), 🇳🇱 Netherlands (KvK), 🇮🇪 Ireland (CRO), 🇲🇹 Malta (Company No.), 🇸🇰 Slovakia (IČO), 🇸🇮 Slovenia (Matična), 🇸🇪 Sweden (Org.nr), 🇿🇦 South Africa (CIPC), 🇳🇿 New Zealand (NZBN) |
 | **EIN** | Employer Identification Number | 🇺🇸 USA |
 | **LEI** | Legal Entity Identifier | 🌍 ISO 17442 worldwide |
 
@@ -172,6 +172,7 @@ dotnet add package Finova.Extensions.FluentValidation
 | | 🇲🇷 Mauritania | NIF ✓ | IBAN ✓ | — |
 | | 🇲🇿 Mozambique | NUIT ✓ | IBAN ✓ | — |
 | | 🇳🇪 Niger | NIF ✓ | IBAN ✓ | — |
+| | 🇿🇦 South Africa | CIPC ✓ | — | — |
 | | 🇸🇹 Sao Tome and Principe | NIF ✓ | IBAN ✓ | — |
 | | 🇸🇳 Senegal | NINEA ✓ | IBAN ✓ | — |
 | | 🇸🇨 Seychelles | TIN ✓ | IBAN ✓ | — |
@@ -179,6 +180,7 @@ dotnet add package Finova.Extensions.FluentValidation
 | | 🇸🇩 Sudan | TIN ✓ | IBAN ✓ | — |
 | | 🇹🇬 Togo | NIF ✓ | IBAN ✓ | — |
 | | 🇹🇳 Tunisia | MF ✓ | IBAN ✓ | — |
+| | 🇰🇪 Kenya | PIN ✓ | — | — |
 | **Asia** | 🇨🇳 China | USCC ✓ | — | — |
 | | 🇯🇵 Japan | Corporate ✓ | — | — |
 | | 🇮🇳 India | GSTIN/PAN ✓ | — | — |
@@ -193,6 +195,7 @@ dotnet add package Finova.Extensions.FluentValidation
 | | 🇹🇭 Thailand | TIN ✓ | — | — |
 | | 🇻🇳 Vietnam | MST ✓ | — | — |
 | **Oceania** | 🇦🇺 Australia | ABN/TFN ✓ | — | BSB ✓ |
+| | 🇳🇿 New Zealand | NZBN ✓ | — | — |
 
 ---
 
@@ -431,6 +434,6 @@ Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTIN
 
 **Made with ❤️ by [Florian Di Vrusa](https://github.com/fdivrusa)**
 
-[⭐ Star on GitHub](https://github.com/fdivrusa/Finova) · [📦 NuGet Package](https://www.nuget.org/packages/Finova) · [🌐 Website](https://finovasharp.com)
+[⭐ Star on GitHub](https://github.com/fdivrusa/Finova) · [📦 NuGet Package](https://www.nuget.org/packages/Finova) · [🌐 Website](https://www.finovasharp.com)
 
 </div>

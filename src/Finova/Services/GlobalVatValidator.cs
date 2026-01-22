@@ -76,11 +76,11 @@ public class GlobalVatValidator : IVatValidator
                 => MiddleEastVatValidator.ValidateVat(vat, countryCode),
 
             // Africa
-            "AO" or "CI" or "DZ" or "EG" or "MA" or "NG" or "SN" or "TN" or "ZA"
+            "AO" or "CI" or "DZ" or "EG" or "KE" or "MA" or "NG" or "SN" or "TN" or "ZA"
                 => AfricaVatValidator.ValidateVat(vat, countryCode),
 
             // Asia
-            "CN" or "IN" or "JP" or "KR" or "SG" or "VN" or "KZ"
+            "CN" or "ID" or "IN" or "JP" or "KR" or "PH" or "SG" or "VN" or "KZ"
                 => AsiaVatValidator.ValidateVat(vat, countryCode),
 
             // Americas
@@ -129,11 +129,11 @@ public class GlobalVatValidator : IVatValidator
                 => MiddleEastVatValidator.GetVatDetails(vat, countryCode),
 
             // Africa
-            "AO" or "CI" or "DZ" or "EG" or "MA" or "NG" or "SN" or "TN" or "ZA"
+            "AO" or "CI" or "DZ" or "EG" or "KE" or "MA" or "NG" or "SN" or "TN" or "ZA"
                 => AfricaVatValidator.GetVatDetails(vat, countryCode),
 
             // Asia
-            "CN" or "IN" or "JP" or "KR" or "SG" or "VN" or "KZ"
+            "CN" or "ID" or "IN" or "JP" or "KR" or "PH" or "SG" or "VN" or "KZ"
                 => AsiaVatValidator.GetVatDetails(vat, countryCode),
 
             // Americas

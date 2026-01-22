@@ -465,6 +465,30 @@ public static class ValidationMessages
     public static string InvalidSouthAfricaVatLength => GetString("InvalidSouthAfricaVatLength");
     public static string InvalidSouthAfricaVatFormat => GetString("InvalidSouthAfricaVatFormat");
 
+    // South Africa Company
+    public static string InvalidSouthAfricaCompanyNumberLength => GetString("InvalidSouthAfricaCompanyNumberLength");
+    public static string InvalidSouthAfricaCompanyNumberFormat => GetString("InvalidSouthAfricaCompanyNumberFormat");
+    public static string InvalidSouthAfricaCompanyNumberChecksum => GetString("InvalidSouthAfricaCompanyNumberChecksum");
+
+    // New Zealand NZBN
+    public static string InvalidNewZealandNzbnLength => GetString("InvalidNewZealandNzbnLength");
+    public static string InvalidNewZealandNzbnChecksum => GetString("InvalidNewZealandNzbnChecksum");
+
+    // Indonesia NPWP
+    public static string InvalidIndonesiaNpwpLength => GetString("InvalidIndonesiaNpwpLength");
+    public static string InvalidIndonesiaNpwpFormat => GetString("InvalidIndonesiaNpwpFormat");
+    public static string InvalidIndonesiaNpwpChecksum => GetString("InvalidIndonesiaNpwpChecksum");
+
+    // Kenya PIN
+    public static string InvalidKenyaPinLength => GetString("InvalidKenyaPinLength");
+    public static string InvalidKenyaPinFormat => GetString("InvalidKenyaPinFormat");
+    public static string InvalidKenyaPinChecksum => GetString("InvalidKenyaPinChecksum");
+
+    // Pakistan NTN
+    public static string InvalidPakistanNtnLength => GetString("InvalidPakistanNtnLength");
+    public static string InvalidPakistanNtnFormat => GetString("InvalidPakistanNtnFormat");
+    public static string InvalidPakistanNtnChecksum => GetString("InvalidPakistanNtnChecksum");
+
     // Luxembourg RCS (Business Registry)
     public static string InvalidLuxembourgRcsFormat => GetString("InvalidLuxembourgRcsFormat");
 

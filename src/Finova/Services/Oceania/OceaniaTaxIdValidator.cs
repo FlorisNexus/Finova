@@ -24,6 +24,7 @@ public static class OceaniaTaxIdValidator
         return countryCode.ToUpperInvariant() switch
         {
             "AU" => AustraliaAbnValidator.ValidateAbn(taxId),
+            "NZ" => new Finova.Countries.Oceania.NewZealand.Validators.NewZealandNzbnValidator().Validate(taxId),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }
