@@ -14,7 +14,14 @@ public class JapanZenginCodeValidator : IBankRoutingValidator, IBankRoutingParse
     public string CountryCode => "JP";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
+    /// <summary>
+    /// Validates the Japanese Zengin Code.
+    /// </summary>
+    /// <param name="input">The Zengin code to validate.</param>
+    /// <returns>A ValidationResult.</returns>
+    public static ValidationResult ValidateStatic(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
