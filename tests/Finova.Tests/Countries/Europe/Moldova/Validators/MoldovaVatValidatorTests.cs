@@ -9,7 +9,7 @@ public class MoldovaVatValidatorTests
     [InlineData("MD1234567890123")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = MoldovaVatValidator.Validate(vat);
+        var result = MoldovaVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class MoldovaVatValidatorTests
     [InlineData("XX1234567890123")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = MoldovaVatValidator.Validate(vat);
+        var result = MoldovaVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

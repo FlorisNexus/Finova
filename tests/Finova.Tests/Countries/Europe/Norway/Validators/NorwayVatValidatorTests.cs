@@ -11,7 +11,7 @@ public class NorwayVatValidatorTests
     [InlineData("995567636")] // Without prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = NorwayVatValidator.Validate(vat);
+        var result = NorwayVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -20,7 +20,7 @@ public class NorwayVatValidatorTests
     [InlineData(" NO995567636 ")] // With whitespace
     public void Validate_WithFormattedVat_ReturnsSuccess(string vat)
     {
-        var result = NorwayVatValidator.Validate(vat);
+        var result = NorwayVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -34,7 +34,7 @@ public class NorwayVatValidatorTests
     [InlineData("XX995567636")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = NorwayVatValidator.Validate(vat);
+        var result = NorwayVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

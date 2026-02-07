@@ -5,11 +5,10 @@ using Finova.Core.Vat;
 namespace Finova.Countries.Europe.Andorra.Validators;
 
 /// <summary>
-/// Validator for Andorra VAT numbers (NRT - Número de Registre Tributari).
-/// Format: [A-Z][0-9]{6}[A-Z] (8 characters).
-/// Example: U123456A
+/// Validator for Andorran VAT numbers (NRT - Número de Registre Tributari).
+/// Format: 8 characters. [A-Z] + 6 digits + [A-Z].
 /// </summary>
-public partial class AndorraVatValidator : IVatValidator
+public partial class AndorraVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "AD";
     private const int VatLength = 8;
@@ -17,64 +16,38 @@ public partial class AndorraVatValidator : IVatValidator
     [GeneratedRegex(@"^[A-Z]\d{6}[A-Z]$")]
     private static partial Regex AndorraVatRegex();
 
-    public string CountryCode => CountryCodePrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new AndorraVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == VatLength;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => AndorraVatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = vat.Trim().ToUpperInvariant();
-
-        // Remove AD prefix if present
-        if (normalized.StartsWith(CountryCodePrefix))
-        {
-            normalized = normalized[2..];
-        }
-
-        if (normalized.Length != VatLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedX, VatLength));
-        }
-
-        if (!AndorraVatRegex().IsMatch(normalized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, string.Format(ValidationMessages.InvalidVatFormat, "Andorra"));
-        }
-
         // No public checksum algorithm available.
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Andorran VAT numbers.
+    /// </summary>
+    /// <param name="vat">The VAT number to validate.</param>
+    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
+        public static ValidationResult ValidateVat(string? vat) => new AndorraVatValidator().Validate(vat);
 
-        var result = Validate(vat);
-        if (!result.IsValid)
-        {
-            return null;
-        }
-
-        var normalized = vat!.Trim().ToUpperInvariant();
-        if (normalized.StartsWith(CountryCodePrefix))
-        {
-            normalized = normalized[2..];
-        }
-
-        return new VatDetails
-        {
-            VatNumber = $"{CountryCodePrefix}{normalized}",
-            CountryCode = CountryCodePrefix,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for an Andorran VAT number.
+    /// </summary>
+    /// <param name="vat">The VAT number to parse.</param>
+    /// <returns>A <see cref="VatDetails"/> object or null if invalid.</returns>
+    public static VatDetails? GetVatDetails(string? vat) => new AndorraVatValidator().Parse(vat);
 }

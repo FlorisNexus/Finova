@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Enterprise;
 using Finova.Services.Africa;
@@ -13,6 +14,20 @@ namespace Finova.Services;
 /// </summary>
 public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
 {
+    private static readonly ConcurrentDictionary<string, IEuropeEnterpriseValidator> _regionalValidators = new();
+
+    private readonly IServiceProvider? _serviceProvider;
+
+    public GlobalEnterpriseValidator(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
+
+    public GlobalEnterpriseValidator()
+    {
+        _serviceProvider = null;
+    }
+
     /// <inheritdoc/>
     public ValidationResult Validate(string? number, string countryCode)
     {
@@ -24,14 +39,14 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
         string country = countryCode.ToUpperInvariant();
 
         // Check Europe (Most comprehensive enterprise validation)
-        var result = EuropeEnterpriseValidator.ValidateEnterpriseNumber(number, country);
+        var europeValidator = new EuropeEnterpriseValidator();
+        var result = europeValidator.Validate(number, country);
         if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
         {
-            // If it's a supported European country, return the result
             return result;
         }
 
-        // Route to other regions (often using Tax ID as Enterprise ID)
+        // Route to other regions
         return country switch
         {
             // Africa
@@ -71,7 +86,11 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
         string country = countryCode.ToUpperInvariant();
 
         // Europe normalization
-        var normalized = EuropeEnterpriseValidator.GetNormalizedNumber(number, country);
+        var europeValidator = new EuropeEnterpriseValidator();
+        var normalized = europeValidator.Validate(number, country).IsValid 
+            ? EuropeEnterpriseValidator.GetNormalizedNumber(number, country) 
+            : null;
+
         if (normalized != null)
         {
             return normalized;

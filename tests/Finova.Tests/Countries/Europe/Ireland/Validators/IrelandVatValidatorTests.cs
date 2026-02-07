@@ -11,7 +11,7 @@ public class IrelandVatValidatorTests
     [InlineData("6433435F")] // Without prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = IrelandVatValidator.Validate(vat);
+        var result = IrelandVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -21,7 +21,7 @@ public class IrelandVatValidatorTests
     [InlineData("")]
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = IrelandVatValidator.Validate(vat);
+        var result = IrelandVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

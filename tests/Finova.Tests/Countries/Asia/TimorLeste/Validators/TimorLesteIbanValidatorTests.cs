@@ -35,5 +35,5 @@ public class TimorLesteIbanValidatorTests
     [Theory]
     [InlineData("TL380080012345678910157")]
     public void ValidateTimorLesteIban_WithValidIbans_ReturnsTrue(string iban)
-        => TimorLesteIbanValidator.ValidateTimorLesteIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

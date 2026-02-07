@@ -8,53 +8,29 @@ namespace Finova.Countries.Europe.Azerbaijan.Validators;
 /// Validator for Azerbaijan Personal Identification Number (PIN / FİN).
 /// Format: 7 alphanumeric characters.
 /// </summary>
-public class AzerbaijanNationalIdValidator : INationalIdValidator
+public partial class AzerbaijanNationalIdValidator : NationalIdValidatorBase
 {
+    [GeneratedRegex(@"^[A-Z0-9]{7}$")]
+    private static partial Regex FormatRegex();
+
     /// <inheritdoc/>
-    public string CountryCode => "AZ";
+        public override string CountryCode => "AZ";
 
-    /// <summary>
-    /// Validates the Azerbaijan PIN.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 7;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => FormatRegex().IsMatch(sanitized);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Azerbaijan PIN (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = nationalId.Trim().ToUpperInvariant();
-
-        if (sanitized.Length != 7)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        // Must be alphanumeric
-        if (!Regex.IsMatch(sanitized, "^[A-Z0-9]{7}$"))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
+        // No public checksum algorithm available.
         return ValidationResult.Success();
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? input?.Trim().ToUpperInvariant() : null;
-    }
+    /// <summary>
+    /// Static validation method for Azerbaijan National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new AzerbaijanNationalIdValidator().Validate(nationalId);
 }

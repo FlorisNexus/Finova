@@ -4,40 +4,67 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Greece.Validators;
 
-public partial class GreeceVatValidator : IVatValidator
+/// <summary>
+/// Validator for Greek VAT numbers (AFM).
+/// Format: 9 digits.
+/// </summary>
+public partial class GreeceVatValidator : VatValidatorBase
 {
-    [GeneratedRegex(@"^EL\d{9}$")]
+    [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex VatRegex();
 
-    private const string VatPrefix = "EL"; // Greece uses EL for VAT, GR for country code usually.
+    private const string VatPrefix = "EL"; // Greece uses EL for VAT
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new GreeceVatValidator().ValidateInternal(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix) || cleaned.StartsWith("GR"))
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+
+        // Special handling for Greece prefixes: EL, GR
+        if (cleaned.StartsWith("EL", StringComparison.OrdinalIgnoreCase) || 
+            cleaned.StartsWith("GR", StringComparison.OrdinalIgnoreCase))
         {
             cleaned = cleaned[2..];
         }
 
-        if (cleaned.Length != 9 || !long.TryParse(cleaned, out _))
+        if (!IsValidLength(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidGreeceVatFormat);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                string.Format(ValidationMessages.InvalidLength, CountryCode));
         }
 
-        // Checksum Validation (Powers of 2 Mod 11)
+        if (!ValidateFormat(cleaned))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat,
+                string.Format(ValidationMessages.InvalidVatFormat, CountryCode));
+        }
+
+        return ValidateChecksum(cleaned);
+    }
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
         // Weights: 256, 128, 64, 32, 16, 8, 4, 2
         int[] weights = { 256, 128, 64, 32, 16, 8, 4, 2 };
 
@@ -47,34 +74,18 @@ public partial class GreeceVatValidator : IVatValidator
         int checkDigit = remainder % 10; // If remainder is 10, check digit is 0.
 
         int lastDigit = cleaned[8] - '0';
-        if (checkDigit != lastDigit)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidGreeceVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == lastDigit
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidGreeceVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Greek VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new GreeceVatValidator().ValidateInternal(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix) || cleaned.StartsWith("GR"))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Greek VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new GreeceVatValidator().Parse(vat);
 }

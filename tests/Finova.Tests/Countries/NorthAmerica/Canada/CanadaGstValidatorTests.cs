@@ -12,7 +12,7 @@ public class CanadaGstValidatorTests
     public void Validate_WithInvalidBnChecksum_ReturnsFailure()
     {
         // 123456789 has invalid Luhn checksum
-        var result = CanadaGstValidator.Validate("123456789RT0001");
+        var result = CanadaGstValidator.ValidateStatic("123456789RT0001");
         result.IsValid.Should().BeFalse();
     }
 
@@ -26,7 +26,7 @@ public class CanadaGstValidatorTests
     [InlineData("1234567890RT0001")] // Too long BN (10 digits)
     public void Validate_WithInvalidGst_ReturnsFailure(string? gst)
     {
-        var result = CanadaGstValidator.Validate(gst);
+        var result = CanadaGstValidator.ValidateStatic(gst);
         result.IsValid.Should().BeFalse();
     }
 
@@ -44,7 +44,7 @@ public class CanadaGstValidatorTests
     public void Validate_ChecksFormat_ReturnsFailureForMissingRT()
     {
         // Valid length but missing RT suffix
-        var result = CanadaGstValidator.Validate("123456789AB0001");
+        var result = CanadaGstValidator.ValidateStatic("123456789AB0001");
         result.IsValid.Should().BeFalse();
     }
 }

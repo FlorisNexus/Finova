@@ -1,9 +1,11 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Vat;
 using Finova.Countries.Africa.Algeria.Validators;
 using Finova.Countries.Africa.Angola.Validators;
 using Finova.Countries.Africa.CoteDIvoire.Validators;
 using Finova.Countries.Africa.Egypt.Validators;
+using Finova.Countries.Africa.Kenya.Validators;
 using Finova.Countries.Africa.Morocco.Validators;
 using Finova.Countries.Africa.Nigeria.Validators;
 using Finova.Countries.Africa.Senegal.Validators;
@@ -17,18 +19,10 @@ namespace Finova.Services;
 /// Unified validator for African VAT numbers.
 /// Delegates validation to specific country validators based on the country code prefix.
 /// </summary>
-/// <example>
-/// <code>
-/// // Static usage
-/// var result = AfricaVatValidator.ValidateVat("ZA4123456789");
-///
-/// // Instance usage
-/// var validator = new AfricaVatValidator();
-/// var result = validator.Validate("ZA4123456789");
-/// </code>
-/// </example>
 public class AfricaVatValidator : IVatValidator
 {
+    private static readonly ConcurrentDictionary<string, IVatValidator> _staticValidators = new();
+
     private readonly IServiceProvider? _serviceProvider;
     private IEnumerable<IVatValidator>? _validators;
 
@@ -110,18 +104,29 @@ public class AfricaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        {
+            "EG" => new EgyptVatValidator(),
+            "KE" => new KenyaVatValidator(),
+            "ZA" => new SouthAfricaVatValidator(),
+            _ => null!
+        });
+
+        if (validator != null)
+        {
+            return validator.Validate(vat);
+        }
+
+        // Handle cases that don't have a standard class yet
         return countryCode switch
         {
             "AO" => new AngolaNifValidator().Validate(vat),
             "CI" => new IvoryCoastNccValidator().Validate(vat),
             "DZ" => new AlgeriaNifValidator().Validate(vat),
-            "EG" => new Finova.Countries.Africa.Egypt.Validators.EgyptVatValidator().Validate(vat),
-            "KE" => new Finova.Countries.Africa.Kenya.Validators.KenyaVatValidator().Validate(vat),
             "MA" => new MoroccoIceValidator().Validate(vat),
             "NG" => new NigeriaTinValidator().Validate(vat),
             "SN" => new SenegalNineaValidator().Validate(vat),
             "TN" => new TunisiaMatriculeFiscalValidator().Validate(vat),
-            "ZA" => SouthAfricaVatValidator.Validate(vat),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }
@@ -146,6 +151,12 @@ public class AfricaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetValueOrDefault(countryCode);
+        if (validator != null)
+        {
+            return validator.Parse(vat);
+        }
+
         return countryCode switch
         {
             "AO" => new VatDetails { VatNumber = vat!, CountryCode = "AO", IsValid = true, IdentifierKind = "NIF" },
@@ -156,7 +167,6 @@ public class AfricaVatValidator : IVatValidator
             "NG" => new VatDetails { VatNumber = vat!, CountryCode = "NG", IsValid = true, IdentifierKind = "TIN" },
             "SN" => new VatDetails { VatNumber = vat!, CountryCode = "SN", IsValid = true, IdentifierKind = "NINEA" },
             "TN" => new VatDetails { VatNumber = vat!, CountryCode = "TN", IsValid = true, IdentifierKind = "Matricule" },
-            "ZA" => SouthAfricaVatValidator.GetVatDetails(vat),
             _ => null
         };
     }

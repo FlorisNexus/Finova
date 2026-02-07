@@ -6,70 +6,44 @@ namespace Finova.Countries.Europe.Serbia.Validators;
 
 /// <summary>
 /// Validator for Serbia VAT numbers (PIB).
-/// Format: RS + 9 digits.
-/// Algorithm: ISO 7064 Mod 11, 10.
+/// Format: 9 digits.
 /// </summary>
-public partial class SerbiaVatValidator : IVatValidator
+public partial class SerbiaVatValidator : VatValidatorBase
 {
-    [GeneratedRegex(@"^RS\d{9}$")]
+    [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "RS";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new SerbiaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(VatPrefix + cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidSerbiaVatFormat);
-        }
-
-        if (!ChecksumHelper.ValidateISO7064Mod11_10(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidSerbiaVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return ChecksumHelper.ValidateISO7064Mod11_10(cleaned)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidSerbiaVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Serbian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new SerbiaVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Serbian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new SerbiaVatValidator().Parse(vat);
 }

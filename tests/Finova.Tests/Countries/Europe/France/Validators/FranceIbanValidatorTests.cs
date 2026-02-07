@@ -55,7 +55,7 @@ public class FranceIbanValidatorTests
     [InlineData("FR7630006000011234567890189")]
     public void ValidateFranceIban_WithValidIbans_ReturnsTrue(string iban)
     {
-        FranceIbanValidator.ValidateFranceIban(iban).IsValid.Should().BeTrue();
+        _validator.Validate(iban).IsValid.Should().BeTrue();
     }
 
     [Theory]
@@ -64,7 +64,7 @@ public class FranceIbanValidatorTests
     [InlineData(null)]
     public void ValidateFranceIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
-        FranceIbanValidator.ValidateFranceIban(iban).IsValid.Should().BeFalse();
+        _validator.Validate(iban).IsValid.Should().BeFalse();
     }
 
     [Fact]

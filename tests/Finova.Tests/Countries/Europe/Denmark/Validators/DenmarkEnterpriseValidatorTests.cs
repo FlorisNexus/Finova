@@ -30,6 +30,14 @@ public class DenmarkEnterpriseValidatorTests
     [Theory]
     [InlineData("1234567")] // Too short
     [InlineData("123456789")] // Too long
+    public void Validate_InvalidLength_ReturnsFailure(string? cvr)
+    {
+        var result = DenmarkCvrValidator.ValidateCvr(cvr);
+        Assert.False(result.IsValid);
+        Assert.Equal(ValidationErrorCode.InvalidLength, result.ErrorCode());
+    }
+
+    [Theory]
     [InlineData("ABCDEFGH")] // Non-numeric
     public void Validate_InvalidFormat_ReturnsFailure(string? cvr)
     {

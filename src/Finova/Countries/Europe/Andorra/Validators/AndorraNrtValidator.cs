@@ -25,7 +25,7 @@ public class AndorraNrtValidator : ITaxIdValidator
     public static ValidationResult ValidateNrt(string? nrt)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(nrt, "AD");
-        return AndorraVatValidator.Validate(normalized);
+        return AndorraVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

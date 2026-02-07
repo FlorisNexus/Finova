@@ -31,8 +31,17 @@ public class MaltaNationalIdValidatorTests
     }
 
     [Theory]
-    [InlineData("12345678M")] // Too many digits
-    [InlineData("M")] // No digits
+    [InlineData("12345678M")] // Too many digits (9 chars, exceeds max length 8)
+    [InlineData("M")] // No digits (1 char, below min length 2)
+    public void Validate_InvalidLength_ReturnsFailure(string? input)
+    {
+        var result = _validator.Validate(input);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().ContainSingle()
+            .Which.Message.Should().Be("Invalid length.");
+    }
+
+    [Theory]
     [InlineData("1234567X")] // Invalid letter
     [InlineData("1234567")] // Missing letter
     public void Validate_InvalidFormat_ReturnsFailure(string? input)

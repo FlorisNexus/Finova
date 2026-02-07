@@ -36,7 +36,7 @@ public class LuxembourgIbanValidatorTests
     [Theory]
     [InlineData("LU280019400644750000")]
     public void ValidateLuxembourgIban_WithValidIbans_ReturnsTrue(string iban)
-        => LuxembourgIbanValidator.ValidateLuxembourgIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }
 
 

@@ -4,40 +4,34 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Hungary.Validators;
 
-public partial class HungaryVatValidator : IVatValidator
+/// <summary>
+/// Validator for Hungarian VAT numbers (Adószám).
+/// Format: 8 digits.
+/// </summary>
+public partial class HungaryVatValidator : VatValidatorBase
 {
-    [GeneratedRegex(@"^HU\d{8}$")]
+    [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "HU";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new HungaryVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 8;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (cleaned.Length != 8 || !long.TryParse(cleaned, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidHungaryVatFormat);
-        }
-
-        // Checksum Validation (Weighted Mod 10)
         // Weights: 9, 7, 3, 1, 9, 7, 3
         int[] weights = { 9, 7, 3, 1, 9, 7, 3 };
 
@@ -50,34 +44,18 @@ public partial class HungaryVatValidator : IVatValidator
         }
 
         int lastDigit = cleaned[7] - '0';
-        if (checkDigit != lastDigit)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidHungaryVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == lastDigit
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidHungaryVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Hungarian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new HungaryVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Hungarian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new HungaryVatValidator().Parse(vat);
 }

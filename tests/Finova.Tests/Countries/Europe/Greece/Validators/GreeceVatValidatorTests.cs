@@ -10,7 +10,7 @@ public class GreeceVatValidatorTests
     [InlineData("GR123456783")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = GreeceVatValidator.Validate(vat);
+        var result = GreeceVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -22,7 +22,7 @@ public class GreeceVatValidatorTests
     [InlineData("XX123456789")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = GreeceVatValidator.Validate(vat);
+        var result = GreeceVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

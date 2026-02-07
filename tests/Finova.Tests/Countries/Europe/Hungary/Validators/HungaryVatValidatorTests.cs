@@ -9,7 +9,7 @@ public class HungaryVatValidatorTests
     [InlineData("HU12892312")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = HungaryVatValidator.Validate(vat);
+        var result = HungaryVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class HungaryVatValidatorTests
     [InlineData("XX12345678")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = HungaryVatValidator.Validate(vat);
+        var result = HungaryVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

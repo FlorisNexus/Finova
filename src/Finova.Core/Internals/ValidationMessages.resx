@@ -110,7 +110,7 @@
     <value>Swedish OCR reference must be between 2 and 25 digits.</value>
   </data>
   <data name="InvalidLengthDigit" xml:space="preserve">
-    <value>Invalid length digit.</value>
+    <value>Invalid length digit. The second-to-last digit must match the total length of the reference (mod 10).</value>
   </data>
   <data name="InvalidFinnishReferenceLength" xml:space="preserve">
     <value>Finnish reference must be between 4 and 20 digits.</value>

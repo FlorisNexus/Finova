@@ -13,7 +13,7 @@ public class AustraliaGstValidatorTests
     [InlineData("51 824 753 556")] // With spaces
     public void Validate_WithValidGst_ReturnsSuccess(string gst)
     {
-        var result = AustraliaGstValidator.Validate(gst);
+        var result = AustraliaGstValidator.ValidateStatic(gst);
         result.IsValid.Should().BeTrue();
     }
 
@@ -27,7 +27,7 @@ public class AustraliaGstValidatorTests
     [InlineData("00000000000")] // All zeros
     public void Validate_WithInvalidGst_ReturnsFailure(string? gst)
     {
-        var result = AustraliaGstValidator.Validate(gst);
+        var result = AustraliaGstValidator.ValidateStatic(gst);
         result.IsValid.Should().BeFalse();
     }
 

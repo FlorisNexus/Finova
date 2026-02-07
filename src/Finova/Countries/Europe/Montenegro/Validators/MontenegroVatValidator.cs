@@ -5,10 +5,10 @@ using Finova.Core.Vat;
 namespace Finova.Countries.Europe.Montenegro.Validators;
 
 /// <summary>
-/// Validator for Montenegro VAT numbers.
-/// Format : ME + 7 digits
+/// Validator for Montenegrin VAT numbers.
+/// Format: 8 digits.
 /// </summary>
-public partial class MontenegroVatValidator : IVatValidator
+public partial class MontenegroVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex VatRegex();
@@ -16,42 +16,32 @@ public partial class MontenegroVatValidator : IVatValidator
     private const string VatPrefix = "ME";
     private static readonly int[] Weights = { 7, 6, 5, 4, 3, 2, 7 };
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new MontenegroVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 8;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidMontenegroVatFormat);
-        }
-
         int sum = ChecksumHelper.CalculateWeightedSum(cleaned[..7], Weights);
         int remainder = sum % 11;
-        int checkDigit;
 
         if (remainder == 10)
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidMontenegroVatChecksumRemainder10);
         }
 
-        checkDigit = 11 - remainder;
+        int checkDigit = 11 - remainder;
         if (checkDigit == 11)
         {
             checkDigit = 0;
@@ -65,26 +55,13 @@ public partial class MontenegroVatValidator : IVatValidator
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Montenegrin VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new MontenegroVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Montenegrin VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new MontenegroVatValidator().Parse(vat);
 }

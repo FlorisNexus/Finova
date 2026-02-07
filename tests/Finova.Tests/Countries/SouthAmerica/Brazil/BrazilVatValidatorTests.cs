@@ -12,7 +12,7 @@ public class BrazilVatValidatorTests
     [InlineData("11.222.333/0001-81")] // Formatted
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = BrazilVatValidator.Validate(vat);
+        var result = BrazilVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -24,7 +24,7 @@ public class BrazilVatValidatorTests
     [InlineData("112223330001815")] // Too long (15 digits)
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = BrazilVatValidator.Validate(vat);
+        var result = BrazilVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

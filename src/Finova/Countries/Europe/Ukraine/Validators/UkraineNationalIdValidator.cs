@@ -7,69 +7,38 @@ namespace Finova.Countries.Europe.Ukraine.Validators;
 /// Validator for Ukraine National Identification Number (RNTRC).
 /// Format: 10 digits.
 /// </summary>
-public class UkraineNationalIdValidator : INationalIdValidator
+public partial class UkraineNationalIdValidator : NationalIdValidatorBase
 {
+    private static readonly int[] Weights = { -1, 5, 7, 9, 4, 6, 10, 5, 7 };
+
     /// <inheritdoc/>
-    public string CountryCode => "UA";
+        public override string CountryCode => "UA";
 
-    /// <summary>
-    /// Validates the Ukraine RNTRC.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 10;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => long.TryParse(sanitized, out _);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Ukraine RNTRC (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 10)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        // Weights: -1 5 7 9 4 6 10 5 7
-        int[] weights = { -1, 5, 7, 9, 4, 6, 10, 5, 7 };
         int sum = 0;
-
         for (int i = 0; i < 9; i++)
         {
-            sum += (sanitized[i] - '0') * weights[i];
+            sum += (sanitized[i] - '0') * Weights[i];
         }
 
         int remainder = sum % 11;
         int checkDigit = (remainder == 10) ? 0 : remainder;
 
-        if (checkDigit != (sanitized[9] - '0'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == (sanitized[9] - '0')
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Ukrainian RNTRC.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new UkraineNationalIdValidator().Validate(nationalId);
 }

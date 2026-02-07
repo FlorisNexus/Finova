@@ -35,5 +35,5 @@ public class CostaRicaIbanValidatorTests
     [Theory]
     [InlineData("CR05015202001026284066")]
     public void ValidateCostaRicaIban_WithValidIbans_ReturnsTrue(string iban)
-        => CostaRicaIbanValidator.ValidateCostaRicaIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

@@ -1,5 +1,6 @@
 using Finova.Core.Bic;
 using Finova.Services;
+using Finova.Services.Global;
 using FluentValidation;
 
 namespace Finova.Extensions.FluentValidation;
@@ -18,7 +19,7 @@ public static class IbanValidators
     public static IRuleBuilderOptions<T, string?> MustBeValidIban<T>(this IRuleBuilder<T, string?> ruleBuilder)
     {
         return ruleBuilder
-            .Must(iban => EuropeIbanValidator.ValidateIban(iban).IsValid)
+            .Must(iban => GlobalIbanValidator.ValidateIban(iban).IsValid)
             .WithMessage("'{PropertyName}' is not a valid IBAN.");
     }
 

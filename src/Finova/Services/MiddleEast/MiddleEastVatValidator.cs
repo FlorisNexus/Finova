@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Vat;
 using Finova.Countries.MiddleEast.Bahrain.Validators;
@@ -13,18 +14,10 @@ namespace Finova.Services;
 /// Unified validator for Middle East VAT numbers.
 /// Delegates validation to specific country validators based on the country code prefix.
 /// </summary>
-/// <example>
-/// <code>
-/// // Static usage
-/// var result = MiddleEastVatValidator.ValidateVat("AE100123456789012");
-///
-/// // Instance usage
-/// var validator = new MiddleEastVatValidator();
-/// var result = validator.Validate("SA3123456789012345");
-/// </code>
-/// </example>
 public class MiddleEastVatValidator : IVatValidator
 {
+    private static readonly ConcurrentDictionary<string, IVatValidator> _staticValidators = new();
+
     private readonly IServiceProvider? _serviceProvider;
     private IEnumerable<IVatValidator>? _validators;
 
@@ -86,12 +79,6 @@ public class MiddleEastVatValidator : IVatValidator
         return GetVatDetails(input);
     }
 
-    /// <summary>
-    /// Validates a Middle Eastern VAT number based on country code prefix.
-    /// </summary>
-    /// <param name="vat">The VAT number with country prefix.</param>
-    /// <param name="countryCode">Optional explicit country code.</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
     public static ValidationResult ValidateVat(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -112,21 +99,28 @@ public class MiddleEastVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        {
+            "AE" => new UaeVatValidator(),
+            "BH" => new BahrainVatValidator(),
+            "IL" => new IsraelVatValidator(),
+            "OM" => new OmanVatValidator(),
+            "SA" => new SaudiArabiaVatValidator(),
+            _ => null!
+        });
+
+        if (validator != null)
+        {
+            return validator.Validate(vat);
+        }
+
         return countryCode switch
         {
-            "AE" => UaeVatValidator.Validate(vat),
-            "BH" => BahrainVatValidator.ValidateVat(vat),
-            "IL" => IsraelVatValidator.Validate(vat),
-            "OM" => OmanVatValidator.ValidateVat(vat),
             "QA" => Finova.Countries.MiddleEast.Qatar.Validators.QatarTinValidator.ValidateTin(vat),
-            "SA" => SaudiArabiaVatValidator.Validate(vat),
             _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
         };
     }
 
-    /// <summary>
-    /// Gets details of a validated Middle Eastern VAT number.
-    /// </summary>
     public static VatDetails? GetVatDetails(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -147,14 +141,17 @@ public class MiddleEastVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetValueOrDefault(countryCode);
+        if (validator != null)
+        {
+            return validator.Parse(vat);
+        }
+
         return countryCode switch
         {
-            "AE" => UaeVatValidator.GetVatDetails(vat),
             "BH" => new VatDetails { VatNumber = vat!, CountryCode = "BH", IsValid = true, IdentifierKind = "VAT" },
-            "IL" => IsraelVatValidator.GetVatDetails(vat),
             "OM" => new VatDetails { VatNumber = vat!, CountryCode = "OM", IsValid = true, IdentifierKind = "VAT" },
             "QA" => new VatDetails { VatNumber = vat!, CountryCode = "QA", IsValid = true, IdentifierKind = "TIN" },
-            "SA" => SaudiArabiaVatValidator.GetVatDetails(vat),
             _ => null
         };
     }

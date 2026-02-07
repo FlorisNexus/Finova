@@ -80,7 +80,7 @@ public class AustriaIbanValidatorTests
     public void ValidateAustriaIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = AustriaIbanValidator.ValidateAustriaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -92,7 +92,7 @@ public class AustriaIbanValidatorTests
     public void ValidateAustriaIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = AustriaIbanValidator.ValidateAustriaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -109,7 +109,7 @@ public class AustriaIbanValidatorTests
     public void ValidateAustriaIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = AustriaIbanValidator.ValidateAustriaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -178,5 +178,3 @@ public class AustriaIbanValidatorTests
 
     #endregion
 }
-
-

@@ -35,5 +35,5 @@ public class UAEIbanValidatorTests
     [Theory]
     [InlineData("AE070331234567890123456")]
     public void ValidateUAEIban_WithValidIbans_ReturnsTrue(string iban)
-        => UAEIbanValidator.ValidateUAEIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

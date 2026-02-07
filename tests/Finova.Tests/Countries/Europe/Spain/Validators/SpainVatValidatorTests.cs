@@ -13,7 +13,7 @@ public class SpainVatValidatorTests
     [InlineData("X1234567L")] // Valid NIE (Calculated)
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = SpainVatValidator.Validate(vat);
+        var result = SpainVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -23,7 +23,7 @@ public class SpainVatValidatorTests
     [InlineData("X1234567A")] // Invalid NIE
     public void Validate_WithInvalidVat_ReturnsFailure(string vat)
     {
-        var result = SpainVatValidator.Validate(vat);
+        var result = SpainVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 }

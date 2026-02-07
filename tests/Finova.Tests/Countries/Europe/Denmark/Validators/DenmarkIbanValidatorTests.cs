@@ -76,7 +76,7 @@ public class DenmarkIbanValidatorTests
     public void ValidateDenmarkIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = DenmarkIbanValidator.ValidateDenmarkIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -88,7 +88,7 @@ public class DenmarkIbanValidatorTests
     public void ValidateDenmarkIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = DenmarkIbanValidator.ValidateDenmarkIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -105,7 +105,7 @@ public class DenmarkIbanValidatorTests
     public void ValidateDenmarkIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = DenmarkIbanValidator.ValidateDenmarkIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -174,5 +174,3 @@ public class DenmarkIbanValidatorTests
 
     #endregion
 }
-
-

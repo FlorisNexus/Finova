@@ -11,7 +11,7 @@ public class MonacoVatValidatorTests
     [InlineData("44732829320")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = MonacoVatValidator.Validate(vat);
+        var result = MonacoVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -23,7 +23,7 @@ public class MonacoVatValidatorTests
     [InlineData("XX12345678901")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = MonacoVatValidator.Validate(vat);
+        var result = MonacoVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

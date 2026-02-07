@@ -5,54 +5,20 @@ using Finova.Core.Iban;
 namespace Finova.Countries.MiddleEast.Bahrain.Validators;
 
 /// <summary>
-/// Validator for Bahrain IBANs.
+/// Validator for Bahraini IBANs.
 /// Bahrain IBAN format: BH + 2 check digits + 4 letters (bank code) + 14 alphanumeric (account)
-/// Length: 22 characters
-/// Example: BH67BMAG00001299123456
 /// </summary>
-public class BahrainIbanValidator : IIbanValidator
+public class BahrainIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "BH";
+    /// <inheritdoc/>
+    public override string CountryCode => "BH";
 
-    private const int BahrainIbanLength = 22;
-    private const string BahrainCountryCode = "BH";
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 22;
 
-    public ValidationResult Validate(string? iban) => ValidateBahrainIban(iban);
-
-    public static ValidationResult ValidateBahrainIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != BahrainIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
-                string.Format(ValidationMessages.InvalidLengthExpectedXGotY, BahrainIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(BahrainCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        // Validate BBAN format: 4 letters (bank code) + 14 alphanumeric (account)
-        string bban = normalized.Substring(4);
-        if (!bban.Substring(0, 4).All(char.IsLetter))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        if (!bban.Substring(4).All(char.IsLetterOrDigit))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return BahrainBbanValidator.Validate(bban);
     }
 }

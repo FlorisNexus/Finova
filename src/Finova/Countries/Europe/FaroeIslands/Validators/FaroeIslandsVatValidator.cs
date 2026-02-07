@@ -4,62 +4,45 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.FaroeIslands.Validators;
 
-public partial class FaroeIslandsVatValidator : IVatValidator
+/// <summary>
+/// Validator for Faroe Islands VAT numbers.
+/// Format: 6 digits.
+/// </summary>
+public partial class FaroeIslandsVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{6}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "FO";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new FaroeIslandsVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 6;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.VatNumberEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.FaroeIslandsVatInvalidFormat);
-        }
-
+        // No public checksum algorithm available.
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Faroe Islands VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new FaroeIslandsVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Faroe Islands VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new FaroeIslandsVatValidator().Parse(vat);
 }

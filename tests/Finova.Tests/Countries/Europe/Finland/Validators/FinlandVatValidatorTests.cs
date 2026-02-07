@@ -14,7 +14,7 @@ public class FinlandVatValidatorTests
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
         // Act
-        var result = FinlandVatValidator.Validate(vat);
+        var result = FinlandVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -27,7 +27,7 @@ public class FinlandVatValidatorTests
     public void Validate_WithFormattedVat_ReturnsSuccess(string vat)
     {
         // Act
-        var result = FinlandVatValidator.Validate(vat);
+        var result = FinlandVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -45,7 +45,7 @@ public class FinlandVatValidatorTests
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
         // Act
-        var result = FinlandVatValidator.Validate(vat);
+        var result = FinlandVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeFalse();

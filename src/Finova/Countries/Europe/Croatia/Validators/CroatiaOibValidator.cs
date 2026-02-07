@@ -30,7 +30,7 @@ public class CroatiaOibValidator : ITaxIdValidator, INationalIdValidator
     public static ValidationResult ValidateOib(string? oib)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(oib, "HR");
-        return CroatiaVatValidator.Validate(normalized);
+        return CroatiaVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

@@ -4,44 +4,72 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Norway.Validators;
 
-public partial class NorwayVatValidator : IVatValidator
+/// <summary>
+/// Validator for Norwegian VAT numbers (MVA).
+/// Format: 9 digits + optional MVA suffix.
+/// </summary>
+public partial class NorwayVatValidator : VatValidatorBase
 {
-    [GeneratedRegex(@"^(NO)?\d{9}(MVA)?$")]
+    [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "NO";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new NorwayVatValidator().ValidateInternal(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+
+        // Remove NO prefix if present
+        if (cleaned.StartsWith(VatPrefix, StringComparison.OrdinalIgnoreCase))
         {
             cleaned = cleaned[2..];
         }
-        if (cleaned.EndsWith("MVA"))
+
+        // Remove MVA suffix if present
+        if (cleaned.EndsWith("MVA", StringComparison.OrdinalIgnoreCase))
         {
-            cleaned = cleaned.Substring(0, cleaned.Length - 3);
+            cleaned = cleaned[..^3];
         }
 
-        if (cleaned.Length != 9 || !long.TryParse(cleaned, out _))
+        if (!IsValidLength(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidNorwayVatFormat);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                string.Format(ValidationMessages.InvalidLength, CountryCode));
         }
 
-        // Checksum Validation (Mod 11)
+        if (!ValidateFormat(cleaned))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat,
+                string.Format(ValidationMessages.InvalidVatFormat, CountryCode));
+        }
+
+        return ValidateChecksum(cleaned);
+    }
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
         // Weights: 3, 2, 7, 6, 5, 4, 3, 2
         int[] weights = { 3, 2, 7, 6, 5, 4, 3, 2 };
 
@@ -60,38 +88,29 @@ public partial class NorwayVatValidator : IVatValidator
         }
 
         int lastDigit = cleaned[8] - '0';
-        if (checkDigit != lastDigit)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidNorwayVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == lastDigit
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidNorwayVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-        if (cleaned.EndsWith("MVA"))
-        {
-            cleaned = cleaned.Substring(0, cleaned.Length - 3);
-        }
-
         return new VatDetails
         {
-            CountryCode = VatPrefix,
+            CountryCode = CountryCode,
             VatNumber = cleaned,
             IsValid = true
         };
     }
+
+    /// <summary>
+    /// Static validation method for Norwegian VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new NorwayVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for a Norwegian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new NorwayVatValidator().Parse(vat);
 }

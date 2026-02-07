@@ -35,5 +35,5 @@ public class KazakhstanIbanValidatorTests
     [Theory]
     [InlineData("KZ86125KZT5004100100")]
     public void ValidateKazakhstanIban_WithValidIbans_ReturnsTrue(string iban)
-        => KazakhstanIbanValidator.ValidateKazakhstanIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

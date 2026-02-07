@@ -25,7 +25,7 @@ public class BelarusUnpValidator : ITaxIdValidator
     public static ValidationResult ValidateUnp(string? unp)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(unp, "BY");
-        return BelarusVatValidator.Validate(normalized);
+        return BelarusVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

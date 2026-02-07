@@ -11,7 +11,7 @@ public class PolandVatValidatorTests
     [InlineData("5260300291")] // Valid without prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = PolandVatValidator.Validate(vat);
+        var result = PolandVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -20,7 +20,7 @@ public class PolandVatValidatorTests
     [InlineData(" PL5260300291 ")] // With whitespace
     public void Validate_WithFormattedVat_ReturnsSuccess(string vat)
     {
-        var result = PolandVatValidator.Validate(vat);
+        var result = PolandVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -33,7 +33,7 @@ public class PolandVatValidatorTests
     [InlineData("XX5260300291")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = PolandVatValidator.Validate(vat);
+        var result = PolandVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

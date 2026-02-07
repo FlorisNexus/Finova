@@ -13,15 +13,15 @@ public class AndorraVatValidatorTests
     public void IsValid_WithValidVatNumbers_ReturnsTrue(string vat)
     {
         // Act
-        var result = AndorraVatValidator.Validate(vat);
+        var result = AndorraVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
     }
 
     [Theory]
-    [InlineData("U123456A", "ADU123456A")]
-    [InlineData("ADU123456A", "ADU123456A")]
+    [InlineData("U123456A", "U123456A")]
+    [InlineData("ADU123456A", "U123456A")]
     public void Parse_ReturnsCorrectDetails(string input, string expectedVatNumber)
     {
         // Act
@@ -44,7 +44,7 @@ public class AndorraVatValidatorTests
     public void IsValid_WithInvalidVatNumbers_ReturnsFalse(string? vat)
     {
         // Act
-        var result = AndorraVatValidator.Validate(vat);
+        var result = AndorraVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeFalse();

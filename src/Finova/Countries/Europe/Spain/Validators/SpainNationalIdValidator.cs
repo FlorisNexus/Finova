@@ -5,91 +5,63 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Europe.Spain.Validators;
 
 /// <summary>
-/// Validates the Spanish National ID (DNI) and Foreigner ID (NIE).
+/// Validator for Spanish National ID (DNI) and Foreigner ID (NIE).
+/// Format: 9 characters.
 /// </summary>
-public class SpainNationalIdValidator : INationalIdValidator
+public partial class SpainNationalIdValidator : NationalIdValidatorBase
 {
     private const string ControlLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
 
     /// <inheritdoc/>
-    public string CountryCode => "ES";
+        public override string CountryCode => "ES";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input) => ValidateStatic(input);
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 9;
 
-    /// <summary>
-    /// Validates the Spanish DNI/NIE format and checksum.
-    /// </summary>
-    /// <param name="input">The DNI or NIE to validate.</param>
-    /// <returns>The validation result.</returns>
-    public static ValidationResult ValidateStatic(string? input)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(input))
+        char firstChar = sanitized[0];
+        if (char.IsDigit(firstChar))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+            // DNI: 8 digits + 1 letter
+            return Regex.IsMatch(sanitized, @"^\d{8}[A-Z]$");
         }
-
-        string? sanitized = InputSanitizer.Sanitize(input);
-        if (string.IsNullOrEmpty(sanitized))
+        else if (firstChar == 'X' || firstChar == 'Y' || firstChar == 'Z')
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+            // NIE: X/Y/Z + 7 digits + 1 letter
+            return Regex.IsMatch(sanitized, @"^[XYZ]\d{7}[A-Z]$");
         }
+        return false;
+    }
 
-        if (sanitized.Length != 9)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        // Determine if DNI or NIE
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
+    {
         char firstChar = sanitized[0];
         string numberPart;
 
         if (char.IsDigit(firstChar))
         {
-            // DNI: 8 digits + 1 letter
-            if (!Regex.IsMatch(sanitized, @"^\d{8}[A-Z]$"))
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-            }
             numberPart = sanitized.Substring(0, 8);
-        }
-        else if (firstChar == 'X' || firstChar == 'Y' || firstChar == 'Z')
-        {
-            // NIE: X/Y/Z + 7 digits + 1 letter
-            if (!Regex.IsMatch(sanitized, @"^[XYZ]\d{7}[A-Z]$"))
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-            }
-
-            // Replace X->0, Y->1, Z->2
-            string prefix = firstChar == 'X' ? "0" : (firstChar == 'Y' ? "1" : "2");
-            numberPart = prefix + sanitized.Substring(1, 7);
         }
         else
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
+            string prefix = firstChar == 'X' ? "0" : (firstChar == 'Y' ? "1" : "2");
+            numberPart = prefix + sanitized.Substring(1, 7);
         }
 
-        if (!long.TryParse(numberPart, out long number))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
+        long number = long.Parse(numberPart);
         int index = (int)(number % 23);
         char expectedLetter = ControlLetters[index];
-        char actualLetter = sanitized[8];
 
-        if (expectedLetter != actualLetter)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return sanitized[8] == expectedLetter
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        return InputSanitizer.Sanitize(input);
-    }
+    /// <summary>
+    /// Static validation method for Spanish DNI/NIE.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? input) => new SpainNationalIdValidator().Validate(input);
 }

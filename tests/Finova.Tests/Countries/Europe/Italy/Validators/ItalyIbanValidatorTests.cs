@@ -56,7 +56,7 @@ public class ItalyIbanValidatorTests
     [InlineData("IT60X0542811101000000123456")]
     public void ValidateItalyIban_WithValidIbans_ReturnsTrue(string iban)
     {
-        ItalyIbanValidator.ValidateItalyIban(iban).IsValid.Should().BeTrue();
+        _validator.Validate(iban).IsValid.Should().BeTrue();
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class ItalyIbanValidatorTests
     [InlineData(null)] // Null
     public void ValidateItalyIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
-        ItalyIbanValidator.ValidateItalyIban(iban).IsValid.Should().BeFalse();
+        _validator.Validate(iban).IsValid.Should().BeFalse();
     }
 
     [Fact]

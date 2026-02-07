@@ -1010,7 +1010,7 @@
     <value>Longueur OCR suédoise invalide.</value>
   </data>
   <data name="InvalidLengthDigit" xml:space="preserve">
-    <value>Chiffre de longueur invalide.</value>
+    <value>Chiffre de longueur invalide. L'avant-dernier chiffre doit correspondre à la longueur totale de la référence (mod 10).</value>
   </data>
   <data name="BelgiumIbanMustBeDigits" xml:space="preserve">
     <value>L'IBAN belge ne doit contenir que des chiffres après le code pays.</value>

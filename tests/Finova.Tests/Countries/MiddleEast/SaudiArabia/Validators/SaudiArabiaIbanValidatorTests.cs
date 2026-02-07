@@ -35,5 +35,5 @@ public class SaudiArabiaIbanValidatorTests
     [Theory]
     [InlineData("SA0380000000608010167519")]
     public void ValidateSaudiArabiaIban_WithValidIbans_ReturnsTrue(string iban)
-        => SaudiArabiaIbanValidator.ValidateSaudiArabiaIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

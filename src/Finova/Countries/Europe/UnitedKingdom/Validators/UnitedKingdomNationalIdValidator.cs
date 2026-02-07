@@ -6,43 +6,25 @@ namespace Finova.Countries.Europe.UnitedKingdom.Validators;
 
 /// <summary>
 /// Validator for United Kingdom National Insurance Number (NINO).
-/// Format: AA 12 34 56 A.
+/// Format: 9 characters (2 letters, 6 digits, 1 letter).
 /// </summary>
-public class UnitedKingdomNationalIdValidator : INationalIdValidator
+public partial class UnitedKingdomNationalIdValidator : NationalIdValidatorBase
 {
+    [GeneratedRegex(@"^[A-Z]{2}[0-9]{6}[A-Z]$")]
+    private static partial Regex FormatRegex();
+
     /// <inheritdoc/>
-    public string CountryCode => "GB";
+        public override string CountryCode => "GB";
 
-    /// <summary>
-    /// Validates the UK NINO.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId) => ValidateStatic(nationalId);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 9;
 
-    /// <summary>
-    /// Validates the UK NINO (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(nationalId))
+        if (!FormatRegex().IsMatch(sanitized))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 9)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        // Format: 2 letters, 6 digits, 1 letter
-        if (!Regex.IsMatch(sanitized, "^[A-Z]{2}[0-9]{6}[A-Z]$"))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
+            return false;
         }
 
         // Specific invalid prefixes
@@ -52,23 +34,23 @@ public class UnitedKingdomNationalIdValidator : INationalIdValidator
         {
             if (prefix == invalid)
             {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
+                return false;
             }
         }
 
         // Second letter cannot be O
-        if (sanitized[1] == 'O')
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        return ValidationResult.Success();
+        return sanitized[1] != 'O';
     }
 
     /// <inheritdoc/>
-    public string? Parse(string? input)
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
+        // No public checksum algorithm available for NINO.
+        return ValidationResult.Success();
     }
+
+    /// <summary>
+    /// Static validation method for UK NINO.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new UnitedKingdomNationalIdValidator().Validate(nationalId);
 }

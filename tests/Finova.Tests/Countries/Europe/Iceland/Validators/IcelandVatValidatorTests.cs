@@ -10,7 +10,7 @@ public class IcelandVatValidatorTests
     [InlineData("IS12345")] // 5 digits is valid
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = IcelandVatValidator.Validate(vat);
+        var result = IcelandVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -22,7 +22,7 @@ public class IcelandVatValidatorTests
     [InlineData("XX123456")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = IcelandVatValidator.Validate(vat);
+        var result = IcelandVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

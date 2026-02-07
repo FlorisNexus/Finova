@@ -9,39 +9,15 @@ namespace Finova.Countries.Africa.Algeria.Validators;
 /// Algeria IBAN format: DZ + 2 check digits + 20 digits (BBAN).
 /// Length: 24 characters.
 /// </summary>
-public class AlgeriaIbanValidator : IIbanValidator
+public class AlgeriaIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "DZ";
-    private const int IbanLength = 24;
-    private const string CountryCodeVal = "DZ";
+    /// <inheritdoc/>
+    public override string CountryCode => "DZ";
 
-    public ValidationResult Validate(string? iban) => ValidateIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 24;
 
-    public static ValidationResult ValidateIban([NotNullWhen(true)] string? iban)
-    {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != IbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, IbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(CountryCodeVal, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        var bbanResult = AlgeriaBbanValidator.Validate(normalized.Substring(4));
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized) ? ValidationResult.Success() : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-    }
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
+        => AlgeriaBbanValidator.Validate(bban);
 }

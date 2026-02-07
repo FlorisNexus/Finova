@@ -16,7 +16,7 @@ public class CanadaGstValidator : IVatValidator
     public string CountryCode => CountryCodePrefix;
 
     /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
+    ValidationResult IValidator<VatDetails>.Validate(string? instance) => ValidateStatic(instance);
 
     /// <inheritdoc/>
     public VatDetails? Parse(string? vat) => GetVatDetails(vat);
@@ -26,7 +26,7 @@ public class CanadaGstValidator : IVatValidator
     /// </summary>
     /// <param name="gst">The GST/HST number string (9-15 characters).</param>
     /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? gst)
+    public static ValidationResult ValidateStatic(string? gst)
     {
         if (string.IsNullOrWhiteSpace(gst))
         {
@@ -92,7 +92,7 @@ public class CanadaGstValidator : IVatValidator
     /// </summary>
     public static VatDetails? GetVatDetails(string? gst)
     {
-        if (!Validate(gst).IsValid)
+        if (!ValidateStatic(gst).IsValid)
         {
             return null;
         }

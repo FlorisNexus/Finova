@@ -25,7 +25,7 @@ public class DenmarkCvrValidator : ITaxIdValidator
     public static ValidationResult ValidateCvr(string? cvr)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(cvr, "DK");
-        return DenmarkVatValidator.Validate(normalized);
+        return DenmarkVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

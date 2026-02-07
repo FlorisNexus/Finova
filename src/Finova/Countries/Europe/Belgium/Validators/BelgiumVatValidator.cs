@@ -9,7 +9,7 @@ namespace Finova.Countries.Europe.Belgium.Validators;
 /// Format: BE0xxx.xxx.xxx or BE0xxxxxxxxx (10 digits total).
 /// Note: Belgian VAT numbers are essentially the same as Enterprise Numbers (KBO/BCE) with "BE" prefix.
 /// </summary>
-public partial class BelgiumVatValidator : IVatValidator
+public partial class BelgiumVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"[^\d]")]
     private static partial Regex DigitsOnlyRegex();
@@ -17,32 +17,28 @@ public partial class BelgiumVatValidator : IVatValidator
     private const int VatLength = 10;
     private const string VatPrefix = "BE";
 
-    public string CountryCode => VatPrefix;
-
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
     /// <summary>
-    /// Validates a Belgian VAT number.
-    /// Accepts formats: BE0123.456.789, BE0123456789, 0123.456.789, or 0123456789.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The VAT number to validate</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    public static ValidationResult ValidateStatic(string? input) => new BelgiumVatValidator().ValidateInternal(input);
 
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
+    {
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
         // Remove "BE" prefix if present
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+        if (cleaned.StartsWith(CountryCode))
         {
-            cleaned = cleaned[VatPrefix.Length..];
+            cleaned = cleaned[CountryCode.Length..];
         }
 
         // Auto-correction for historical 9-digit numbers
@@ -55,6 +51,23 @@ public partial class BelgiumVatValidator : IVatValidator
         return BelgiumEnterpriseValidator.ValidateEnterpriseNumber(cleaned);
     }
 
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 10 || cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by EnterpriseValidator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
+        var toValidate = cleaned;
+        if (toValidate.Length == 9)
+        {
+            toValidate = "0" + toValidate;
+        }
+        return BelgiumEnterpriseValidator.ValidateEnterpriseNumber(toValidate);
+    }
+
     /// <summary>
     /// Formats a Belgian VAT number in the standard format: BE 0xxx.xxx.xxx.
     /// </summary>
@@ -63,7 +76,8 @@ public partial class BelgiumVatValidator : IVatValidator
     /// <exception cref="ArgumentException">If the VAT number is invalid</exception>
     public static string Format(string? vat)
     {
-        if (!Validate(vat).IsValid)
+        var validator = new BelgiumVatValidator();
+        if (!validator.Validate(vat).IsValid)
         {
             throw new ArgumentException("Invalid Belgian VAT number", nameof(vat));
         }
@@ -111,7 +125,8 @@ public partial class BelgiumVatValidator : IVatValidator
     /// <returns>The corresponding KBO/BCE number or null if invalid</returns>
     public static string? GetEnterpriseNumber(string? vat)
     {
-        if (!Validate(vat).IsValid)
+        var validator = new BelgiumVatValidator();
+        if (!validator.Validate(vat).IsValid)
         {
             return null;
         }
@@ -132,16 +147,12 @@ public partial class BelgiumVatValidator : IVatValidator
     /// <returns>VatDetails object or null if invalid.</returns>
     public static Core.Vat.VatDetails? GetVatDetails(string? vat)
     {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        return new Core.Vat.VatDetails
-        {
-            VatNumber = Normalize(vat),
-            CountryCode = "BE",
-            IsValid = true
-        };
+        var validator = new BelgiumVatValidator();
+        return validator.Parse(vat);
     }
+
+    /// <summary>
+    /// Static validation method for Belgian VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new BelgiumVatValidator().Validate(vat);
 }

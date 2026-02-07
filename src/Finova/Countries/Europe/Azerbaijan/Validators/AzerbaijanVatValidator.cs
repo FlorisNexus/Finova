@@ -4,62 +4,46 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Azerbaijan.Validators;
 
-public partial class AzerbaijanVatValidator : IVatValidator
+/// <summary>
+/// Validator for Azerbaijan VAT numbers (VÖEN).
+/// Format: 10 digits.
+/// </summary>
+public partial class AzerbaijanVatValidator : VatValidatorBase
 {
+    private const string CountryCodePrefix = "AZ";
+    private const int VatLength = 10;
+
     [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex VatRegex();
 
-    private const string VatPrefix = "AZ";
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new AzerbaijanVatValidator().Validate(input);
 
-    public string CountryCode => VatPrefix;
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == VatLength;
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.VatNumberEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.AzerbaijanVatInvalidFormat);
-        }
-
+        // No public checksum algorithm available for AZ.
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Azerbaijan VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new AzerbaijanVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for an Azerbaijan VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new AzerbaijanVatValidator().Parse(vat);
 }

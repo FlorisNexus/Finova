@@ -35,5 +35,5 @@ public class EgyptIbanValidatorTests
     [Theory]
     [InlineData("EG380019000500000000263180002")]
     public void ValidateEgyptIban_WithValidIbans_ReturnsTrue(string iban)
-        => EgyptIbanValidator.ValidateEgyptIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

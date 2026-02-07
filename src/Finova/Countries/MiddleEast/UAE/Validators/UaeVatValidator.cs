@@ -5,103 +5,54 @@ using Finova.Core.Vat;
 namespace Finova.Countries.MiddleEast.UAE.Validators;
 
 /// <summary>
-/// Validates UAE Tax Registration Number (TRN).
-/// VAT was introduced in UAE on January 1, 2018.
-/// Format: 100XXXXXXXXX (15 digits starting with 100).
+/// Validator for United Arab Emirates Tax Registration Number (TRN).
+/// Format: 15 digits starting with 100.
 /// </summary>
-public partial class UaeVatValidator : IVatValidator
+public partial class UaeVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "AE";
 
-    [GeneratedRegex(@"^100\d{12}$", RegexOptions.Compiled)]
+    [GeneratedRegex(@"^100\d{12}$")]
     private static partial Regex TrnPattern();
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a UAE Tax Registration Number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The TRN number (15 digits starting with 100).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new UaeVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 15;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => TrnPattern().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "");
-
-        // Remove AE prefix if present
-        if (clean.StartsWith("AE", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        if (!TrnPattern().IsMatch(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidUaeTrnFormat);
-        }
-
-        // UAE TRN uses a Luhn-like checksum validation
-        // The last digit is a check digit
-        if (!ValidateTrnChecksum(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidUaeTrnChecksum);
-        }
-
-        return ValidationResult.Success();
-    }
-
-    private static bool ValidateTrnChecksum(string trn)
-    {
-        // UAE TRN checksum algorithm (Mod 97-10)
-        // Similar to IBAN check digit calculation
         int sum = 0;
-        for (int i = 0; i < trn.Length - 1; i++)
+        for (int i = 0; i < cleaned.Length - 1; i++)
         {
-            sum += trn[i] - '0';
+            sum += cleaned[i] - '0';
         }
 
         int expectedCheck = (10 - (sum % 10)) % 10;
-        int actualCheck = trn[^1] - '0';
+        int actualCheck = cleaned[^1] - '0';
 
-        return expectedCheck == actualCheck;
+        return expectedCheck == actualCheck
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidUaeTrnChecksum);
     }
 
     /// <summary>
-    /// Gets details of a validated UAE TRN.
+    /// Static validation method for UAE VAT numbers.
     /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
+        public static ValidationResult ValidateVat(string? vat) => new UaeVatValidator().Validate(vat);
 
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "");
-
-        if (clean.StartsWith("AE", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        return new VatDetails
-        {
-            VatNumber = clean,
-            CountryCode = CountryCodePrefix,
-            IsValid = true,
-            IdentifierKind = "TRN",
-            IsEuVat = false,
-            IsViesEligible = false,
-            Notes = "UAE Tax Registration Number"
-        };
-    }
+    /// <summary>
+    /// Gets details for a UAE VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new UaeVatValidator().Parse(vat);
 }

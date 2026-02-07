@@ -10,7 +10,7 @@ public class SaudiArabiaVatValidatorTests
     public void Validate_WithValidFormat_PassesFormatCheck()
     {
         // Test correct format (15 digits starting with 3)
-        var result = SaudiArabiaVatValidator.Validate("300000000000000");
+        var result = SaudiArabiaVatValidator.ValidateStatic("300000000000000");
         // Format check passes, Luhn checksum might fail
         result.Should().NotBeNull();
     }
@@ -19,7 +19,7 @@ public class SaudiArabiaVatValidatorTests
     public void Validate_WithPrefix_ParsesCorrectly()
     {
         // Test that SA prefix is stripped correctly
-        var result = SaudiArabiaVatValidator.Validate("SA300000000000000");
+        var result = SaudiArabiaVatValidator.ValidateStatic("SA300000000000000");
         result.Should().NotBeNull();
     }
 
@@ -33,7 +33,7 @@ public class SaudiArabiaVatValidatorTests
     [InlineData("100000000000003")] // Doesn't start with 3
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = SaudiArabiaVatValidator.Validate(vat);
+        var result = SaudiArabiaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

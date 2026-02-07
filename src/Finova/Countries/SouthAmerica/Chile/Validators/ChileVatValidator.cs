@@ -4,68 +4,39 @@ using Finova.Core.Vat;
 namespace Finova.Countries.SouthAmerica.Chile.Validators;
 
 /// <summary>
-/// Validates Chilean VAT identifier (RUT - Rol Único Tributario).
-/// Chile uses RUT for VAT (IVA) registration purposes.
-/// Format: XX.XXX.XXX-X (8-9 digits including check digit).
+/// Validator for Chilean VAT identifier (RUT).
+/// Format: 8 or 9 characters.
 /// </summary>
-public class ChileVatValidator : IVatValidator
+public partial class ChileVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "CL";
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a Chilean VAT/RUT number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The RUT number (8-9 characters).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new ChileVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 8 || cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by RUT validator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim().Replace(" ", "").Replace(".", "").Replace("-", "");
-
-        // Remove CL prefix if present
-        if (clean.StartsWith("CL", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        // Use the existing RUT validator
-        return ChileRutValidator.ValidateStatic(clean);
+        return ChileRutValidator.ValidateStatic(cleaned);
     }
 
-    /// <summary>
-    /// Gets details of a validated Chilean VAT/RUT number.
-    /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var clean = vat!.Trim().Replace(" ", "").Replace(".", "").Replace("-", "").ToUpperInvariant();
-
-        // Remove CL prefix if present
-        if (clean.StartsWith("CL", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
         return new VatDetails
         {
-            VatNumber = clean,
+            VatNumber = cleaned,
             CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "RUT",
@@ -74,4 +45,14 @@ public class ChileVatValidator : IVatValidator
             Notes = "Chilean tax identifier (RUT)"
         };
     }
+
+    /// <summary>
+    /// Static validation method for Chilean VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new ChileVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for a Chilean VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new ChileVatValidator().Parse(vat);
 }

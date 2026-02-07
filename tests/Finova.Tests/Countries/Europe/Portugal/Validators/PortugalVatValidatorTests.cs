@@ -11,7 +11,7 @@ public class PortugalVatValidatorTests
     [InlineData("502757191")] // Without prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = PortugalVatValidator.Validate(vat);
+        var result = PortugalVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -21,7 +21,7 @@ public class PortugalVatValidatorTests
     [InlineData("")]
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = PortugalVatValidator.Validate(vat);
+        var result = PortugalVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

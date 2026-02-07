@@ -10,7 +10,7 @@ public class SwitzerlandVatValidatorTests
     [InlineData("CH123456788")] // Assuming CH prefix is also supported by validator if implemented that way, check validator code if needed. EuropeVatValidator supports it.
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = SwitzerlandVatValidator.Validate(vat);
+        var result = SwitzerlandVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -22,7 +22,7 @@ public class SwitzerlandVatValidatorTests
     [InlineData("XX123456789")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = SwitzerlandVatValidator.Validate(vat);
+        var result = SwitzerlandVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

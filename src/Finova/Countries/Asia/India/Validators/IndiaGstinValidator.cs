@@ -5,15 +5,10 @@ using Finova.Core.Vat;
 namespace Finova.Countries.Asia.India.Validators;
 
 /// <summary>
-/// Validates Indian Goods and Services Tax Identification Number (GSTIN).
-/// Format: 22AAAAA0000A1Z5 (15 characters)
-/// - Positions 1-2: State code (01-37)
-/// - Positions 3-12: PAN of the taxpayer
-/// - Position 13: Entity number (1-9, A-Z)
-/// - Position 14: 'Z' (default)
-/// - Position 15: Checksum character
+/// Validator for Indian Goods and Services Tax Identification Number (GSTIN).
+/// Format: 15 characters.
 /// </summary>
-public partial class IndiaGstinValidator : IVatValidator
+public partial class IndiaGstinValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "IN";
 
@@ -22,65 +17,49 @@ public partial class IndiaGstinValidator : IVatValidator
     private static partial Regex GstinRegex();
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates an Indian GSTIN.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="gstin">The GSTIN string (15 characters).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? gstin)
+    public static ValidationResult ValidateStatic(string? input) => new IndiaGstinValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 15;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(gstin))
+        if (!GstinRegex().IsMatch(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = gstin.Trim().ToUpperInvariant().Replace(" ", "").Replace("-", "");
-
-        if (clean.Length != 15)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidIndiaGstinLength);
-        }
-
-        if (!GstinRegex().IsMatch(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIndiaGstinFormat);
+            return false;
         }
 
         // Validate state code (01-37)
-        if (!int.TryParse(clean[..2], out int stateCode) || stateCode < 1 || stateCode > 37)
+        if (!int.TryParse(cleaned[..2], out int stateCode) || stateCode < 1 || stateCode > 37)
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIndiaGstinStateCode);
+            return false;
         }
 
         // Extract the embedded PAN and validate its structure
-        string embeddedPan = clean.Substring(2, 10);
-        if (!ValidatePanStructure(embeddedPan))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIndiaGstinPan);
-        }
+        string embeddedPan = cleaned.Substring(2, 10);
+        return ValidatePanStructure(embeddedPan);
+    }
 
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
         // Position 14 must be 'Z' (default)
-        if (clean[13] != 'Z')
+        if (cleaned[13] != 'Z')
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIndiaGstinPosition14);
         }
 
         // Validate checksum (position 15)
-        char expectedChecksum = CalculateGstinChecksum(clean[..14]);
-        if (clean[14] != expectedChecksum)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        char expectedChecksum = CalculateGstinChecksum(cleaned[..14]);
+        return cleaned[14] == expectedChecksum
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
     /// <summary>
@@ -128,7 +107,6 @@ public partial class IndiaGstinValidator : IVatValidator
     /// </summary>
     private static char CalculateGstinChecksum(string input)
     {
-        // Character set for GSTIN (0-9, A-Z)
         const string charSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         int factor = 2;
         int sum = 0;
@@ -151,26 +129,12 @@ public partial class IndiaGstinValidator : IVatValidator
     }
 
     /// <summary>
-    /// Gets details of a validated GSTIN.
+    /// Static validation method for Indian GSTIN numbers.
     /// </summary>
-    public static VatDetails? GetVatDetails(string? gstin)
-    {
-        if (!Validate(gstin).IsValid)
-        {
-            return null;
-        }
+    public static ValidationResult ValidateVat(string? vat) => new IndiaGstinValidator().Validate(vat);
 
-        var normalized = gstin!.Trim().ToUpperInvariant().Replace(" ", "").Replace("-", "");
-
-        return new VatDetails
-        {
-            VatNumber = normalized,
-            CountryCode = CountryCodePrefix,
-            IsValid = true,
-            IdentifierKind = "GSTIN",
-            IsEuVat = false,
-            IsViesEligible = false,
-            Notes = "Indian Goods and Services Tax Identification Number"
-        };
-    }
+    /// <summary>
+    /// Gets details for an Indian GSTIN number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new IndiaGstinValidator().Parse(vat);
 }

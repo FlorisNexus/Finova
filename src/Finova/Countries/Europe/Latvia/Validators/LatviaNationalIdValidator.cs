@@ -5,104 +5,63 @@ namespace Finova.Countries.Europe.Latvia.Validators;
 
 /// <summary>
 /// Validator for Latvia Personal Code (Personas kods).
+/// Format: 11 digits.
 /// </summary>
-public class LatviaNationalIdValidator : INationalIdValidator
+public partial class LatviaNationalIdValidator : NationalIdValidatorBase
 {
-    /// <inheritdoc/>
-    public string CountryCode => "LV";
-
     private static readonly int[] Weights = { 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 };
 
-    /// <summary>
-    /// Validates the Latvian Personas kods.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+        public override string CountryCode => "LV";
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 11;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Latvian Personas kods (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 11)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
         if (!long.TryParse(sanitized, out _))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
+            return false;
         }
 
-        // Check for new format (starting with 32)
+        // New format: starts with 32. No date info.
         if (sanitized.StartsWith("32"))
         {
-            // New format: 32xxxxxxxxx. No checksum, no date info.
-            // Just 11 digits starting with 32.
-            return ValidationResult.Success();
+            return true;
         }
 
         // Old format: DDMMYYXXXXX
         int day = int.Parse(sanitized.Substring(0, 2));
         int month = int.Parse(sanitized.Substring(2, 2));
-        int year = int.Parse(sanitized.Substring(4, 2));
-
-        // Century adjustment?
-        // Usually 1800-2099.
-        // 7th digit (century):
-        // 0 -> 1800
-        // 1 -> 1900
-        // 2 -> 2000
+        int yearPart = int.Parse(sanitized.Substring(4, 2));
         int centuryDigit = sanitized[6] - '0';
-        int fullYear = 0;
-        if (centuryDigit == 0)
+
+        int century = centuryDigit switch
         {
-            fullYear = 1800 + year;
-        }
-        else if (centuryDigit == 1)
+            0 => 1800,
+            1 => 1900,
+            2 => 2000,
+            _ => 0
+        };
+
+        if (century != 0)
         {
-            fullYear = 1900 + year;
-        }
-        else if (centuryDigit == 2)
-        {
-            fullYear = 2000 + year;
-        }
-        else
-        {
-            // If century digit is not 0,1,2, it might be invalid or different logic.
-            // But let's assume standard.
+            return DateHelper.IsValidDate(century + yearPart, month, day);
         }
 
-        if (fullYear != 0)
+        return month >= 1 && month <= 12 && day >= 1 && day <= 31;
+    }
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
+    {
+        // New format (starting with 32) has no checksum.
+        if (sanitized.StartsWith("32"))
         {
-            if (!DateHelper.IsValidDate(fullYear, month, day))
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-            }
-        }
-        else
-        {
-            // Fallback date check without year
-            if (month < 1 || month > 12 || day < 1 || day > 31)
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-            }
+            return ValidationResult.Success();
         }
 
-        // Checksum for old format
         int sum = 0;
         for (int i = 0; i < 10; i++)
         {
@@ -114,23 +73,16 @@ public class LatviaNationalIdValidator : INationalIdValidator
 
         if (checkDigit == 10)
         {
-            // Invalid checksum calculation result (cannot be 10)
-            // This implies the number is invalid if the formula yields 10.
             return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
         }
 
-        if (checkDigit != (sanitized[10] - '0'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == (sanitized[10] - '0')
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Latvian Personal Code.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new LatviaNationalIdValidator().Validate(nationalId);
 }

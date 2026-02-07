@@ -12,7 +12,7 @@ public class ArgentinaVatValidatorTests
     [InlineData("20123456786")] // Without hyphens
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = ArgentinaVatValidator.Validate(vat);
+        var result = ArgentinaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -25,7 +25,7 @@ public class ArgentinaVatValidatorTests
     [InlineData("ABCDEFGHIJK")] // Non-numeric
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = ArgentinaVatValidator.Validate(vat);
+        var result = ArgentinaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

@@ -25,7 +25,7 @@ public class IrelandVatNumberValidator : ITaxIdValidator
     public static ValidationResult ValidateVatNumber(string? vatNumber)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(vatNumber, "IE");
-        return IrelandVatValidator.Validate(normalized);
+        return IrelandVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

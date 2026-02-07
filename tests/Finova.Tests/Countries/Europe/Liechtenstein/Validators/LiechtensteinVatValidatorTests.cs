@@ -9,7 +9,7 @@ public class LiechtensteinVatValidatorTests
     [InlineData("123456788")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = LiechtensteinVatValidator.Validate(vat);
+        var result = LiechtensteinVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class LiechtensteinVatValidatorTests
     [InlineData("XX12345")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = LiechtensteinVatValidator.Validate(vat);
+        var result = LiechtensteinVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

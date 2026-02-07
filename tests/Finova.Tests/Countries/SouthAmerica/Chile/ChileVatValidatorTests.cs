@@ -12,7 +12,7 @@ public class ChileVatValidatorTests
     [InlineData("12.345.678-5")] // Formatted
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = ChileVatValidator.Validate(vat);
+        var result = ChileVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -24,7 +24,7 @@ public class ChileVatValidatorTests
     [InlineData("1234567890")] // Too long (10 chars)
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = ChileVatValidator.Validate(vat);
+        var result = ChileVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

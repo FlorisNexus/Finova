@@ -16,6 +16,15 @@ public class GlobalBankValidatorTests
     [InlineData("GB", "12-34-56", true)] // Valid UK Sort Code
     [InlineData("UK", "123456", true)] // Valid UK Sort Code (Alias)
     [InlineData("AU", "032-001", true)] // Valid AU BSB
+    [InlineData("SG", "7171-001", true)] // Valid SG (Bank+Branch)
+    [InlineData("SG", "7171", true)] // Valid SG (Bank only)
+    [InlineData("SG", "001", true)] // Valid SG (Branch only)
+    [InlineData("SG", "12", false)] // Invalid SG length
+    [InlineData("JP", "0001-001", true)] // Valid JP (Bank+Branch)
+    [InlineData("JP", "0001", true)] // Valid JP (Bank only)
+    [InlineData("JP", "12", false)] // Invalid JP length
+    [InlineData("KR", "004", true)] // Valid KR Bank Code
+    [InlineData("KR", "12", false)] // Invalid KR length
     [InlineData("XX", "12345", false)] // Unsupported Country
     [InlineData("US", null, false)] // Null
     [InlineData("US", "", false)] // Empty

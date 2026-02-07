@@ -4,7 +4,11 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Cyprus.Validators;
 
-public partial class CyprusVatValidator : IVatValidator
+/// <summary>
+/// Validator for Cypriot VAT numbers.
+/// Format: 9 characters. 8 digits + 1 letter.
+/// </summary>
+public partial class CyprusVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{8}[A-Z]$")]
     private static partial Regex VatRegex();
@@ -15,39 +19,27 @@ public partial class CyprusVatValidator : IVatValidator
 
     private const string VatPrefix = "CY";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new CyprusVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidCyprusVatFormat);
-        }
-
-        // Checksum Validation
-        // Format: 12345678 L
         string digits = cleaned.Substring(0, 8);
         char expectedLetter = cleaned[8];
 
         int sum = 0;
-
         for (int i = 0; i < 8; i++)
         {
             int digit = digits[i] - '0';
@@ -74,26 +66,17 @@ public partial class CyprusVatValidator : IVatValidator
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Cypriot VAT numbers.
+    /// </summary>
+    /// <param name="vat">The VAT number to validate.</param>
+    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
+        public static ValidationResult ValidateVat(string? vat) => new CyprusVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Cypriot VAT number.
+    /// </summary>
+    /// <param name="vat">The VAT number to parse.</param>
+    /// <returns>A <see cref="VatDetails"/> object or null if invalid.</returns>
+    public static VatDetails? GetVatDetails(string? vat) => new CyprusVatValidator().Parse(vat);
 }

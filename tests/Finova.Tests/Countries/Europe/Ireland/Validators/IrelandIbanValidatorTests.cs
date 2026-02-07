@@ -79,7 +79,7 @@ public class IrelandIbanValidatorTests
     public void ValidateIrelandIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = IrelandIbanValidator.ValidateIrelandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -94,7 +94,7 @@ public class IrelandIbanValidatorTests
     public void ValidateIrelandIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = IrelandIbanValidator.ValidateIrelandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -188,6 +188,3 @@ public class IrelandIbanValidatorTests
 
     #endregion
 }
-
-
-

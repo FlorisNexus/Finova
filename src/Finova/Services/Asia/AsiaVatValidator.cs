@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Vat;
 using Finova.Countries.Asia.China.Validators;
@@ -6,6 +7,8 @@ using Finova.Countries.Asia.Japan.Validators;
 using Finova.Countries.Asia.Kazakhstan.Validators;
 using Finova.Countries.Asia.Singapore.Validators;
 using Finova.Countries.Asia.SouthKorea.Validators;
+using Finova.Countries.SoutheastAsia.Indonesia.Validators;
+using Finova.Countries.SoutheastAsia.Philippines.Validators;
 using Finova.Countries.SoutheastAsia.Vietnam.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,18 +18,10 @@ namespace Finova.Services;
 /// Unified validator for Asian VAT/GST numbers.
 /// Delegates validation to specific country validators based on the country code prefix.
 /// </summary>
-/// <example>
-/// <code>
-/// // Static usage
-/// var result = AsiaVatValidator.ValidateVat("IN22AAAAA0000A1Z5");
-///
-/// // Instance usage
-/// var validator = new AsiaVatValidator();
-/// var result = validator.Validate("SG123456789A");
-/// </code>
-/// </example>
 public class AsiaVatValidator : IVatValidator
 {
+    private static readonly ConcurrentDictionary<string, IVatValidator> _staticValidators = new();
+
     private readonly IServiceProvider? _serviceProvider;
     private IEnumerable<IVatValidator>? _validators;
 
@@ -88,12 +83,6 @@ public class AsiaVatValidator : IVatValidator
         return GetVatDetails(input);
     }
 
-    /// <summary>
-    /// Validates an Asian VAT/GST number based on country code prefix.
-    /// </summary>
-    /// <param name="vat">The VAT number with country prefix.</param>
-    /// <param name="countryCode">Optional explicit country code.</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
     public static ValidationResult ValidateVat(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -114,24 +103,31 @@ public class AsiaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        {
+            "CN" => new ChinaVatValidator(),
+            "ID" => new IndonesiaVatValidator(),
+            "IN" => new IndiaGstinValidator(),
+            "JP" => new JapanVatValidator(),
+            "KR" => new SouthKoreaVatValidator(),
+            "PH" => new PhilippinesVatValidator(),
+            "SG" => new SingaporeGstValidator(),
+            "VN" => new VietnamVatValidator(),
+            _ => null!
+        });
+
+        if (validator != null)
+        {
+            return validator.Validate(vat);
+        }
+
         return countryCode switch
         {
-            "CN" => ChinaVatValidator.Validate(vat),
-            "ID" => new Finova.Countries.SoutheastAsia.Indonesia.Validators.IndonesiaVatValidator().Validate(vat),
-            "IN" => IndiaGstinValidator.Validate(vat),
-            "JP" => JapanVatValidator.Validate(vat),
-            "KR" => SouthKoreaVatValidator.Validate(vat),
-            "PH" => new Finova.Countries.SoutheastAsia.Philippines.Validators.PhilippinesVatValidator().Validate(vat),
-            "SG" => SingaporeGstValidator.Validate(vat),
-            "VN" => new Finova.Countries.SoutheastAsia.Vietnam.Validators.VietnamVatValidator().Validate(vat),
-            "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator().Validate(vat),
+            "KZ" => new KazakhstanBinValidator().Validate(vat),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }
 
-    /// <summary>
-    /// Gets details of a validated Asian VAT/GST number.
-    /// </summary>
     public static VatDetails? GetVatDetails(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -152,13 +148,14 @@ public class AsiaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetValueOrDefault(countryCode);
+        if (validator != null)
+        {
+            return validator.Parse(vat);
+        }
+
         return countryCode switch
         {
-            "CN" => ChinaVatValidator.GetVatDetails(vat),
-            "IN" => IndiaGstinValidator.GetVatDetails(vat),
-            "JP" => JapanVatValidator.GetVatDetails(vat),
-            "KR" => SouthKoreaVatValidator.GetVatDetails(vat),
-            "SG" => SingaporeGstValidator.GetVatDetails(vat),
             "VN" => new VatDetails { VatNumber = vat!, CountryCode = "VN", IsValid = true, IdentifierKind = "MST" },
             "KZ" => new VatDetails { VatNumber = vat!, CountryCode = "KZ", IsValid = true, IdentifierKind = "BIN" },
             _ => null

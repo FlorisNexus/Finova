@@ -77,7 +77,7 @@ public class DutchBankAccountValidatorTests
     public void ValidateDutchIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -90,7 +90,7 @@ public class DutchBankAccountValidatorTests
     public void ValidateDutchIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -110,7 +110,7 @@ public class DutchBankAccountValidatorTests
     public void ValidateDutchIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -125,7 +125,7 @@ public class DutchBankAccountValidatorTests
     public void ValidateDutchIban_BankCodeMustBeLetters_ReturnsTrue(string iban)
     {
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -139,7 +139,7 @@ public class DutchBankAccountValidatorTests
     public void ValidateDutchIban_BankCodeWithDigits_ReturnsFalse(string iban)
     {
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -154,7 +154,7 @@ public class DutchBankAccountValidatorTests
     public void ValidateDutchIban_AccountNumberMustBeDigits_ReturnsTrue(string iban)
     {
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -167,7 +167,7 @@ public class DutchBankAccountValidatorTests
     public void ValidateDutchIban_AccountNumberWithLetters_ReturnsFalse(string iban)
     {
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -184,12 +184,10 @@ public class DutchBankAccountValidatorTests
         var iban = "NL00ABNA0000000000";
 
         // Act
-        var result = NetherlandsIbanValidator.ValidateNetherlandsIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse(); // Invalid checksum
     }
     #endregion
 }
-
-

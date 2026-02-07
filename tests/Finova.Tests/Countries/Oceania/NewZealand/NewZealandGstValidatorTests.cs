@@ -17,7 +17,7 @@ public class NewZealandGstValidatorTests
     [InlineData("4909185012")] // Too long (10 digits)
     public void Validate_WithInvalidFormat_ReturnsFailure(string? gst)
     {
-        var result = NewZealandGstValidator.Validate(gst);
+        var result = NewZealandGstValidator.ValidateStatic(gst);
         result.IsValid.Should().BeFalse();
     }
 
@@ -25,7 +25,7 @@ public class NewZealandGstValidatorTests
     public void Validate_WithInvalidChecksum_ReturnsFailure()
     {
         // 12345678 likely has invalid checksum
-        var result = NewZealandGstValidator.Validate("12345678");
+        var result = NewZealandGstValidator.ValidateStatic("12345678");
         result.IsValid.Should().BeFalse();
     }
 
@@ -33,8 +33,8 @@ public class NewZealandGstValidatorTests
     public void Validate_RemovesNZPrefix()
     {
         // Test that NZ prefix is stripped
-        var result1 = NewZealandGstValidator.Validate("NZ12345678");
-        var result2 = NewZealandGstValidator.Validate("12345678");
+        var result1 = NewZealandGstValidator.ValidateStatic("NZ12345678");
+        var result2 = NewZealandGstValidator.ValidateStatic("12345678");
 
         // Both should fail the same way (checksum failure)
         result1.IsValid.Should().Be(result2.IsValid);
@@ -44,8 +44,8 @@ public class NewZealandGstValidatorTests
     public void Validate_RemovesFormatting()
     {
         // Test that hyphens and spaces are stripped
-        var result1 = NewZealandGstValidator.Validate("12-345-678");
-        var result2 = NewZealandGstValidator.Validate("12345678");
+        var result1 = NewZealandGstValidator.ValidateStatic("12-345-678");
+        var result2 = NewZealandGstValidator.ValidateStatic("12345678");
 
         // Both should have same validity
         result1.IsValid.Should().Be(result2.IsValid);

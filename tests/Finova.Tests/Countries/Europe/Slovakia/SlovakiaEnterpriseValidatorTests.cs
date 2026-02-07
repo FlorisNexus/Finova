@@ -20,8 +20,7 @@ public class SlovakiaEnterpriseValidatorTests
     [Fact]
     public void Normalize_ShouldReturnCleanedNumber()
     {
-        var validator = new SlovakiaVatValidator();
-        var result = validator.Normalize("SK 1100000000");
+        var result = SlovakiaVatValidator.Normalize("SK 1100000000");
         Assert.Equal("1100000000", result);
     }
 }

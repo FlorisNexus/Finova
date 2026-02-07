@@ -5,43 +5,20 @@ using Finova.Core.Iban;
 namespace Finova.Countries.NorthAmerica.SaintLucia.Validators;
 
 /// <summary>
-/// Validator for Saint Lucia IBANs.
+/// Validator for Saint Lucian IBANs.
 /// Saint Lucia IBAN format: LC + 2 check digits + 28 characters BBAN (4 letters bank, 24 alphanumeric account).
-/// Length: 32 characters.
 /// </summary>
-public class SaintLuciaIbanValidator : IIbanValidator
+public class SaintLuciaIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "LC";
-    private const int IbanLength = 32;
-    private const string CountryCodeVal = "LC";
+    /// <inheritdoc/>
+    public override string CountryCode => "LC";
 
-    public ValidationResult Validate(string? iban) => ValidateIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 32;
 
-    public static ValidationResult ValidateIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != IbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, IbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(CountryCodeVal, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        var bbanResult = SaintLuciaBbanValidator.Validate(normalized.Substring(4));
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized) ? ValidationResult.Success() : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return SaintLuciaBbanValidator.Validate(bban);
     }
 }

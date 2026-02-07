@@ -1,63 +1,54 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Enterprise;
 using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Iceland.Validators;
 
 /// <summary>
 /// Validator for Iceland Kennitala (National ID).
+/// Format: 10 digits.
 /// </summary>
-public partial class IcelandKennitalaValidator : ITaxIdValidator, INationalIdValidator
+public partial class IcelandKennitalaValidator : NationalIdValidatorBase
 {
-    [GeneratedRegex(@"^\d{6}-?\d{4}$")]
+    [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex FormatRegex();
 
-    public string CountryCode => "IS";
+    /// <inheritdoc/>
+        public override string CountryCode => "IS";
 
-    public ValidationResult Validate(string? number)
-    {
-        return ValidateStatic(number);
-    }
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 10;
 
-    /// <summary>
-    /// Validates the Iceland Kennitala (Static).
-    /// </summary>
-    /// <param name="number">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? number)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateKennitala(number);
+        if (!FormatRegex().IsMatch(sanitized))
+        {
+            return false;
+        }
+
+        // Date Validation
+        int day = int.Parse(sanitized.Substring(0, 2));
+        int month = int.Parse(sanitized.Substring(2, 2));
+
+        // Handle organization numbers (day + 40)
+        if (day > 40)
+        {
+            day -= 40;
+        }
+
+        return day >= 1 && day <= 31 && month >= 1 && month <= 12;
     }
 
     /// <inheritdoc/>
-    public string? Parse(string? input)
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
-
-    public static ValidationResult ValidateKennitala(string? kennitala)
-    {
-        var normalized = EnterpriseNumberNormalizer.Normalize(kennitala, "IS");
-
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.KennitalaCannotBeEmpty);
-        }
-
-        if (!FormatRegex().IsMatch(normalized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidKennitalaFormat);
-        }
-
-        // Checksum Validation
         // Weights: 3, 2, 7, 6, 5, 4, 3, 2
         int[] weights = { 3, 2, 7, 6, 5, 4, 3, 2 };
         int sum = 0;
         for (int i = 0; i < 8; i++)
         {
-            sum += (normalized[i] - '0') * weights[i];
+            sum += (sanitized[i] - '0') * weights[i];
         }
 
         int remainder = sum % 11;
@@ -69,36 +60,26 @@ public partial class IcelandKennitalaValidator : ITaxIdValidator, INationalIdVal
 
         if (checkDigit == 10)
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidKennitalaChecksum);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
         }
 
-        if (checkDigit != (normalized[8] - '0'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidKennitalaChecksum);
-        }
-
-        // Date Validation
-        int day = int.Parse(normalized.Substring(0, 2));
-        int month = int.Parse(normalized.Substring(2, 2));
-        int year = int.Parse(normalized.Substring(4, 2));
-
-        // Handle organization numbers (day + 40)
-        if (day > 40)
-        {
-            day -= 40;
-        }
-
-        if (day < 1 || day > 31 || month < 1 || month > 12)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidKennitalaDate);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == (sanitized[8] - '0')
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
+    /// <summary>
+    /// Static validation method for Iceland Kennitala.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? number) => new IcelandKennitalaValidator().Validate(number);
+
+    /// <summary>
+    /// Formats an Iceland Kennitala.
+    /// </summary>
     public static string? Format(string? instance)
     {
-        var normalized = EnterpriseNumberNormalizer.Normalize(instance, "IS");
+        var validator = new IcelandKennitalaValidator();
+        var normalized = validator.Parse(instance);
         if (normalized == null || normalized.Length != 10)
         {
             return normalized;

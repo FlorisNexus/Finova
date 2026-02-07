@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Vat;
 using Finova.Countries.Europe.Albania.Validators;
@@ -23,6 +24,7 @@ using Finova.Countries.Europe.Hungary.Validators;
 using Finova.Countries.Europe.Iceland.Validators;
 using Finova.Countries.Europe.Ireland.Validators;
 using Finova.Countries.Europe.Italy.Validators;
+using Finova.Countries.Europe.Kosovo.Validators;
 using Finova.Countries.Europe.Latvia.Validators;
 using Finova.Countries.Europe.Liechtenstein.Validators;
 using Finova.Countries.Europe.Lithuania.Validators;
@@ -56,18 +58,10 @@ namespace Finova.Services;
 /// Unified validator for European VAT numbers.
 /// Delegates validation to specific country validators based on the country code prefix.
 /// </summary>
-/// <example>
-/// <code>
-/// // Static usage
-/// var result = EuropeVatValidator.ValidateVat("BE0123456789");
-///
-/// // Instance usage (DI)
-/// var validator = new EuropeVatValidator();
-/// var result = validator.Validate("FR12345678901");
-/// </code>
-/// </example>
 public class EuropeVatValidator : IVatValidator
 {
+    private static readonly ConcurrentDictionary<string, IVatValidator> _staticValidators = new();
+
     private readonly IServiceProvider? _serviceProvider;
     private IEnumerable<IVatValidator>? _validators;
 
@@ -153,64 +147,68 @@ public class EuropeVatValidator : IVatValidator
             countryCode = vat[0..2];
         }
 
-        // Special handling for Greece (EL/GR) and Switzerland (CHE/CH) if extracted from VAT
         countryCode = countryCode.ToUpperInvariant();
 
-        return countryCode switch
+        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
         {
-            "AL" => AlbaniaVatValidator.Validate(vat),
-            "AD" => AndorraVatValidator.Validate(vat),
-            "AT" => AustriaVatValidator.Validate(vat),
-            "AZ" => AzerbaijanVatValidator.Validate(vat),
-            "BA" => BosniaAndHerzegovinaVatValidator.Validate(vat),
-            "BE" => BelgiumVatValidator.Validate(vat),
-            "BG" => BulgariaVatValidator.Validate(vat),
-            "BY" => BelarusVatValidator.Validate(vat),
-            "CHE" or "CH" => SwitzerlandVatValidator.Validate(vat),
-            "CY" => CyprusVatValidator.Validate(vat),
-            "CZ" => CzechRepublicVatValidator.Validate(vat),
-            "DE" => GermanyVatValidator.Validate(vat),
-            "DK" => DenmarkVatValidator.Validate(vat),
-            "EE" => EstoniaVatValidator.Validate(vat),
-            "EL" or "GR" => GreeceVatValidator.Validate(vat),
-            "ES" => SpainVatValidator.Validate(vat),
-            "FI" => FinlandVatValidator.Validate(vat),
-            "FO" => FaroeIslandsVatValidator.Validate(vat),
-            "FR" => FranceVatValidator.Validate(vat),
-            "GB" => UnitedKingdomVatValidator.Validate(vat),
-            "GE" => GeorgiaVatValidator.Validate(vat),
-            "HR" => CroatiaVatValidator.Validate(vat),
-            "HU" => HungaryVatValidator.Validate(vat),
-            "IE" => IrelandVatValidator.Validate(vat),
-            "IS" => IcelandVatValidator.Validate(vat),
-            "IT" => ItalyVatValidator.Validate(vat),
-            "XK" => Finova.Countries.Europe.Kosovo.Validators.KosovoFiscalNumberValidator.ValidateFiscalNumber(vat),
-            "LI" => LiechtensteinVatValidator.Validate(vat),
-            "LT" => LithuaniaVatValidator.Validate(vat),
-            "LU" => LuxembourgVatValidator.ValidateVat(vat),
-            "LV" => LatviaVatValidator.Validate(vat),
-            "MC" => MonacoVatValidator.Validate(vat),
-            "MD" => MoldovaVatValidator.Validate(vat),
-            "ME" => MontenegroVatValidator.Validate(vat),
-            "MK" => NorthMacedoniaVatValidator.Validate(vat),
-            "MT" => MaltaVatValidator.ValidateVat(vat),
-            "NL" => NetherlandsVatValidator.ValidateBtw(vat),
-            "NO" => NorwayVatValidator.Validate(vat),
-            "PL" => PolandVatValidator.Validate(vat),
-            "PT" => PortugalVatValidator.Validate(vat),
-            "RO" => RomaniaVatValidator.Validate(vat),
-            "RS" => SerbiaVatValidator.Validate(vat),
-            "RU" => new Finova.Countries.Europe.Russia.Validators.RussiaVatValidator().Validate(vat),
-            "SE" => new SwedenVatValidator().Validate(vat),
-            "SI" => new SloveniaVatValidator().Validate(vat),
-            "SK" => new SlovakiaVatValidator().Validate(vat),
-            "SM" => SanMarinoVatValidator.Validate(vat),
-            "TR" => new Finova.Countries.Europe.Turkey.Validators.TurkeyVatValidator().Validate(vat),
-            "UA" => UkraineVatValidator.Validate(vat),
+            "AL" => new AlbaniaVatValidator(),
+            "AD" => new AndorraVatValidator(),
+            "AT" => new AustriaVatValidator(),
+            "AZ" => new AzerbaijanVatValidator(),
+            "BA" => new BosniaAndHerzegovinaVatValidator(),
+            "BE" => new BelgiumVatValidator(),
+            "BG" => new BulgariaVatValidator(),
+            "BY" => new BelarusVatValidator(),
+            "CHE" or "CH" => new SwitzerlandVatValidator(),
+            "CY" => new CyprusVatValidator(),
+            "CZ" => new CzechRepublicVatValidator(),
+            "DE" => new GermanyVatValidator(),
+            "DK" => new DenmarkVatValidator(),
+            "EE" => new EstoniaVatValidator(),
+            "EL" or "GR" => new GreeceVatValidator(),
+            "ES" => new SpainVatValidator(),
+            "FI" => new FinlandVatValidator(),
+            "FO" => new FaroeIslandsVatValidator(),
+            "FR" => new FranceVatValidator(),
+            "GB" => new UnitedKingdomVatValidator(),
+            "GE" => new GeorgiaVatValidator(),
+            "HR" => new CroatiaVatValidator(),
+            "HU" => new HungaryVatValidator(),
+            "IE" => new IrelandVatValidator(),
+            "IS" => new IcelandVatValidator(),
+            "IT" => new ItalyVatValidator(),
+            "XK" => new KosovoVatValidator(),
+            "LI" => new LiechtensteinVatValidator(),
+            "LT" => new LithuaniaVatValidator(),
+            "LU" => new LuxembourgVatValidator(),
+            "LV" => new LatviaVatValidator(),
+            "MC" => new MonacoVatValidator(),
+            "MD" => new MoldovaVatValidator(),
+            "ME" => new MontenegroVatValidator(),
+            "MK" => new NorthMacedoniaVatValidator(),
+            "MT" => new MaltaVatValidator(),
+            "NL" => new NetherlandsVatValidator(),
+            "NO" => new NorwayVatValidator(),
+            "PL" => new PolandVatValidator(),
+            "PT" => new PortugalVatValidator(),
+            "RO" => new RomaniaVatValidator(),
+            "RS" => new SerbiaVatValidator(),
+            "RU" => new Finova.Countries.Europe.Russia.Validators.RussiaVatValidator(),
+            "SE" => new SwedenVatValidator(),
+            "SI" => new SloveniaVatValidator(),
+            "SK" => new SlovakiaVatValidator(),
+            "SM" => new SanMarinoVatValidator(),
+            "TR" => new Finova.Countries.Europe.Turkey.Validators.TurkeyVatValidator(),
+            "UA" => new UkraineVatValidator(),
+            _ => null!
+        });
 
+        if (validator != null)
+        {
+            return validator.Validate(vat);
+        }
 
-            _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, $"Country code {countryCode} is not supported.")
-        };
+        return ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, $"Country code {countryCode} is not supported.");
     }
 
     public static VatDetails? GetVatDetails(string? vat, string? countryCode = null)
@@ -233,61 +231,20 @@ public class EuropeVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        VatDetails? details = countryCode switch
+        ValidationResult result = ValidateVat(vat, countryCode);
+        if (!result.IsValid)
         {
-            "AL" => AlbaniaVatValidator.GetVatDetails(vat),
-            "AD" => AndorraVatValidator.GetVatDetails(vat),
-            "AT" => AustriaVatValidator.GetVatDetails(vat),
-            "AZ" => AzerbaijanVatValidator.GetVatDetails(vat),
-            "BA" => BosniaAndHerzegovinaVatValidator.GetVatDetails(vat),
-            "BE" => BelgiumVatValidator.GetVatDetails(vat),
-            "BG" => BulgariaVatValidator.GetVatDetails(vat),
-            "BY" => BelarusVatValidator.GetVatDetails(vat),
-            "CHE" or "CH" => SwitzerlandVatValidator.GetVatDetails(vat),
-            "CY" => CyprusVatValidator.GetVatDetails(vat),
-            "CZ" => CzechRepublicVatValidator.GetVatDetails(vat),
-            "DE" => GermanyVatValidator.GetVatDetails(vat),
-            "DK" => DenmarkVatValidator.GetVatDetails(vat),
-            "EE" => EstoniaVatValidator.GetVatDetails(vat),
-            "EL" or "GR" => GreeceVatValidator.GetVatDetails(vat),
-            "ES" => SpainVatValidator.GetVatDetails(vat),
-            "FI" => FinlandVatValidator.GetVatDetails(vat),
-            "FO" => FaroeIslandsVatValidator.GetVatDetails(vat),
-            "FR" => FranceVatValidator.GetVatDetails(vat),
-            "GB" => UnitedKingdomVatValidator.GetVatDetails(vat),
-            "GE" => GeorgiaVatValidator.GetVatDetails(vat),
-            "HR" => CroatiaVatValidator.GetVatDetails(vat),
-            "HU" => HungaryVatValidator.GetVatDetails(vat),
-            "IE" => IrelandVatValidator.GetVatDetails(vat),
-            "IS" => IcelandVatValidator.GetVatDetails(vat),
-            "IT" => ItalyVatValidator.GetVatDetails(vat),
-            "XK" => new VatDetails { VatNumber = vat!, CountryCode = "XK", IsValid = true }, // Kosovo Fiscal Number
-            "LI" => LiechtensteinVatValidator.GetVatDetails(vat),
-            "LT" => LithuaniaVatValidator.GetVatDetails(vat),
-            "LU" => LuxembourgVatValidator.GetVatDetails(vat),
-            "LV" => LatviaVatValidator.GetVatDetails(vat),
-            "MC" => MonacoVatValidator.GetVatDetails(vat),
-            "MD" => MoldovaVatValidator.GetVatDetails(vat),
-            "ME" => MontenegroVatValidator.GetVatDetails(vat),
-            "MK" => NorthMacedoniaVatValidator.GetVatDetails(vat),
-            "MT" => MaltaVatValidator.GetVatDetails(vat),
-            "NL" => NetherlandsVatValidator.GetVatDetails(vat),
-            "NO" => NorwayVatValidator.GetVatDetails(vat),
-            "PL" => PolandVatValidator.GetVatDetails(vat),
-            "PT" => PortugalVatValidator.GetVatDetails(vat),
-            "RO" => RomaniaVatValidator.GetVatDetails(vat),
-            "RS" => SerbiaVatValidator.GetVatDetails(vat),
-            "SE" => SwedenVatValidator.GetVatDetails(vat),
-            "SI" => SloveniaVatValidator.GetVatDetails(vat),
-            "SK" => SlovakiaVatValidator.GetVatDetails(vat),
-            "SM" => SanMarinoVatValidator.GetVatDetails(vat),
-            "TR" => TurkeyVknValidator.GetVatDetails(vat),
-            "UA" => UkraineVatValidator.GetVatDetails(vat),
-            "RU" => (new Finova.Countries.Europe.Russia.Validators.RussiaInnValidator() as Finova.Core.Common.IValidator<Finova.Core.Vat.VatDetails>).Parse(vat),
+            return null;
+        }
 
+        // For most validators, Parse will work
+        var validator = _staticValidators.GetValueOrDefault(countryCode);
+        VatDetails? details = null;
 
-            _ => null
-        };
+        if (validator != null)
+        {
+            details = validator.Parse(vat);
+        }
 
         if (details != null)
         {

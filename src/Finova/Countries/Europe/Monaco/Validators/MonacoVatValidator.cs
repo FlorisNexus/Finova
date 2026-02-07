@@ -1,6 +1,6 @@
 using Finova.Core.Common;
 using Finova.Core.Vat;
-using Finova.Countries.Europe.France.Validators; // Assurez-vous d'avoir ce using
+using Finova.Countries.Europe.France.Validators;
 
 namespace Finova.Countries.Europe.Monaco.Validators;
 
@@ -10,73 +10,69 @@ namespace Finova.Countries.Europe.Monaco.Validators;
 /// Format: FR + 2 key digits + 9 SIREN digits.
 /// Often represented locally with 'MC' prefix, but technical validation is 'FR'.
 /// </summary>
-public partial class MonacoVatValidator : IVatValidator
+public partial class MonacoVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "MC";
     private const string FrenchPrefix = "FR";
 
-    public string CountryCode => CountryCodePrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new MonacoVatValidator().ValidateInternal(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        vat = VatSanitizer.Sanitize(vat);
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var cleaned = vat.Trim().ToUpperInvariant();
-        string frenchFormatVat;
+        // 1. Sanitize (Remove dots, spaces, dashes and convert to uppercase)
+        var sanitized = VatSanitizer.Sanitize(vat)!;
 
-        if (cleaned.StartsWith("MCFR"))
+        // 2. Handle Monaco specific prefix logic
+        string frenchFormatVat;
+        if (sanitized.StartsWith("MCFR", StringComparison.OrdinalIgnoreCase))
         {
-            frenchFormatVat = cleaned[2..]; // Remove MC, keep FR
+            frenchFormatVat = sanitized[2..]; // Remove MC, keep FR
         }
-        else if (cleaned.StartsWith(CountryCodePrefix))
+        else if (sanitized.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            frenchFormatVat = string.Concat(FrenchPrefix, cleaned.AsSpan(2));
+            frenchFormatVat = string.Concat(FrenchPrefix, sanitized.AsSpan(2));
         }
-        else if (cleaned.StartsWith(FrenchPrefix))
+        else if (sanitized.StartsWith(FrenchPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            frenchFormatVat = cleaned;
+            frenchFormatVat = sanitized;
         }
         else
         {
-            frenchFormatVat = string.Concat(FrenchPrefix, cleaned);
+            frenchFormatVat = string.Concat(FrenchPrefix, sanitized);
         }
 
-        return FranceVatValidator.Validate(frenchFormatVat);
+        // 3. Delegate to French validator
+        return FranceVatValidator.ValidateVat(frenchFormatVat);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        var result = Validate(vat);
-        if (!result.IsValid)
-        {
-            return null;
-        }
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => true; // Handled in Validate override
 
-        var cleaned = VatSanitizer.Sanitize(vat)!.Trim().ToUpperInvariant();
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled in Validate override
 
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned) => ValidationResult.Success(); // Handled in Validate override
 
-        if (cleaned.StartsWith(CountryCodePrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-        else if (cleaned.StartsWith(FrenchPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
+    /// <summary>
+    /// Static validation method for Monaco VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new MonacoVatValidator().ValidateInternal(vat);
 
-        return new VatDetails
-        {
-            CountryCode = CountryCodePrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Monaco VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new MonacoVatValidator().Parse(vat);
 }

@@ -35,5 +35,5 @@ public class LebanonIbanValidatorTests
     [Theory]
     [InlineData("LB62099900000001001901229114")]
     public void ValidateLebanonIban_WithValidIbans_ReturnsTrue(string iban)
-        => LebanonIbanValidator.ValidateLebanonIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

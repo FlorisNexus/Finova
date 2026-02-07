@@ -35,5 +35,5 @@ public class PakistanIbanValidatorTests
     [Theory]
     [InlineData("PK36SCBL0000001123456702")]
     public void ValidatePakistanIban_WithValidIbans_ReturnsTrue(string iban)
-        => PakistanIbanValidator.ValidatePakistanIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

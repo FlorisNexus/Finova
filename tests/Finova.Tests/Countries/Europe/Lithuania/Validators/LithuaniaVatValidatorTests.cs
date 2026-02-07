@@ -13,7 +13,7 @@ public class LithuaniaVatValidatorTests
     [InlineData("LT119511515")] // Another valid 9-digit
     public void Validate_WithValid9DigitVat_ReturnsSuccess(string vat)
     {
-        var result = LithuaniaVatValidator.Validate(vat);
+        var result = LithuaniaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -23,7 +23,7 @@ public class LithuaniaVatValidatorTests
     [InlineData("LT100000000001")] // Another valid 12-digit
     public void Validate_WithValid12DigitVat_ReturnsSuccess(string vat)
     {
-        var result = LithuaniaVatValidator.Validate(vat);
+        var result = LithuaniaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -32,7 +32,7 @@ public class LithuaniaVatValidatorTests
     [InlineData(" LT100001911 ")] // With whitespace
     public void Validate_WithFormattedVat_ReturnsSuccess(string vat)
     {
-        var result = LithuaniaVatValidator.Validate(vat);
+        var result = LithuaniaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -47,7 +47,7 @@ public class LithuaniaVatValidatorTests
     [InlineData("LT100001910")] // Invalid checksum
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = LithuaniaVatValidator.Validate(vat);
+        var result = LithuaniaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

@@ -76,7 +76,7 @@ public class SerbiaIbanValidatorTests
     public void ValidateSerbiaIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = SerbiaIbanValidator.ValidateSerbiaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -88,7 +88,7 @@ public class SerbiaIbanValidatorTests
     public void ValidateSerbiaIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = SerbiaIbanValidator.ValidateSerbiaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -105,7 +105,7 @@ public class SerbiaIbanValidatorTests
     public void ValidateSerbiaIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = SerbiaIbanValidator.ValidateSerbiaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();

@@ -4,43 +4,20 @@ using Finova.Core.Iban;
 
 namespace Finova.Countries.Europe.Lithuania.Validators;
 
-public class LithuaniaIbanValidator : IIbanValidator
+/// <summary>
+/// Validator for Lithuanian IBANs.
+/// </summary>
+public class LithuaniaIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "LT";
-    private const int LithuaniaIbanLength = 20;
-    private const string LithuaniaCountryCode = "LT";
+    /// <inheritdoc/>
+    public override string CountryCode => "LT";
 
-    public ValidationResult Validate(string? iban) => ValidateLithuaniaIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 20;
 
-    public static ValidationResult ValidateLithuaniaIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != LithuaniaIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, LithuaniaIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(LithuaniaCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, string.Format(ValidationMessages.InvalidCountryCodeExpected, "LT"));
-        }
-
-        // Validate BBAN
-        string bban = normalized.Substring(4);
-        var bbanResult = LithuaniaBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return LithuaniaBbanValidator.Validate(bban);
     }
 }

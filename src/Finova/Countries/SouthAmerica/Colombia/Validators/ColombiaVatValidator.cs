@@ -5,53 +5,35 @@ using Finova.Core.Vat;
 namespace Finova.Countries.SouthAmerica.Colombia.Validators;
 
 /// <summary>
-/// Validates Colombian NIT (Número de Identificación Tributaria).
-/// Used for VAT (IVA) registration purposes.
-/// Format: 9 digits + check digit (total 10 digits).
+/// Validator for Colombian VAT identifier (NIT).
+/// Format: 9 or 10 digits.
 /// </summary>
-public partial class ColombiaVatValidator : IVatValidator
+public partial class ColombiaVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "CO";
 
-    [GeneratedRegex(@"^\d{9,10}$", RegexOptions.Compiled)]
+    [GeneratedRegex(@"^\d{9,10}$")]
     private static partial Regex NitPattern();
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a Colombian NIT number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The NIT number (9-10 digits).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new ColombiaVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9 || cleaned.Length == 10;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => NitPattern().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "").Replace(".", "");
-
-        // Remove CO prefix if present
-        if (clean.StartsWith("CO", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        if (!NitPattern().IsMatch(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidColombianNitFormat);
-        }
-
         // If 9 digits, no check digit validation (just the base number)
-        if (clean.Length == 9)
+        if (cleaned.Length == 9)
         {
             return ValidationResult.Success();
         }
@@ -63,40 +45,23 @@ public partial class ColombiaVatValidator : IVatValidator
 
         for (int i = 0; i < 9; i++)
         {
-            sum += (clean[i] - '0') * weights[i];
+            sum += (cleaned[i] - '0') * weights[i];
         }
 
         int remainder = sum % 11;
         int checkDigit = remainder > 1 ? 11 - remainder : remainder;
 
-        if (checkDigit != (clean[9] - '0'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidColombianNitChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == (cleaned[9] - '0')
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidColombianNitChecksum);
     }
 
-    /// <summary>
-    /// Gets details of a validated Colombian NIT.
-    /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "").Replace(".", "");
-
-        if (clean.StartsWith("CO", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
         return new VatDetails
         {
-            VatNumber = clean,
+            VatNumber = cleaned,
             CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "NIT",
@@ -105,4 +70,14 @@ public partial class ColombiaVatValidator : IVatValidator
             Notes = "Colombian tax identifier (NIT)"
         };
     }
+
+    /// <summary>
+    /// Static validation method for Colombian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new ColombiaVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for a Colombian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new ColombiaVatValidator().Parse(vat);
 }

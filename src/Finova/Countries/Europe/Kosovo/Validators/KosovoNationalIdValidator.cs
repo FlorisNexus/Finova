@@ -7,52 +7,26 @@ namespace Finova.Countries.Europe.Kosovo.Validators;
 /// Validator for Kosovo National Identity Number (Letërnjoftim).
 /// Format: 10 digits.
 /// </summary>
-public class KosovoNationalIdValidator : INationalIdValidator
+public partial class KosovoNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "XK"; // XK is user-assigned code for Kosovo
+        public override string CountryCode => "XK";
 
-    /// <summary>
-    /// Validates the Kosovo National ID.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 10;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => long.TryParse(sanitized, out _);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Kosovo National ID (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 10)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
+        // No public checksum algorithm available for XK currently.
         return ValidationResult.Success();
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Kosovo National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new KosovoNationalIdValidator().Validate(nationalId);
 }

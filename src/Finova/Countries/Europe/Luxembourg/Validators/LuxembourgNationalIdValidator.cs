@@ -6,75 +6,44 @@ namespace Finova.Countries.Europe.Luxembourg.Validators;
 
 /// <summary>
 /// Validator for Luxembourg National Identification Number (Matricule).
-/// Format: YYYYMMDD-XXX-CC (13 digits).
+/// Format: 13 digits (YYYYMMDD + 5 more digits).
 /// </summary>
-public class LuxembourgNationalIdValidator : INationalIdValidator
+public partial class LuxembourgNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "LU";
+        public override string CountryCode => "LU";
 
-    /// <summary>
-    /// Validates the Luxembourg Matricule.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 13;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Luxembourg Matricule (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 13)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
         if (!long.TryParse(sanitized, out _))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
+            return false;
         }
 
         // First 8 digits are YYYYMMDD
         string dateStr = sanitized.Substring(0, 8);
-        if (!DateTime.TryParseExact(dateStr, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        // Checksum: First 11 digits % 97 == Last 2 digits
-        if (!long.TryParse(sanitized.Substring(0, 11), out long number))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        int checksum = (int)(number % 97);
-        int checkDigits = int.Parse(sanitized.Substring(11, 2));
-
-        if (checksum != checkDigits)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return DateTime.TryParseExact(dateStr, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _);
     }
 
     /// <inheritdoc/>
-    public string? Parse(string? input)
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
+        // Checksum: First 11 digits % 97 == Last 2 digits
+        long number = long.Parse(sanitized.Substring(0, 11));
+        int expectedCheckDigits = (int)(number % 97);
+        int actualCheckDigits = int.Parse(sanitized.Substring(11, 2));
+
+        return expectedCheckDigits == actualCheckDigits
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
+
+    /// <summary>
+    /// Static validation method for Luxembourgish Matricule.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new LuxembourgNationalIdValidator().Validate(nationalId);
 }

@@ -35,5 +35,5 @@ public class VirginIslandsBritishIbanValidatorTests
     [Theory]
     [InlineData("VG96VPVG0000012345678901")]
     public void ValidateVirginIslandsBritishIban_WithValidIbans_ReturnsTrue(string iban)
-        => VirginIslandsBritishIbanValidator.ValidateVirginIslandsBritishIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

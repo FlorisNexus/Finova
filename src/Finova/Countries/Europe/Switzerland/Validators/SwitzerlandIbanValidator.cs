@@ -4,43 +4,20 @@ using Finova.Core.Iban;
 
 namespace Finova.Countries.Europe.Switzerland.Validators;
 
-public class SwitzerlandIbanValidator : IIbanValidator
+/// <summary>
+/// Validator for Swiss IBANs.
+/// </summary>
+public class SwitzerlandIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "CH";
-    private const int SwitzerlandIbanLength = 21;
-    private const string SwitzerlandCountryCode = "CH";
+    /// <inheritdoc/>
+    public override string CountryCode => "CH";
 
-    public ValidationResult Validate(string? iban) => ValidateSwitzerlandIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 21;
 
-    public static ValidationResult ValidateSwitzerlandIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != SwitzerlandIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, SwitzerlandIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(SwitzerlandCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, string.Format(ValidationMessages.InvalidCountryCodeExpected, "CH"));
-        }
-
-        // Validate BBAN
-        string bban = normalized.Substring(4);
-        var bbanResult = SwitzerlandBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return SwitzerlandBbanValidator.Validate(bban);
     }
 }

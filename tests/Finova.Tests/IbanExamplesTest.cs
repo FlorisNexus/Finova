@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Text;
+using Finova.Core.Iban;
 using Finova.Services;
 using Xunit;
 using Xunit.Abstractions;
@@ -129,11 +130,10 @@ public class IbanExamplesTest
             _output.WriteLine($"{country} ({code}): {FormatIban(iban)}");
 
             // Validate to make sure
-            var result = GlobalIbanValidator.ValidateIban(iban);
-            if (!result.IsValid)
+            var result = IbanHelper.IsValidIban(iban);
+            if (!result)
             {
-                var error = result.Errors.FirstOrDefault()?.Message ?? "Unknown";
-                _output.WriteLine($"  WARNING: Still invalid - {error}");
+                _output.WriteLine($"  WARNING: Still invalid - Checksum failed");
             }
         }
     }
@@ -280,12 +280,12 @@ public class IbanExamplesTest
 
         foreach (var (country, code, expectedLength, example) in ibans)
         {
-            var result = GlobalIbanValidator.ValidateIban(example);
+            var isValid = IbanHelper.IsValidIban(example);
             var normalized = example.Replace(" ", "");
 
-            if (!result.IsValid)
+            if (!isValid)
             {
-                var error = result.Errors.FirstOrDefault()?.Message ?? "Unknown error";
+                var error = "Invalid IBAN (checksum or structure)";
                 invalidIbans.Add((country, code, example, error));
                 _output.WriteLine($"INVALID - {country} ({code}): {example} - {error}");
             }

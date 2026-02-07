@@ -11,7 +11,7 @@ public class IsraelVatValidatorTests
     [InlineData("IL516179157")] // With IL prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = IsraelVatValidator.Validate(vat);
+        var result = IsraelVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -24,7 +24,7 @@ public class IsraelVatValidatorTests
     [InlineData("ABCDEFGHI")] // Non-numeric
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = IsraelVatValidator.Validate(vat);
+        var result = IsraelVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

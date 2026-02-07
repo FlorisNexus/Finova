@@ -4,43 +4,20 @@ using Finova.Core.Iban;
 
 namespace Finova.Countries.Europe.Andorra.Validators;
 
-public class AndorraIbanValidator : IIbanValidator
+/// <summary>
+/// Validator for Andorran IBANs.
+/// </summary>
+public class AndorraIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "AD";
-    private const int AndorraIbanLength = 24;
-    private const string AndorraCountryCode = "AD";
+    /// <inheritdoc/>
+    public override string CountryCode => "AD";
 
-    public ValidationResult Validate(string? iban) => ValidateAndorraIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 24;
 
-    public static ValidationResult ValidateAndorraIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.IbanEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != AndorraIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidIbanLength, AndorraIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(AndorraCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, string.Format(ValidationMessages.InvalidCountryCodeExpected, AndorraCountryCode));
-        }
-
-        // Validate BBAN
-        string bban = normalized.Substring(4);
-        var bbanResult = AndorraBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return AndorraBbanValidator.Validate(bban);
     }
 }

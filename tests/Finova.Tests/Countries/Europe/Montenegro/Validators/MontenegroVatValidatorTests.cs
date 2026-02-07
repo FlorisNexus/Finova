@@ -9,7 +9,7 @@ public class MontenegroVatValidatorTests
     [InlineData("10000004")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = MontenegroVatValidator.Validate(vat);
+        var result = MontenegroVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class MontenegroVatValidatorTests
     [InlineData("XX12345678")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = MontenegroVatValidator.Validate(vat);
+        var result = MontenegroVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

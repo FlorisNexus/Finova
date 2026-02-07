@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Iban;
 using Finova.Countries.Europe.Albania.Validators;
@@ -71,6 +72,8 @@ namespace Finova.Services;
 /// </example>
 public class EuropeIbanValidator : IIbanValidator
 {
+    private static readonly ConcurrentDictionary<string, IIbanValidator> _staticValidators = new();
+
     private readonly IServiceProvider? _serviceProvider;
     private IEnumerable<IIbanValidator>? _validators;
 
@@ -135,63 +138,64 @@ public class EuropeIbanValidator : IIbanValidator
 
         string country = IbanHelper.NormalizeIban(iban)[0..2].ToUpperInvariant();
 
-        return country switch
+        var validator = _staticValidators.GetOrAdd(country, code => code switch
         {
-            // Route to specific static methods
-            "DE" => GermanyIbanValidator.ValidateGermanyIban(iban),
-            "IT" => ItalyIbanValidator.ValidateItalyIban(iban),
-            "ES" => SpainIbanValidator.ValidateSpainIban(iban),
-            "FR" => FranceIbanValidator.ValidateFranceIban(iban),
-            "BE" => BelgiumIbanValidator.ValidateBelgiumIban(iban),
-            "NL" => NetherlandsIbanValidator.ValidateNetherlandsIban(iban),
-            "GB" => UnitedKingdomIbanValidator.ValidateUnitedKingdomIban(iban),
-            "LU" => LuxembourgIbanValidator.ValidateLuxembourgIban(iban),
-            "IE" => IrelandIbanValidator.ValidateIrelandIban(iban),
-            "AT" => AustriaIbanValidator.ValidateAustriaIban(iban),
-            "GR" => GreeceIbanValidator.ValidateGreeceIban(iban),
-            "FI" => FinlandIbanValidator.ValidateFinlandIban(iban),
-            "PT" => PortugalIbanValidator.ValidatePortugalIban(iban),
-            "SE" => SwedenIbanValidator.ValidateSwedenIban(iban),
-            "DK" => DenmarkIbanValidator.ValidateDenmarkIban(iban),
-            "NO" => NorwayIbanValidator.ValidateNorwayIban(iban),
-            "PL" => PolandIbanValidator.ValidatePolandIban(iban),
-            "CZ" => CzechRepublicIbanValidator.ValidateCzechIban(iban),
-            "HU" => HungaryIbanValidator.ValidateHungaryIban(iban),
-            "RO" => RomaniaIbanValidator.ValidateRomaniaIban(iban),
-            "BG" => BulgariaIbanValidator.ValidateBulgariaIban(iban),
-            "HR" => CroatiaIbanValidator.ValidateCroatiaIban(iban),
-            "SI" => SloveniaIbanValidator.ValidateSloveniaIban(iban),
-            "SK" => SlovakiaIbanValidator.ValidateSlovakiaIban(iban),
-            "EE" => EstoniaIbanValidator.ValidateEstoniaIban(iban),
-            "LV" => LatviaIbanValidator.ValidateLatviaIban(iban),
-            "LT" => LithuaniaIbanValidator.ValidateLithuaniaIban(iban),
-            "CY" => CyprusIbanValidator.ValidateCyprusIban(iban),
-            "MT" => MaltaIbanValidator.ValidateMaltaIban(iban),
-            "CH" => SwitzerlandIbanValidator.ValidateSwitzerlandIban(iban),
-            "MC" => MonacoIbanValidator.ValidateMonacoIban(iban),
-            "AD" => AndorraIbanValidator.ValidateAndorraIban(iban),
-            "VA" => VaticanIbanValidator.ValidateVaticanIban(iban),
-            "SM" => SanMarinoIbanValidator.ValidateSanMarinoIban(iban),
-            "GI" => GibraltarIbanValidator.ValidateGibraltarIban(iban),
-            "IS" => IcelandIbanValidator.ValidateIcelandIban(iban),
-            "LI" => LiechtensteinIbanValidator.ValidateLiechtensteinIban(iban),
-            "RS" => SerbiaIbanValidator.ValidateSerbiaIban(iban),
-            "UA" => UkraineIbanValidator.ValidateUkraineIban(iban),
-            "ME" => MontenegroIbanValidator.ValidateMontenegroIban(iban),
-            "AL" => AlbaniaIbanValidator.ValidateAlbaniaIban(iban),
-            "TR" => TurkeyIbanValidator.ValidateTurkeyIban(iban),
-            "MK" => NorthMacedoniaIbanValidator.ValidateNorthMacedoniaIban(iban),
-            "BA" => BosniaAndHerzegovinaIbanValidator.ValidateBosniaAndHerzegovinaIban(iban),
-            "GE" => GeorgiaIbanValidator.ValidateGeorgiaIban(iban),
-            // Additional European territories and countries
-            "FO" => FaroeIslandsIbanValidator.ValidateFaroeIslandsIban(iban),
-            "GL" => GreenlandIbanValidator.ValidateGreenlandIban(iban),
-            "XK" => KosovoIbanValidator.ValidateKosovoIban(iban),
-            "MD" => MoldovaIbanValidator.ValidateMoldovaIban(iban),
-            "BY" => BelarusIbanValidator.ValidateBelarusIban(iban),
-            "AZ" => AzerbaijanIbanValidator.ValidateAzerbaijanIban(iban),
+            "DE" => new GermanyIbanValidator(),
+            "IT" => new ItalyIbanValidator(),
+            "ES" => new SpainIbanValidator(),
+            "FR" => new FranceIbanValidator(),
+            "BE" => new BelgiumIbanValidator(),
+            "NL" => new NetherlandsIbanValidator(),
+            "GB" => new UnitedKingdomIbanValidator(),
+            "LU" => new LuxembourgIbanValidator(),
+            "IE" => new IrelandIbanValidator(),
+            "AT" => new AustriaIbanValidator(),
+            "GR" => new GreeceIbanValidator(),
+            "FI" => new FinlandIbanValidator(),
+            "PT" => new PortugalIbanValidator(),
+            "SE" => new SwedenIbanValidator(),
+            "DK" => new DenmarkIbanValidator(),
+            "NO" => new NorwayIbanValidator(),
+            "PL" => new PolandIbanValidator(),
+            "CZ" => new CzechRepublicIbanValidator(),
+            "HU" => new HungaryIbanValidator(),
+            "RO" => new RomaniaIbanValidator(),
+            "BG" => new BulgariaIbanValidator(),
+            "HR" => new CroatiaIbanValidator(),
+            "SI" => new SloveniaIbanValidator(),
+            "SK" => new SlovakiaIbanValidator(),
+            "EE" => new EstoniaIbanValidator(),
+            "LV" => new LatviaIbanValidator(),
+            "LT" => new LithuaniaIbanValidator(),
+            "CY" => new CyprusIbanValidator(),
+            "MT" => new MaltaIbanValidator(),
+            "CH" => new SwitzerlandIbanValidator(),
+            "MC" => new MonacoIbanValidator(),
+            "AD" => new AndorraIbanValidator(),
+            "VA" => new VaticanIbanValidator(),
+            "SM" => new SanMarinoIbanValidator(),
+            "GI" => new GibraltarIbanValidator(),
+            "IS" => new IcelandIbanValidator(),
+            "LI" => new LiechtensteinIbanValidator(),
+            "RS" => new SerbiaIbanValidator(),
+            "UA" => new UkraineIbanValidator(),
+            "ME" => new MontenegroIbanValidator(),
+            "MK" => new NorthMacedoniaIbanValidator(),
+            "AL" => new AlbaniaIbanValidator(),
+            "TR" => new TurkeyIbanValidator(),
+            "BA" => new BosniaAndHerzegovinaIbanValidator(),
+            "GE" => new GeorgiaIbanValidator(),
+            "FO" => new FaroeIslandsIbanValidator(),
+            "GL" => new GreenlandIbanValidator(),
+            "XK" => new KosovoIbanValidator(),
+            "MD" => new MoldovaIbanValidator(),
+            "BY" => new BelarusIbanValidator(),
+            "AZ" => new AzerbaijanIbanValidator(),
+            _ => null!
+        });
 
-            _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban)
-        };
+        return validator != null
+            ? validator.Validate(iban)
+            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
     }
 }

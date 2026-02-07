@@ -9,7 +9,7 @@ public class SerbiaVatValidatorTests
     [InlineData("RS100000024")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = SerbiaVatValidator.Validate(vat);
+        var result = SerbiaVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class SerbiaVatValidatorTests
     [InlineData("XX123456789")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = SerbiaVatValidator.Validate(vat);
+        var result = SerbiaVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

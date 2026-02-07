@@ -6,53 +6,25 @@ namespace Finova.Countries.Europe.Belarus.Validators;
 
 /// <summary>
 /// Validator for Belarus Personal Identification Number (Ientifikatsionny nomer).
+/// Format: 14 characters.
 /// </summary>
-public class BelarusNationalIdValidator : INationalIdValidator
+public partial class BelarusNationalIdValidator : NationalIdValidatorBase
 {
+    [GeneratedRegex(@"^[1-6]\d{6}[ABCKEMH]\d{3}[A-Z]{2}\d$")]
+    private static partial Regex FormatRegex();
+
     /// <inheritdoc/>
-    public string CountryCode => "BY";
+        public override string CountryCode => "BY";
 
-    // Format: G DDMMYY R XXX LL C
-    // G: 1-6
-    // DDMMYY: Date
-    // R: Region (A, B, C, K, E, M, H)
-    // XXX: Sequence (Digits)
-    // LL: Letters (e.g. PB, BA, BI...)
-    // C: Checksum (Digit)
-    private static readonly Regex FormatRegex = new(@"^[1-6]\d{6}[ABCKEMH]\d{3}[A-Z]{2}\d$", RegexOptions.Compiled);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 14;
 
-    /// <summary>
-    /// Validates the Belarus Personal ID.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Belarus Personal ID (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
+        if (!FormatRegex().IsMatch(sanitized))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 14)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!FormatRegex.IsMatch(sanitized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
+            return false;
         }
 
         // Date Validation
@@ -61,37 +33,26 @@ public class BelarusNationalIdValidator : INationalIdValidator
         int month = int.Parse(sanitized.Substring(3, 2));
         int yearPart = int.Parse(sanitized.Substring(5, 2));
 
-        int century = 0;
-        switch (centuryCode)
+        int century = centuryCode switch
         {
-            case 1: // Male 19th
-            case 2: // Female 19th
-                century = 1800;
-                break;
-            case 3: // Male 20th
-            case 4: // Female 20th
-                century = 1900;
-                break;
-            case 5: // Male 21st
-            case 6: // Female 21st
-                century = 2000;
-                break;
-        }
+            1 or 2 => 1800,
+            3 or 4 => 1900,
+            5 or 6 => 2000,
+            _ => 0
+        };
 
-        int fullYear = century + yearPart;
-
-        if (!DateHelper.IsValidDate(fullYear, month, day))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        return ValidationResult.Success();
+        return DateHelper.IsValidDate(century + yearPart, month, day);
     }
 
     /// <inheritdoc/>
-    public string? Parse(string? input)
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
+        // Checksum calculation could be added here.
+        return ValidationResult.Success();
     }
+
+    /// <summary>
+    /// Static validation method for Belarus National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new BelarusNationalIdValidator().Validate(nationalId);
 }

@@ -1226,7 +1226,7 @@
     <value>Ongeldig Bulgaars IBAN-controleteken.</value>
   </data>
   <data name="InvalidLengthDigit" xml:space="preserve">
-    <value>Ongeldig lengtecijfer.</value>
+    <value>Ongeldig lengtecijfer. Het voorlaatste cijfer moet overeenkomen met de totale lengte van de referentie (mod 10).</value>
   </data>
   <data name="InvalidPvmLength" xml:space="preserve">
     <value>PVM moet 9 cijfers zijn.</value>

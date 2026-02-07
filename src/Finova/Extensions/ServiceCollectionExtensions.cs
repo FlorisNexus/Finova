@@ -1,4 +1,5 @@
 using Finova.Core.Bic;
+using Finova.Core.Iban;
 using Finova.Core.Enterprise;
 using Finova.Core.Identifiers;
 using Finova.Core.PaymentCard;
@@ -48,6 +49,13 @@ public static class ServiceCollectionExtensions
         services.AddFinovaMiddleEast();
         services.AddFinovaAfrica();
         services.AddFinovaSoutheastAsia();
+
+        // Register Global IBAN Validator (Composite)
+        // This must be registered LAST to override any partial validators registered by regional extensions
+        // We register the concrete type first so we can forward both interfaces to the same singleton instance
+        services.AddSingleton<GlobalIbanValidator>();
+        services.AddSingleton<IIbanValidator>(sp => sp.GetRequiredService<GlobalIbanValidator>());
+        services.AddSingleton<IIbanService>(sp => sp.GetRequiredService<GlobalIbanValidator>());
 
         return services;
     }

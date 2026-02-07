@@ -25,7 +25,7 @@ public class AlbaniaNiptValidator : ITaxIdValidator
     public static ValidationResult ValidateNipt(string? nipt)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(nipt, "AL");
-        return AlbaniaVatValidator.Validate(normalized);
+        return AlbaniaVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

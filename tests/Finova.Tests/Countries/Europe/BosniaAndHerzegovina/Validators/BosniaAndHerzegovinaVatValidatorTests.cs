@@ -9,7 +9,7 @@ public class BosniaAndHerzegovinaVatValidatorTests
     [InlineData("4000000000005")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = BosniaAndHerzegovinaVatValidator.Validate(vat);
+        var result = BosniaAndHerzegovinaVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class BosniaAndHerzegovinaVatValidatorTests
     [InlineData("XX1234567890123")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = BosniaAndHerzegovinaVatValidator.Validate(vat);
+        var result = BosniaAndHerzegovinaVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

@@ -12,7 +12,7 @@ public class UnitedKingdomVatValidatorTests
     [InlineData("GB999999973")] // Another valid example
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = UnitedKingdomVatValidator.Validate(vat);
+        var result = UnitedKingdomVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -22,7 +22,7 @@ public class UnitedKingdomVatValidatorTests
     [InlineData("GB123456780")] // Invalid checksum
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = UnitedKingdomVatValidator.Validate(vat);
+        var result = UnitedKingdomVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

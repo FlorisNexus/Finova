@@ -4,67 +4,38 @@ using Finova.Core.Vat;
 namespace Finova.Countries.SouthAmerica.Argentina.Validators;
 
 /// <summary>
-/// Validates Argentine VAT identifier (CUIT - Código Único de Identificación Tributaria).
-/// Argentina uses CUIT for VAT (IVA) registration purposes.
-/// Format: XX-XXXXXXXX-X (11 digits with optional hyphens).
+/// Validator for Argentine VAT identifier (CUIT).
+/// Format: 11 digits.
 /// </summary>
-public class ArgentinaVatValidator : IVatValidator
+public partial class ArgentinaVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "AR";
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates an Argentine VAT/CUIT number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The CUIT number (11 digits).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new ArgentinaVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 11;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => cleaned.All(char.IsDigit);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "");
-
-        // Remove AR prefix if present
-        if (clean.StartsWith("AR", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        // Use the existing CUIT validator
-        return ArgentinaCuitValidator.ValidateStatic(clean);
+        return ArgentinaCuitValidator.ValidateStatic(cleaned);
     }
 
-    /// <summary>
-    /// Gets details of a validated Argentine VAT/CUIT number.
-    /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "");
-
-        // Remove AR prefix if present
-        if (clean.StartsWith("AR", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
         // First two digits indicate entity type
-        var prefix = clean[..2];
+        var prefix = cleaned[..2];
         var entityType = prefix switch
         {
             "20" or "23" or "24" or "27" => "Individual",
@@ -74,7 +45,7 @@ public class ArgentinaVatValidator : IVatValidator
 
         return new VatDetails
         {
-            VatNumber = clean,
+            VatNumber = cleaned,
             CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "CUIT",
@@ -83,4 +54,14 @@ public class ArgentinaVatValidator : IVatValidator
             Notes = $"Argentine tax identifier (CUIT) - {entityType}"
         };
     }
+
+    /// <summary>
+    /// Static validation method for Argentine VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new ArgentinaVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for an Argentine VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new ArgentinaVatValidator().Parse(vat);
 }

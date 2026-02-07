@@ -12,7 +12,7 @@ public class DenmarkVatValidatorTests
     [InlineData("DK88146328")] // Another valid example
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = DenmarkVatValidator.Validate(vat);
+        var result = DenmarkVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -22,7 +22,7 @@ public class DenmarkVatValidatorTests
     [InlineData(" DK13585628 ")] // With whitespace
     public void Validate_WithFormattedVat_ReturnsSuccess(string vat)
     {
-        var result = DenmarkVatValidator.Validate(vat);
+        var result = DenmarkVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -37,7 +37,7 @@ public class DenmarkVatValidatorTests
     [InlineData("XX13585628")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = DenmarkVatValidator.Validate(vat);
+        var result = DenmarkVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

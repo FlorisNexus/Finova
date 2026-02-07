@@ -4,43 +4,20 @@ using Finova.Core.Iban;
 
 namespace Finova.Countries.Europe.Denmark.Validators;
 
-public class DenmarkIbanValidator : IIbanValidator
+/// <summary>
+/// Validator for Danish IBANs.
+/// </summary>
+public class DenmarkIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "DK";
-    private const int DenmarkIbanLength = 18;
-    private const string DenmarkCountryCode = "DK";
+    /// <inheritdoc/>
+    public override string CountryCode => "DK";
 
-    public ValidationResult Validate(string? iban) => ValidateDenmarkIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 18;
 
-    public static ValidationResult ValidateDenmarkIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != DenmarkIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, DenmarkIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(DenmarkCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidDenmarkCountryCode);
-        }
-
-        // Validate BBAN
-        string bban = normalized.Substring(4);
-        var bbanResult = DenmarkBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return DenmarkBbanValidator.Validate(bban);
     }
 }

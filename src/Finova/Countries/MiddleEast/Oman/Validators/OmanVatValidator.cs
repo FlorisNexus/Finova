@@ -1,70 +1,101 @@
+using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.MiddleEast.Oman.Validators;
 
 /// <summary>
-/// Validator for Oman VAT Number.
-/// Format: 15 digits. Starts with 'OM'.
+/// Validator for Omani VAT numbers.
+/// Format: 15 digits. Usually starts with OM.
 /// </summary>
-public class OmanVatValidator : ITaxIdValidator, IVatValidator
+public partial class OmanVatValidator : VatValidatorBase
 {
-    public string CountryCode => "OM";
+    [GeneratedRegex(@"^\d{15}$")]
+    private static partial Regex VatRegex();
 
-    public ValidationResult Validate(string? input) => ValidateVat(input);
+    private const string CountryCodePrefix = "OM";
 
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Explicit implementation for IVatValidator.
+    /// Static validation method for tests.
     /// </summary>
-    VatDetails? IValidator<VatDetails>.Parse(string? input)
-    {
-        var result = Validate(input);
-        if (!result.IsValid)
-        {
-            return null;
-        }
+    public static ValidationResult ValidateStatic(string? input) => new OmanVatValidator().ValidateInternal(input);
 
-        return new VatDetails
-        {
-            CountryCode = "OM",
-            VatNumber = input!.Trim().ToUpperInvariant(),
-            IsValid = true,
-            IdentifierKind = "VAT"
-        };
-    }
 
-    /// <summary>
-    /// Implementation for ITaxIdValidator / IValidator&lt;string&gt;.
-    /// </summary>
-    public string? Parse(string? input) => Validate(input).IsValid ? input?.Trim().ToUpperInvariant() : null;
-
-    public static ValidationResult ValidateVat(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = vat.Trim().ToUpperInvariant();
-        if (clean.StartsWith("OM"))
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+
+        // Oman VAT numbers often include the OM prefix in the 15-digit total or as a separate prefix
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            clean = clean[2..];
+            cleaned = cleaned[2..];
         }
 
-        if (!clean.All(char.IsDigit))
+        // If it was already 15 digits including OM, it's now 13.
+        // The spec usually says 15 digits total.
+        if (cleaned.Length != 15 && sanitized.Length != 15)
+        {
+             return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                ValidationMessages.InvalidOmanVatLength);
+        }
+
+        // Standardize to 15 digits for format check
+        var toCheck = sanitized.StartsWith(CountryCodePrefix) ? sanitized[2..] : sanitized;
+        if (toCheck.Length != 15 && toCheck.Length != 13)
+        {
+             return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                ValidationMessages.InvalidOmanVatLength);
+        }
+
+        if (!toCheck.All(char.IsDigit))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
         }
 
-        if (clean.Length != 13) // Updated to match example length (2+13=15)
-        {
-            if (vat.Trim().Length != 15)
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidOmanVatLength);
-            }
-        }
-
         return ValidationResult.Success();
     }
+
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
+    {
+        return new VatDetails
+        {
+            CountryCode = CountryCode,
+            VatNumber = cleaned,
+            IsValid = true,
+            IdentifierKind = "VAT"
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 15 || cleaned.Length == 13;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => cleaned.All(char.IsDigit);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
+        // No public checksum algorithm available for OM.
+        return ValidationResult.Success();
+    }
+
+    /// <summary>
+    /// Static validation method for Omani VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new OmanVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for an Omani VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new OmanVatValidator().Parse(vat);
 }

@@ -30,6 +30,14 @@ public class CroatiaEnterpriseValidatorTests
     [Theory]
     [InlineData("1234567890")] // Too short
     [InlineData("123456789012")] // Too long
+    public void Validate_InvalidLength_ReturnsFailure(string? oib)
+    {
+        var result = CroatiaOibValidator.ValidateOib(oib);
+        Assert.False(result.IsValid);
+        Assert.Equal(ValidationErrorCode.InvalidLength, result.ErrorCode());
+    }
+
+    [Theory]
     [InlineData("ABCDEFGHIJK")] // Non-numeric
     public void Validate_InvalidFormat_ReturnsFailure(string? oib)
     {

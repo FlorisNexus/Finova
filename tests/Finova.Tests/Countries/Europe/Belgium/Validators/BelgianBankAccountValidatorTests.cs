@@ -80,7 +80,7 @@ public class BelgianBankAccountValidatorTests
     public void ValidateBelgianIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -93,7 +93,7 @@ public class BelgianBankAccountValidatorTests
     public void ValidateBelgianIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -112,7 +112,7 @@ public class BelgianBankAccountValidatorTests
     public void ValidateBelgianIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -129,7 +129,7 @@ public class BelgianBankAccountValidatorTests
         var iban = "BE00000000000000";
 
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -142,7 +142,7 @@ public class BelgianBankAccountValidatorTests
         var iban = "BEABCDEFGHIJKLMN";
 
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -155,7 +155,7 @@ public class BelgianBankAccountValidatorTests
         var iban = "BE68!539@0754#7034";
 
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -163,5 +163,3 @@ public class BelgianBankAccountValidatorTests
 
     #endregion
 }
-
-

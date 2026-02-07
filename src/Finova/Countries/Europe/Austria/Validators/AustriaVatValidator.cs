@@ -4,52 +4,79 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Austria.Validators;
 
-public partial class AustriaVatValidator : IVatValidator
+/// <summary>
+/// Validator for Austrian VAT numbers (UID-Nummer).
+/// Format: 9 characters. 'U' + 8 digits.
+/// </summary>
+public partial class AustriaVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "AT";
 
-    [GeneratedRegex(@"^ATU\d{8}$")]
+    [GeneratedRegex(@"^U\d{8}$")]
     private static partial Regex AustriaVatRegex();
 
-    public string CountryCode => CountryCodePrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new AustriaVatValidator().ValidateInternal(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        vat = VatSanitizer.Sanitize(vat);
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var normalized = vat.Trim().ToUpperInvariant();
-        if (normalized.StartsWith("U") && normalized.Length == 9)
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+
+        // Special handling for Austria prefixes: AT, ATU, U
+        if (cleaned.StartsWith("ATU", StringComparison.OrdinalIgnoreCase))
         {
-            normalized = "AT" + normalized;
+            cleaned = cleaned[2..]; // Keep the 'U'
         }
-        else if (normalized.Length == 8 && long.TryParse(normalized, out _))
+        else if (cleaned.StartsWith("AT", StringComparison.OrdinalIgnoreCase))
         {
-            normalized = "ATU" + normalized;
+            cleaned = "U" + cleaned[2..];
         }
-        else if (normalized.StartsWith("AT") && !normalized.StartsWith("ATU"))
+        else if (cleaned.Length == 8 && long.TryParse(cleaned, out _))
         {
-            normalized = normalized.Insert(2, "U");
+            cleaned = "U" + cleaned;
         }
 
-
-        if (!AustriaVatRegex().IsMatch(normalized))
+        if (!IsValidLength(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidAustriaVatFormat);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                string.Format(ValidationMessages.InvalidLength, CountryCode));
         }
 
-        string digitsStr = normalized.Substring(3, 7);
-        int checkDigit = normalized[10] - '0';
+        if (!ValidateFormat(cleaned))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat,
+                string.Format(ValidationMessages.InvalidVatFormat, CountryCode));
+        }
+
+        return ValidateChecksum(cleaned);
+    }
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => AustriaVatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
+        // For ATU12345678, we validate '1234567' with check digit '8'
+        string digitsStr = cleaned.Substring(1, 7);
+        int checkDigit = cleaned[8] - '0';
 
         int[] weights = { 1, 2, 1, 2, 1, 2, 1 };
-
         int sum = ChecksumHelper.CalculateLuhnStyleWeightedSum(digitsStr, weights);
 
         int total = (sum + 4);
@@ -61,29 +88,24 @@ public partial class AustriaVatValidator : IVatValidator
             : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var normalized = vat!.Trim().ToUpperInvariant();
-        if (!normalized.StartsWith(CountryCodePrefix))
-        {
-            if (normalized.StartsWith("U"))
-            {
-                normalized = CountryCodePrefix + normalized;
-            }
-        }
-
         return new VatDetails
         {
-            VatNumber = normalized,
-            CountryCode = CountryCodePrefix,
+            CountryCode = CountryCode,
+            VatNumber = cleaned.StartsWith("U") ? cleaned : "U" + cleaned,
             IsValid = true
         };
     }
+
+    /// <summary>
+    /// Static validation method for Austrian VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new AustriaVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for an Austrian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new AustriaVatValidator().Parse(vat);
 }

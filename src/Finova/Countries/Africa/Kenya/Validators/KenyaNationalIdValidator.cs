@@ -4,53 +4,29 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Africa.Kenya.Validators;
 
 /// <summary>
-/// Validates Kenyan National ID numbers.
+/// Validator for Kenyan National ID numbers.
+/// Format: 7 to 9 digits.
 /// </summary>
-public class KenyaNationalIdValidator : INationalIdValidator
+public partial class KenyaNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "KE";
+        public override string CountryCode => "KE";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
-    {
-        return ValidateStatic(input);
-    }
+    protected override bool IsValidLength(string sanitized) => sanitized.Length >= 7 && sanitized.Length <= 9;
 
     /// <inheritdoc/>
-    public string? Parse(string? input)
+    protected override bool ValidateFormat(string sanitized) => long.TryParse(sanitized, out _);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        if (Validate(input).IsValid)
-        {
-            return input?.Trim().Replace(" ", "");
-        }
-        return null;
+        // No public checksum algorithm available for KE currently.
+        return ValidationResult.Success();
     }
 
     /// <summary>
-    /// Validates a Kenyan National ID number.
+    /// Static validation method for Kenyan National ID.
     /// </summary>
-    /// <param name="idNumber">The ID number (7-9 digits).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? idNumber)
-    {
-        if (string.IsNullOrWhiteSpace(idNumber))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = idNumber.Trim().Replace(" ", "");
-
-        if (clean.Length < 7 || clean.Length > 9)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!clean.All(char.IsDigit))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        return ValidationResult.Success();
-    }
+    public static ValidationResult ValidateStatic(string? idNumber) => new KenyaNationalIdValidator().Validate(idNumber);
 }

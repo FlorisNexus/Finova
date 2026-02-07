@@ -35,5 +35,5 @@ public class KuwaitIbanValidatorTests
     [Theory]
     [InlineData("KW81CBKU0000000000001234560101")]
     public void ValidateKuwaitIban_WithValidIbans_ReturnsTrue(string iban)
-        => KuwaitIbanValidator.ValidateKuwaitIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

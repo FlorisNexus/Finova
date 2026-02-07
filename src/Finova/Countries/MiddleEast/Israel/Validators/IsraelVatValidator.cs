@@ -5,72 +5,90 @@ using Finova.Core.Vat;
 namespace Finova.Countries.MiddleEast.Israel.Validators;
 
 /// <summary>
-/// Validates Israeli VAT Registration Number (מספר עוסק מורשה).
-/// Format: 9 digits with Luhn checksum.
+/// Validator for Israeli VAT Registration Number (Authorized Dealer Number).
+/// Format: 9 digits.
 /// </summary>
-public partial class IsraelVatValidator : IVatValidator
+public partial class IsraelVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "IL";
 
-    [GeneratedRegex(@"^\d{9}$", RegexOptions.Compiled)]
-    private static partial Regex VatPattern();
+    [GeneratedRegex(@"^\d{9}$")]
+    private static partial Regex VatRegex();
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates an Israeli VAT Registration Number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The VAT number (9 digits).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new IsraelVatValidator().ValidateInternal(input);
+
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "");
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
 
         // Remove IL prefix if present
-        if (clean.StartsWith("IL", StringComparison.OrdinalIgnoreCase))
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            clean = clean[2..];
+            cleaned = cleaned[2..];
         }
 
-        // Pad with leading zeros if necessary (some older numbers have less digits)
-        if (clean.Length < 9 && clean.Length >= 5)
+        // Pad with leading zeros if necessary
+        if (cleaned.Length < 9 && cleaned.Length >= 5)
         {
-            clean = clean.PadLeft(9, '0');
+            cleaned = cleaned.PadLeft(9, '0');
         }
 
-        if (!VatPattern().IsMatch(clean))
+        if (!IsValidLength(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIsraelVatFormat);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                string.Format(ValidationMessages.InvalidLength, CountryCode));
         }
 
-        // Validate using Luhn algorithm variant
-        if (!ValidateChecksum(clean))
+        if (!ValidateFormat(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidIsraelVatChecksum);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat,
+                string.Format(ValidationMessages.InvalidVatFormat, CountryCode));
         }
 
-        return ValidationResult.Success();
+        return ValidateChecksum(cleaned);
     }
 
-    private static bool ValidateChecksum(string number)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
+    {
+        return new VatDetails
+        {
+            CountryCode = CountryCode,
+            VatNumber = cleaned,
+            IsValid = true,
+            IdentifierKind = "Authorized Dealer Number",
+            IsEuVat = false,
+            Notes = "מספר עוסק מורשה (Authorized Dealer Number)"
+        };
+    }
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
         // Israeli ID/VAT uses a modified Luhn algorithm
         int sum = 0;
         for (int i = 0; i < 9; i++)
         {
-            int digit = number[i] - '0';
+            int digit = cleaned[i] - '0';
             int weight = (i % 2 == 0) ? 1 : 2;
             int product = digit * weight;
 
@@ -82,40 +100,18 @@ public partial class IsraelVatValidator : IVatValidator
             sum += product;
         }
 
-        return sum % 10 == 0;
+        return sum % 10 == 0
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidIsraelVatChecksum);
     }
 
     /// <summary>
-    /// Gets details of a validated Israeli VAT number.
+    /// Static validation method for Israeli VAT numbers.
     /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
+    public static ValidationResult ValidateVat(string? vat) => new IsraelVatValidator().ValidateInternal(vat);
 
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "");
-
-        if (clean.StartsWith("IL", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        if (clean.Length < 9)
-        {
-            clean = clean.PadLeft(9, '0');
-        }
-
-        return new VatDetails
-        {
-            VatNumber = clean,
-            CountryCode = CountryCodePrefix,
-            IsValid = true,
-            IdentifierKind = "Authorized Dealer Number",
-            IsEuVat = false,
-            IsViesEligible = false,
-            Notes = "Israeli VAT Registration Number (מספר עוסק מורשה)"
-        };
-    }
+    /// <summary>
+    /// Gets details for an Israeli VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new IsraelVatValidator().Parse(vat);
 }
