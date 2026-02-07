@@ -6,6 +6,53 @@ namespace Finova.Extensions.FluentValidation;
 public static class BankValidators
 {
     /// <summary>
+    /// Validates that the string is a valid US ABA Routing Number.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidABARoutingNumber<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidBankRoutingNumber("US");
+    }
+
+    /// <summary>
+    /// Validates that the string is a valid US ACH Routing Number.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidAchRoutingNumber<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidBankRoutingNumber("US");
+    }
+
+    /// <summary>
+    /// Validates that the string is a valid Canadian Transit Number (Routing Number).
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidCanadianTransitNumber<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidBankRoutingNumber("CA");
+    }
+
+    /// <summary>
+    /// Validates that the string is a valid Australian BSB Number.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidAustralianBsb<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidBankRoutingNumber("AU");
+    }
+
+    /// <summary>
+    /// Validates that the string is a valid Singapore Bank/Branch Code.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidSingaporeBankCode<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidBankRoutingNumber("SG");
+    }
+
+    /// <summary>
+    /// Validates that the string is a valid Japanese Zengin Code.
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidJapanZenginCode<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidBankRoutingNumber("JP");
+    }
+    /// <summary>
     /// Validates that the string is a valid Bank Routing Number for the specified country.
     /// </summary>
     /// <param name="countryCode">The 2-letter ISO country code (e.g., "US", "CA").</param>

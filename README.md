@@ -303,21 +303,31 @@ public class PaymentRequestValidator : AbstractValidator<PaymentRequest>
 {
     public PaymentRequestValidator()
     {
-        RuleFor(x => x.Iban)
-            .IsValidIban()
-            .WithMessage("Please provide a valid IBAN");
+        // 🏦 Banking
+        RuleFor(x => x.Iban).MustBeValidIban();
+        RuleFor(x => x.Bic).MustBeValidBic();
 
-        RuleFor(x => x.VatNumber)
-            .IsValidVat()
-            .WithMessage("Invalid VAT number format");
+        // 🇺🇸🇨🇦🇦🇺🇸🇬🇯🇵 Routing Numbers (Aliases)
+        RuleFor(x => x.UsRoutingNumber).MustBeValidABARoutingNumber();       // US ABA
+        RuleFor(x => x.CaTransitNumber).MustBeValidCanadianTransitNumber(); // Canada
+        RuleFor(x => x.AuBsb).MustBeValidAustralianBsb();                   // Australia BSB
+        RuleFor(x => x.SgBankCode).MustBeValidSingaporeBankCode();          // Singapore
+        RuleFor(x => x.JpZengin).MustBeValidJapanZenginCode();              // Japan
 
-        RuleFor(x => x.CardNumber)
-            .IsValidPaymentCard()
-            .WithMessage("Invalid credit card number");
+        // 💳 Payment Cards
+        RuleFor(x => x.CardNumber).MustBeValidPaymentCard();
+        RuleFor(x => x.VisaNumber).MustBeValidPaymentCardForBrand(PaymentCardBrand.Visa);
 
-        RuleFor(x => x.NationalId)
-            .IsValidNationalId("BE")
-            .WithMessage("Invalid Belgian national ID");
+        // 🏢 Enterprise & Tax IDs (Aliases)
+        RuleFor(x => x.Siret).MustBeValidSiret();                           // France SIRET
+        RuleFor(x => x.Siren).MustBeValidSiren();                           // France SIREN
+        RuleFor(x => x.Kbo).MustBeValidKbo();                               // Belgium KBO/BCE
+        RuleFor(x => x.VatNumber).MustBeValidVat();                         // EU VAT
+
+        // 📝 Payment References
+        RuleFor(x => x.Communication).MustBeValidIsoRf();                   // ISO 11649 RF
+        RuleFor(x => x.Ogm).MustBeValidOgm();                               // Belgian OGM
+        RuleFor(x => x.QrRef).MustBeValidSwissQrReference();                // Swiss QR
     }
 }
 ```

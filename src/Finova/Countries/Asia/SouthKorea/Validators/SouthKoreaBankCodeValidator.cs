@@ -14,7 +14,14 @@ public class SouthKoreaBankCodeValidator : IBankRoutingValidator, IBankRoutingPa
     public string CountryCode => "KR";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
+    public ValidationResult Validate(string? input) => ValidateStatic(input);
+
+    /// <summary>
+    /// Validates the South Korean Bank Code.
+    /// </summary>
+    /// <param name="input">The bank code to validate.</param>
+    /// <returns>A ValidationResult.</returns>
+    public static ValidationResult ValidateStatic(string? input)
     {
         if (string.IsNullOrWhiteSpace(input))
         {

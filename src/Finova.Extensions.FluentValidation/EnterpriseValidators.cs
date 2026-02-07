@@ -6,6 +6,29 @@ namespace Finova.Extensions.FluentValidation;
 public static class EnterpriseValidators
 {
     /// <summary>
+    /// Validates that the string is a valid French SIRET Number (14 digits).
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidSiret<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidEnterpriseNumber(Finova.Core.Enterprise.EnterpriseNumberType.FranceSiret);
+    }
+
+    /// <summary>
+    /// Validates that the string is a valid French SIREN Number (9 digits).
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidSiren<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidEnterpriseNumber(Finova.Core.Enterprise.EnterpriseNumberType.FranceSiren);
+    }
+
+    /// <summary>
+    /// Validates that the string is a valid Belgian Enterprise Number (KBO/BCE).
+    /// </summary>
+    public static IRuleBuilderOptions<T, string?> MustBeValidKbo<T>(this IRuleBuilder<T, string?> ruleBuilder)
+    {
+        return ruleBuilder.MustBeValidEnterpriseNumber(Finova.Core.Enterprise.EnterpriseNumberType.BelgiumEnterpriseNumber);
+    }
+    /// <summary>
     /// Validates that the string is a valid Enterprise Number for the specified country.
     /// </summary>
     /// <param name="countryCode">The 2-letter ISO country code (e.g., "BE", "FR").</param>
