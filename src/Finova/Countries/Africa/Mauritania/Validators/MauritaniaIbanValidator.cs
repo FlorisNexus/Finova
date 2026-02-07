@@ -10,44 +10,17 @@ namespace Finova.Countries.Africa.Mauritania.Validators;
 /// Length: 27 characters
 /// Example: MR1300020001010000123456753
 /// </summary>
-public class MauritaniaIbanValidator : IIbanValidator
+public class MauritaniaIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "MR";
+    /// <inheritdoc/>
+    public override string CountryCode => "MR";
 
-    private const int MauritaniaIbanLength = 27;
-    private const string MauritaniaCountryCode = "MR";
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 27;
 
-    public ValidationResult Validate(string? iban) => ValidateMauritaniaIban(iban);
-
-    public static ValidationResult ValidateMauritaniaIban([NotNullWhen(true)] string? iban)
-    {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != MauritaniaIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
-                string.Format(ValidationMessages.InvalidLengthExpectedXGotY, MauritaniaIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(MauritaniaCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        // BBAN (23 digits)
-        string bban = normalized.Substring(4);
-        if (!bban.All(char.IsDigit))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        return IbanHelper.IsValidIban(normalized)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
+        => bban.All(char.IsDigit)
             ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-    }
+            : ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
 }

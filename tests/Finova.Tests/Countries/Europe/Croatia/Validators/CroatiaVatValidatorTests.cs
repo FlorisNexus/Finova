@@ -11,7 +11,7 @@ public class CroatiaVatValidatorTests
     [InlineData("94577403194")] // Without prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = CroatiaVatValidator.Validate(vat);
+        var result = CroatiaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -21,7 +21,7 @@ public class CroatiaVatValidatorTests
     [InlineData("")]
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = CroatiaVatValidator.Validate(vat);
+        var result = CroatiaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

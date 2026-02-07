@@ -35,5 +35,5 @@ public class JordanIbanValidatorTests
     [Theory]
     [InlineData("JO94CBJO0010000000000131000302")]
     public void ValidateJordanIban_WithValidIbans_ReturnsTrue(string iban)
-        => JordanIbanValidator.ValidateJordanIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

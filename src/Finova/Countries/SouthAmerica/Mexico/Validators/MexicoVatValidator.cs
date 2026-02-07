@@ -4,70 +4,41 @@ using Finova.Core.Vat;
 namespace Finova.Countries.SouthAmerica.Mexico.Validators;
 
 /// <summary>
-/// Validates Mexican VAT identifier (RFC - Registro Federal de Contribuyentes).
-/// Mexico uses RFC for both income tax and IVA (Impuesto al Valor Agregado) purposes.
-/// Format: 12 characters for companies, 13 characters for individuals.
+/// Validator for Mexican VAT identifier (RFC).
+/// Format: 12 or 13 characters.
 /// </summary>
-public class MexicoVatValidator : IVatValidator
+public partial class MexicoVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "MX";
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a Mexican VAT/RFC number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The RFC number (12-13 characters).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new MexicoVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 12 || cleaned.Length == 13;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by RFC validator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "");
-
-        // Remove MX prefix if present
-        if (clean.StartsWith("MX", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        // Use the existing RFC validator
-        return MexicoRfcValidator.ValidateStatic(clean);
+        return MexicoRfcValidator.ValidateStatic(cleaned);
     }
 
-    /// <summary>
-    /// Gets details of a validated Mexican VAT/RFC number.
-    /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "").ToUpperInvariant();
-
-        // Remove MX prefix if present
-        if (clean.StartsWith("MX", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        var entityType = clean.Length == 12 ? "Company" : "Individual";
+        var entityType = cleaned.Length == 12 ? "Company" : "Individual";
 
         return new VatDetails
         {
-            VatNumber = clean,
+            VatNumber = cleaned,
             CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "RFC",
@@ -76,4 +47,14 @@ public class MexicoVatValidator : IVatValidator
             Notes = $"Mexican tax identifier (RFC) - {entityType}"
         };
     }
+
+    /// <summary>
+    /// Static validation method for Mexican VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new MexicoVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for a Mexican VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new MexicoVatValidator().Parse(vat);
 }

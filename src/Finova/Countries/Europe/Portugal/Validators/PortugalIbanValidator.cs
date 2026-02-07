@@ -4,44 +4,20 @@ using Finova.Core.Iban;
 
 namespace Finova.Countries.Europe.Portugal.Validators;
 
-public class PortugalIbanValidator : IIbanValidator
+/// <summary>
+/// Validator for Portuguese IBANs.
+/// </summary>
+public class PortugalIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "PT";
-    private const int PortugalIbanLength = 25;
+    /// <inheritdoc/>
+    public override string CountryCode => "PT";
 
-    public ValidationResult Validate(string? iban) => ValidatePortugalIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 25;
 
-    public static ValidationResult ValidatePortugalIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != PortugalIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, PortugalIbanLength, normalized.Length));
-        }
-
-
-        if (!normalized.StartsWith("PT", StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, string.Format(ValidationMessages.InvalidCountryCodeExpected, "PT"));
-        }
-
-        // Extract the parts relevant to NIB (Positions 4 to 25)
-        // BBAN is 21 digits
-        string bban = normalized.Substring(4, 21);
-
-        var bbanResult = PortugalBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return PortugalBbanValidator.Validate(bban);
     }
 }

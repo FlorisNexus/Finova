@@ -1,78 +1,57 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Sweden.Validators;
 
-public partial class SwedenVatValidator : IVatValidator, ITaxIdValidator
+/// <summary>
+/// Validator for Swedish VAT numbers (Momsnummer).
+/// Format: 12 digits.
+/// </summary>
+public partial class SwedenVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{12}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "SE";
 
-    public string CountryCode => VatPrefix;
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new SwedenVatValidator().Validate(input);
 
-    public ValidationResult Validate(string? number) => ValidateVat(number);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 12;
 
-    string? IValidator<string>.Parse(string? instance) => Normalize(instance);
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
 
-    public static ValidationResult ValidateVat(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidSwedenVatFormat);
-        }
-
         // Checksum Validation (Luhn on first 10 digits)
         string numberPart = cleaned[..10];
-        if (!ChecksumHelper.ValidateLuhn(numberPart))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidSwedenVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return ChecksumHelper.ValidateLuhn(numberPart)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidSwedenVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        var result = ValidateVat(vat);
-        if (!result.IsValid)
-        {
-            return null;
-        }
+    /// <summary>
+    /// Static validation method for Swedish VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new SwedenVatValidator().Validate(vat);
 
-        var cleaned = VatSanitizer.Sanitize(vat)!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
+    /// <summary>
+    /// Gets details for a Swedish VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new SwedenVatValidator().Parse(vat);
 
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
-
+    /// <summary>
+    /// Normalizes a Swedish VAT number.
+    /// </summary>
     public static string? Normalize(string? number)
     {
         if (string.IsNullOrWhiteSpace(number))
@@ -80,7 +59,11 @@ public partial class SwedenVatValidator : IVatValidator, ITaxIdValidator
             return null;
         }
 
-        var cleaned = number.ToUpperInvariant().Replace(VatPrefix, "").Replace(" ", "").Replace("-", "");
-        return VatRegex().IsMatch(cleaned) ? cleaned : null;
+        var sanitized = VatSanitizer.Sanitize(number)!;
+        if (sanitized.StartsWith(VatPrefix))
+        {
+            return sanitized[2..];
+        }
+        return sanitized;
     }
 }

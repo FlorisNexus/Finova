@@ -35,5 +35,5 @@ public class MauritaniaIbanValidatorTests
     [Theory]
     [InlineData("MR1300020001010000123456753")]
     public void ValidateMauritaniaIban_WithValidIbans_ReturnsTrue(string iban)
-        => MauritaniaIbanValidator.ValidateMauritaniaIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

@@ -4,60 +4,30 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Europe.Greece.Validators;
 
 /// <summary>
-/// Validates the Greek Social Security Number (AMKA).
+/// Validator for Greek Social Security Number (AMKA).
+/// Format: 11 digits.
 /// </summary>
-public class GreeceNationalIdValidator : INationalIdValidator
+public partial class GreeceNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "GR";
+        public override string CountryCode => "GR";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 11;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => long.TryParse(sanitized, out _);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(input);
+        return ChecksumHelper.ValidateLuhn(sanitized)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
     /// <summary>
-    /// Validates the Greek Social Security Number (AMKA) (Static).
+    /// Static validation method for Greek National ID.
     /// </summary>
-    /// <param name="input">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string? sanitized = InputSanitizer.Sanitize(input);
-        if (string.IsNullOrEmpty(sanitized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        if (sanitized.Length != 11)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        // Luhn Algorithm
-        if (!ChecksumHelper.ValidateLuhn(sanitized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
-    }
-
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+        public static ValidationResult ValidateStatic(string? input) => new GreeceNationalIdValidator().Validate(input);
 }

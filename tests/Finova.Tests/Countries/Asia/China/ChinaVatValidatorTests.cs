@@ -11,7 +11,7 @@ public class ChinaVatValidatorTests
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
         // Note: This tests format validation; actual USCC validation uses complex Mod 31
-        var result = ChinaVatValidator.Validate(vat);
+        var result = ChinaVatValidator.ValidateStatic(vat);
         // Result depends on USCC checksum (Mod 31)
         result.Should().NotBeNull();
     }
@@ -20,7 +20,7 @@ public class ChinaVatValidatorTests
     public void Validate_WithFormatTest_ReturnsResult()
     {
         // This is a format-only validation test
-        var result = ChinaVatValidator.Validate("91110000100000003H");
+        var result = ChinaVatValidator.ValidateStatic("91110000100000003H");
         result.Should().NotBeNull();
     }
 
@@ -32,7 +32,7 @@ public class ChinaVatValidatorTests
     [InlineData("91110000MA001234X56")] // Too long (19 chars)
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = ChinaVatValidator.Validate(vat);
+        var result = ChinaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

@@ -4,39 +4,34 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Lithuania.Validators;
 
-public partial class LithuaniaVatValidator : IVatValidator
+/// <summary>
+/// Validator for Lithuanian VAT numbers (PVM mokėtojo kodas).
+/// Format: 9 or 12 digits.
+/// </summary>
+public partial class LithuaniaVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^(\d{9}|\d{12})$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "LT";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new LithuaniaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9 || cleaned.Length == 12;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidLithuaniaVatFormat);
-        }
-
         if (cleaned.Length == 9)
         {
             int[] weights1 = { 1, 2, 3, 4, 5, 6, 7, 8 };
@@ -87,26 +82,13 @@ public partial class LithuaniaVatValidator : IVatValidator
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Lithuanian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new LithuaniaVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Lithuanian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new LithuaniaVatValidator().Parse(vat);
 }

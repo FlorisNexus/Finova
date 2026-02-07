@@ -4,60 +4,32 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Europe.Germany.Validators;
 
 /// <summary>
-/// Validates the German Identity Card Number (Personalausweisnummer).
+/// Validator for German Identity Card Number (Personalausweisnummer).
+/// Format: 9 alphanumeric characters.
 /// </summary>
-public class GermanyNationalIdValidator : INationalIdValidator
+public partial class GermanyNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "DE";
+        public override string CountryCode => "DE";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input) => ValidateStatic(input);
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 9;
 
-    /// <summary>
-    /// Validates the German Identity Card Number format and checksum.
-    /// Format: 9 alphanumeric characters.
-    /// Checksum: The last character is a check digit calculated from the first 8 characters using weights 7, 3, 1.
-    /// </summary>
-    /// <param name="input">The Identity Card Number to validate.</param>
-    /// <returns>The validation result.</returns>
-    public static ValidationResult ValidateStatic(string? input)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string? sanitized = InputSanitizer.Sanitize(input);
-        if (string.IsNullOrEmpty(sanitized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        if (sanitized.Length != 9)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        // Validate format: Alphanumeric
         foreach (char c in sanitized)
         {
             if (!char.IsLetterOrDigit(c))
             {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
+                return false;
             }
         }
-
-        // Validate Checksum
-        if (!ValidateChecksum(sanitized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return true;
     }
 
-    private static bool ValidateChecksum(string input)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
         // Weights: 7, 3, 1 repeating
         int[] weights = { 7, 3, 1 };
@@ -66,15 +38,17 @@ public class GermanyNationalIdValidator : INationalIdValidator
         // Calculate sum for the first 8 characters
         for (int i = 0; i < 8; i++)
         {
-            int value = GetCharValue(input[i]);
+            int value = GetCharValue(sanitized[i]);
             int weight = weights[i % 3];
             sum += value * weight;
         }
 
         int calculatedCheckDigit = sum % 10;
-        int actualCheckDigit = GetCharValue(input[8]);
+        int actualCheckDigit = GetCharValue(sanitized[8]);
 
-        return calculatedCheckDigit == actualCheckDigit;
+        return calculatedCheckDigit == actualCheckDigit
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
     private static int GetCharValue(char c)
@@ -87,12 +61,11 @@ public class GermanyNationalIdValidator : INationalIdValidator
         {
             return char.ToUpperInvariant(c) - 'A' + 10;
         }
-        return 0; // Should not happen due to prior validation
+        return 0;
     }
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+
+    /// <summary>
+    /// Static validation method for German National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? input) => new GermanyNationalIdValidator().Validate(input);
 }

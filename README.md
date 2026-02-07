@@ -65,7 +65,7 @@ dotnet add package Finova.Extensions.FluentValidation
 | **ISO RF** | 🌍 International | `RF18 5390 0754 7034` |
 | **Finnish Viitenumero** | 🇫🇮 Finland | `12345 67890 00123` |
 | **Norwegian KID** | 🇳🇴 Norway | `2345678901234` |
-| **Swedish OCR** | 🇸🇪 Sweden | `1234567890128` |
+| **Swedish OCR** | 🇸🇪 Sweden | `1234567890136` |
 | **Swiss QR-Reference** | 🇨🇭 Switzerland | `210000000003139471430009017` |
 | **Slovenian SI12** | 🇸🇮 Slovenia | `SI12 1234 5678 901` |
 | **Danish FIK** | 🇩🇰 Denmark | `+71<12345678901234+` |

@@ -6,9 +6,9 @@ namespace Finova.Countries.Europe.BosniaAndHerzegovina.Validators;
 
 /// <summary>
 /// Validator for Bosnia and Herzegovina VAT numbers.
-/// Format: BA + 13 digits.
+/// Format: 13 digits.
 /// </summary>
-public partial class BosniaAndHerzegovinaVatValidator : IVatValidator
+public partial class BosniaAndHerzegovinaVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{13}$")]
     private static partial Regex VatRegex();
@@ -18,33 +18,23 @@ public partial class BosniaAndHerzegovinaVatValidator : IVatValidator
     // Weights repeat: 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2
     private static readonly int[] Weights = { 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new BosniaAndHerzegovinaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 13;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidBosniaAndHerzegovinaVatFormat);
-        }
-
-        // Implementation of Modulo 11
         // Last digit is check digit
         int checkDigit = cleaned[12] - '0';
         string dataPart = cleaned.Substring(0, 12);
@@ -74,26 +64,17 @@ public partial class BosniaAndHerzegovinaVatValidator : IVatValidator
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Bosnia and Herzegovina VAT numbers.
+    /// </summary>
+    /// <param name="vat">The VAT number to validate.</param>
+    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
+        public static ValidationResult ValidateVat(string? vat) => new BosniaAndHerzegovinaVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Bosnia and Herzegovina VAT number.
+    /// </summary>
+    /// <param name="vat">The VAT number to parse.</param>
+    /// <returns>A <see cref="VatDetails"/> object or null if invalid.</returns>
+    public static VatDetails? GetVatDetails(string? vat) => new BosniaAndHerzegovinaVatValidator().Parse(vat);
 }

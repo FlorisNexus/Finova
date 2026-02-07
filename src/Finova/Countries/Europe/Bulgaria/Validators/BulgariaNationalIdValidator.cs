@@ -5,82 +5,60 @@ namespace Finova.Countries.Europe.Bulgaria.Validators;
 
 /// <summary>
 /// Validator for Bulgaria Uniform Civil Number (EGN).
+/// Format: 10 digits.
 /// </summary>
-public class BulgariaNationalIdValidator : INationalIdValidator
+public partial class BulgariaNationalIdValidator : NationalIdValidatorBase
 {
-    /// <inheritdoc/>
-    public string CountryCode => "BG";
-
     private static readonly int[] Weights = { 2, 4, 8, 5, 10, 9, 7, 3, 6 };
 
-    /// <summary>
-    /// Validates the Bulgarian EGN.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+        public override string CountryCode => "BG";
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 10;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Bulgarian EGN (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 10)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
         if (!long.TryParse(sanitized, out _))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
+            return false;
         }
 
         // Validate Date
-        int year = int.Parse(sanitized.Substring(0, 2));
-        int month = int.Parse(sanitized.Substring(2, 2));
-        int day = int.Parse(sanitized.Substring(4, 2));
+        int yearPart = int.Parse(sanitized.Substring(0, 2));
+        int monthPart = int.Parse(sanitized.Substring(2, 2));
+        int dayPart = int.Parse(sanitized.Substring(4, 2));
 
         int fullYear = 0;
         int realMonth = 0;
 
-        if (month >= 1 && month <= 12)
+        if (monthPart >= 1 && monthPart <= 12)
         {
-            fullYear = 1900 + year;
-            realMonth = month;
+            fullYear = 1900 + yearPart;
+            realMonth = monthPart;
         }
-        else if (month >= 21 && month <= 32)
+        else if (monthPart >= 21 && monthPart <= 32)
         {
-            fullYear = 1800 + year;
-            realMonth = month - 20;
+            fullYear = 1800 + yearPart;
+            realMonth = monthPart - 20;
         }
-        else if (month >= 41 && month <= 52)
+        else if (monthPart >= 41 && monthPart <= 52)
         {
-            fullYear = 2000 + year;
-            realMonth = month - 40;
+            fullYear = 2000 + yearPart;
+            realMonth = monthPart - 40;
         }
         else
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
+            return false;
         }
 
-        if (!DateHelper.IsValidDate(fullYear, realMonth, day))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
+        return DateHelper.IsValidDate(fullYear, realMonth, dayPart);
+    }
 
-        // Calculate Checksum
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
+    {
         int sum = 0;
         for (int i = 0; i < 9; i++)
         {
@@ -90,18 +68,13 @@ public class BulgariaNationalIdValidator : INationalIdValidator
         int remainder = sum % 11;
         int checkDigit = remainder == 10 ? 0 : remainder;
 
-        if (checkDigit != (sanitized[9] - '0'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == (sanitized[9] - '0')
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Bulgarian National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new BulgariaNationalIdValidator().Validate(nationalId);
 }

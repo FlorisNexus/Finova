@@ -9,7 +9,7 @@ public class CzechRepublicVatValidatorTests
     [InlineData("CZ25123891")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = CzechRepublicVatValidator.Validate(vat);
+        var result = CzechRepublicVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class CzechRepublicVatValidatorTests
     [InlineData("XX12345678")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = CzechRepublicVatValidator.Validate(vat);
+        var result = CzechRepublicVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

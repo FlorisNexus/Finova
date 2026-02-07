@@ -4,39 +4,34 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Poland.Validators;
 
-public partial class PolandVatValidator : IVatValidator
+/// <summary>
+/// Validator for Polish VAT numbers (NIP).
+/// Format: 10 digits.
+/// </summary>
+public partial class PolandVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{10}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "PL";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new PolandVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 10;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, string.Format(ValidationMessages.InvalidVatFormat, "Poland"));
-        }
-
         int[] weights = { 6, 5, 7, 2, 3, 4, 5, 6, 7 };
 
         int sum = ChecksumHelper.CalculateWeightedSum(cleaned.Substring(0, 9), weights);
@@ -48,34 +43,18 @@ public partial class PolandVatValidator : IVatValidator
         }
 
         int checkDigit = cleaned[9] - '0';
-        if (remainder != checkDigit)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Poland"));
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == remainder
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Poland"));
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Polish VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new PolandVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Polish VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new PolandVatValidator().Parse(vat);
 }

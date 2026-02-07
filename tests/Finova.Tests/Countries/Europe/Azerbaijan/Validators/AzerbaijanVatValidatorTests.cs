@@ -9,7 +9,7 @@ public class AzerbaijanVatValidatorTests
     [InlineData("AZ1234567890")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = AzerbaijanVatValidator.Validate(vat);
+        var result = AzerbaijanVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class AzerbaijanVatValidatorTests
     [InlineData("XX1234567890")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = AzerbaijanVatValidator.Validate(vat);
+        var result = AzerbaijanVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

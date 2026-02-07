@@ -10,7 +10,7 @@ public class UaeVatValidatorTests
     [InlineData("100000000000001")] // Valid TRN format - digit sum 2 -> check = 8
     public void Validate_WithValidFormat_PassesFormatCheck(string vat)
     {
-        var result = UaeVatValidator.Validate(vat);
+        var result = UaeVatValidator.ValidateStatic(vat);
         // Format check passes, checksum might fail depending on algorithm
         result.Should().NotBeNull();
     }
@@ -19,7 +19,7 @@ public class UaeVatValidatorTests
     public void Validate_WithCorrectFormat_ReturnsResult()
     {
         // Test that validation returns a result for correct format
-        var result = UaeVatValidator.Validate("100111111111118");
+        var result = UaeVatValidator.ValidateStatic("100111111111118");
         result.Should().NotBeNull();
     }
 
@@ -33,7 +33,7 @@ public class UaeVatValidatorTests
     [InlineData("101234567890123")] // Doesn't start with 100
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = UaeVatValidator.Validate(vat);
+        var result = UaeVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

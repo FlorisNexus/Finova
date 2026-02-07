@@ -5,98 +5,45 @@ using Finova.Core.Vat;
 namespace Finova.Countries.Africa.SouthAfrica.Validators;
 
 /// <summary>
-/// Validates South African Value Added Tax (VAT) registration number.
-/// Format: 10 digits, typically formatted as 4XXXXXXXXX
-/// First digit is usually 4 for VAT vendors.
+/// Validator for South African VAT numbers.
+/// Format: 10 digits starting with 4.
 /// </summary>
-public partial class SouthAfricaVatValidator : IVatValidator
+public partial class SouthAfricaVatValidator : VatValidatorBase
 {
-    private const string CountryCodePrefix = "ZA";
-
     [GeneratedRegex(@"^4\d{9}$")]
     private static partial Regex VatRegex();
 
-    /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
+    private const string CountryCodePrefix = "ZA";
 
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Cleans and normalizes a VAT number by removing whitespace, hyphens, and the ZA prefix.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The VAT number to clean.</param>
-    /// <returns>The cleaned VAT number.</returns>
-    private static string CleanVatNumber(string vat)
-    {
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "");
+    public static ValidationResult ValidateStatic(string? input) => new SouthAfricaVatValidator().Validate(input);
 
-        // Remove ZA prefix if present
-        if (clean.StartsWith("ZA", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        return clean;
-    }
 
     /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 10;
 
     /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
 
-    /// <summary>
-    /// Validates a South African VAT number.
-    /// </summary>
-    /// <param name="vat">The VAT number string (10 digits starting with 4).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = CleanVatNumber(vat);
-
-        if (clean.Length != 10)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidSouthAfricaVatLength);
-        }
-
-        if (!VatRegex().IsMatch(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidSouthAfricaVatFormat);
-        }
-
-        // Validate using Luhn algorithm
-        if (!ChecksumHelper.ValidateLuhn(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return ChecksumHelper.ValidateLuhn(cleaned)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
     /// <summary>
-    /// Gets details of a validated South African VAT number.
+    /// Static validation method for South African VAT numbers.
     /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
+        public static ValidationResult ValidateVat(string? vat) => new SouthAfricaVatValidator().Validate(vat);
 
-        var clean = CleanVatNumber(vat!);
-
-        return new VatDetails
-        {
-            VatNumber = clean,
-            CountryCode = CountryCodePrefix,
-            IsValid = true,
-            IdentifierKind = "VAT",
-            IsEuVat = false,
-            IsViesEligible = false,
-            Notes = "South African Value Added Tax registration number"
-        };
-    }
+    /// <summary>
+    /// Gets details for a South African VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new SouthAfricaVatValidator().Parse(vat);
 }

@@ -4,44 +4,20 @@ using Finova.Core.Iban;
 
 namespace Finova.Countries.Europe.Norway.Validators;
 
-public class NorwayIbanValidator : IIbanValidator
+/// <summary>
+/// Validator for Norwegian IBANs.
+/// </summary>
+public class NorwayIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "NO";
-    private const int NorwayIbanLength = 15;
-    private const string NorwayCountryCode = "NO";
+    /// <inheritdoc/>
+    public override string CountryCode => "NO";
 
-    public ValidationResult Validate(string? iban) => ValidateNorwayIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 15;
 
-    public static ValidationResult ValidateNorwayIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != NorwayIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidIbanLength, NorwayIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(NorwayCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        // Internal Validation: Modulo 11 on BBAN (Last 11 digits)
-        // Indices 4 to 15 in IBAN
-        string bban = normalized.Substring(4, 11);
-        var bbanResult = NorwayBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return NorwayBbanValidator.Validate(bban);
     }
 }

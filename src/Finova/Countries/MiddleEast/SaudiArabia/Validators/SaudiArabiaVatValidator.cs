@@ -5,112 +5,45 @@ using Finova.Core.Vat;
 namespace Finova.Countries.MiddleEast.SaudiArabia.Validators;
 
 /// <summary>
-/// Validates Saudi Arabia VAT Registration Number.
-/// VAT was introduced in Saudi Arabia on January 1, 2018.
-/// Format: 3XXXXXXXXXXXXXX (15 digits starting with 3).
-/// The first digit (3) indicates Saudi Arabia in the GCC region.
+/// Validator for Saudi Arabian VAT Registration Number.
+/// Format: 15 digits starting with 3.
 /// </summary>
-public partial class SaudiArabiaVatValidator : IVatValidator
+public partial class SaudiArabiaVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "SA";
 
-    [GeneratedRegex(@"^3\d{14}$", RegexOptions.Compiled)]
-    private static partial Regex VatPattern();
+    [GeneratedRegex(@"^3\d{14}$")]
+    private static partial Regex VatRegex();
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a Saudi Arabia VAT Registration Number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The VAT number (15 digits starting with 3).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new SaudiArabiaVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 15;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "");
-
-        // Remove SA prefix if present
-        if (clean.StartsWith("SA", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        if (!VatPattern().IsMatch(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidSaudiArabiaVatFormat);
-        }
-
-        // The last digit is a check digit using Luhn algorithm
-        if (!ValidateLuhnChecksum(clean))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidSaudiArabiaVatChecksum);
-        }
-
-        return ValidationResult.Success();
-    }
-
-    private static bool ValidateLuhnChecksum(string number)
-    {
-        int sum = 0;
-        bool alternate = false;
-
-        for (int i = number.Length - 1; i >= 0; i--)
-        {
-            int digit = number[i] - '0';
-
-            if (alternate)
-            {
-                digit *= 2;
-                if (digit > 9)
-                {
-                    digit -= 9;
-                }
-            }
-
-            sum += digit;
-            alternate = !alternate;
-        }
-
-        return sum % 10 == 0;
+        return ChecksumHelper.ValidateLuhn(cleaned)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidSaudiArabiaVatChecksum);
     }
 
     /// <summary>
-    /// Gets details of a validated Saudi Arabia VAT number.
+    /// Static validation method for Saudi Arabian VAT numbers.
     /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
+        public static ValidationResult ValidateVat(string? vat) => new SaudiArabiaVatValidator().Validate(vat);
 
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "");
-
-        if (clean.StartsWith("SA", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        return new VatDetails
-        {
-            VatNumber = clean,
-            CountryCode = CountryCodePrefix,
-            IsValid = true,
-            IdentifierKind = "VAT Registration Number",
-            IsEuVat = false,
-            IsViesEligible = false,
-            Notes = "Saudi Arabia VAT Registration Number (رقم التسجيل الضريبي)"
-        };
-    }
+    /// <summary>
+    /// Gets details for a Saudi Arabian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new SaudiArabiaVatValidator().Parse(vat);
 }

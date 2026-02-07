@@ -4,9 +4,12 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Switzerland.Validators;
 
-public partial class SwitzerlandVatValidator : IVatValidator
+/// <summary>
+/// Validator for Swiss VAT numbers (UID/MWST).
+/// Format: CHE-123.456.789 or 9 digits.
+/// </summary>
+public partial class SwitzerlandVatValidator : VatValidatorBase
 {
-    // CHE-123.456.789 or 123456789 (UID)
     [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex VatRegex();
 
@@ -15,41 +18,59 @@ public partial class SwitzerlandVatValidator : IVatValidator
 
     private static readonly int[] Weights = { 5, 4, 3, 2, 7, 6, 5, 4 };
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new SwitzerlandVatValidator().ValidateInternal(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var cleaned = vat.Trim().ToUpperInvariant()
-            .Replace(".", "")
-            .Replace("-", "")
-            .Replace(" ", "");
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
 
-        if (cleaned.StartsWith(VatPrefix))
+        // Handle Swiss prefixes: CHE, CH
+        if (cleaned.StartsWith(VatPrefix, StringComparison.OrdinalIgnoreCase))
         {
             cleaned = cleaned[3..];
         }
-        else if (cleaned.StartsWith(AltPrefix))
+        else if (cleaned.StartsWith(AltPrefix, StringComparison.OrdinalIgnoreCase))
         {
             cleaned = cleaned[2..];
         }
 
-        if (!VatRegex().IsMatch(cleaned))
+        if (!IsValidLength(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, string.Format(ValidationMessages.InvalidVatFormat, "Switzerland"));
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                string.Format(ValidationMessages.InvalidLength, CountryCode));
         }
 
-        // Checksum Validation (Mod 11)
+        if (!ValidateFormat(cleaned))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat,
+                string.Format(ValidationMessages.InvalidVatFormat, CountryCode));
+        }
+
+        return ValidateChecksum(cleaned);
+    }
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
         int sum = ChecksumHelper.CalculateWeightedSum(cleaned.Substring(0, 8), Weights);
         int remainder = sum % 11;
         int checkDigit = 11 - remainder;
@@ -65,42 +86,36 @@ public partial class SwitzerlandVatValidator : IVatValidator
         }
 
         int lastDigit = cleaned[8] - '0';
-        if (checkDigit != lastDigit)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Switzerland"));
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == lastDigit
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Switzerland"));
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (!Validate(vat).IsValid)
+        // Extract normalized Swiss number (remove CHE if present in the cleaned part)
+        var result = cleaned;
+        if (result.StartsWith(VatPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant()
-             .Replace(".", "")
-             .Replace("-", "")
-             .Replace(" ", "");
-
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[3..];
-        }
-        else if (cleaned.StartsWith(AltPrefix))
-        {
-            cleaned = cleaned[2..];
+            result = result[VatPrefix.Length..];
         }
 
         return new VatDetails
         {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
+            CountryCode = CountryCode,
+            VatNumber = result,
             IsValid = true
         };
     }
+
+    /// <summary>
+    /// Static validation method for Swiss VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new SwitzerlandVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for a Swiss VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new SwitzerlandVatValidator().Parse(vat);
 }

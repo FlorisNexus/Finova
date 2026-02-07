@@ -4,68 +4,40 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Germany.Validators;
 
-public partial class GermanyVatValidator : IVatValidator
+/// <summary>
+/// Validator for German VAT numbers.
+/// </summary>
+public partial class GermanyVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex VatRegex();
 
-    private const string VatPrefix = "DE";
+    /// <inheritdoc/>
+        public override string CountryCode => "DE";
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new GermanyVatValidator().Validate(input);
 
-    public string CountryCode => VatPrefix;
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9;
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidGermanyVatFormat);
-        }
-
-        // Checksum Validation (ISO 7064 Mod 11, 10)
-        if (!ChecksumHelper.ValidateISO7064Mod11_10(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return ChecksumHelper.ValidateISO7064Mod11_10(cleaned)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Static validation method for German VAT numbers.
+    /// </summary>
+    /// <param name="vat">The VAT number to validate.</param>
+    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
+        public static ValidationResult ValidateVat(string? vat) => new GermanyVatValidator().Validate(vat);
 }

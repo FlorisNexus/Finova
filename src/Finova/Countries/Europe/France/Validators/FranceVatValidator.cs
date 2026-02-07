@@ -4,55 +4,32 @@ using Finova.Countries.Europe.France.Models;
 
 namespace Finova.Countries.Europe.France.Validators;
 
-public class FranceVatValidator : IVatValidator
+/// <summary>
+/// Validator for French VAT numbers.
+/// </summary>
+public class FranceVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "FR";
 
-    public string CountryCode => CountryCodePrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new FranceVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 11;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => long.TryParse(cleaned, out _);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = vat.Trim().ToUpperInvariant();
-
-        if (!normalized.StartsWith(CountryCodePrefix))
-        {
-            if (normalized.Length == 11 && long.TryParse(normalized, out _))
-            {
-                // Proceed
-            }
-            else
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidFranceVatFormatPrefixOrDigits);
-            }
-        }
-        else
-        {
-            normalized = normalized[2..];
-        }
-
-        normalized = normalized.Replace(" ", "").Replace(".", "");
-
-        if (normalized.Length != 11)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, 11, normalized.Length));
-        }
-
-        if (!long.TryParse(normalized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.FranceVatDigitsAfterPrefix);
-        }
-
-        var keyStr = normalized.Substring(0, 2);
-        var sirenStr = normalized.Substring(2, 9);
+        var keyStr = cleaned.Substring(0, 2);
+        var sirenStr = cleaned.Substring(2, 9);
 
         if (!int.TryParse(keyStr, out int key))
         {
@@ -80,29 +57,30 @@ public class FranceVatValidator : IVatValidator
         return ValidationResult.Success();
     }
 
-    public static FranceVatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        var result = Validate(vat);
-        if (!result.IsValid)
-        {
-            return null;
-        }
-
-        var normalized = vat!.Trim().ToUpperInvariant();
-        if (normalized.StartsWith(CountryCodePrefix))
-        {
-            normalized = normalized[2..];
-        }
-        normalized = normalized.Replace(" ", "").Replace(".", "");
-
-        var siren = normalized.Substring(2, 9);
-
+        var siren = cleaned.Substring(2, 9);
         return new FranceVatDetails
         {
-            VatNumber = $"{CountryCodePrefix}{normalized}",
+            VatNumber = $"{CountryCodePrefix}{cleaned}",
             CountryCode = CountryCodePrefix,
             IsValid = true,
             Siren = siren
         };
+    }
+
+    /// <summary>
+    /// Static validation method for French VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new FranceVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for a French VAT number.
+    /// </summary>
+    public static FranceVatDetails? GetVatDetails(string? vat)
+    {
+        var validator = new FranceVatValidator();
+        return (FranceVatDetails?)validator.Parse(vat);
     }
 }

@@ -35,5 +35,5 @@ public class QatarIbanValidatorTests
     [Theory]
     [InlineData("QA58DOHB00001234567890ABCDEFG")]
     public void ValidateQatarIban_WithValidIbans_ReturnsTrue(string iban)
-        => QatarIbanValidator.ValidateQatarIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

@@ -12,7 +12,7 @@ public class GermanyVatValidatorTests
     [InlineData("DE811569869")] // Another valid example
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = GermanyVatValidator.Validate(vat);
+        var result = GermanyVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -22,7 +22,7 @@ public class GermanyVatValidatorTests
     [InlineData(" DE123456788 ")] // With whitespace
     public void Validate_WithFormattedVat_ReturnsSuccess(string vat)
     {
-        var result = GermanyVatValidator.Validate(vat);
+        var result = GermanyVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -37,7 +37,7 @@ public class GermanyVatValidatorTests
     [InlineData("XX123456788")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = GermanyVatValidator.Validate(vat);
+        var result = GermanyVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

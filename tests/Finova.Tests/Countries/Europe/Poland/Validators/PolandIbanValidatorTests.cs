@@ -80,7 +80,7 @@ public class PolandIbanValidatorTests
     public void ValidatePolandIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = PolandIbanValidator.ValidatePolandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -92,7 +92,7 @@ public class PolandIbanValidatorTests
     public void ValidatePolandIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = PolandIbanValidator.ValidatePolandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -109,7 +109,7 @@ public class PolandIbanValidatorTests
     public void ValidatePolandIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = PolandIbanValidator.ValidatePolandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();

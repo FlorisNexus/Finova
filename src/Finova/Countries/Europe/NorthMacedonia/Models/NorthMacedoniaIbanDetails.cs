@@ -5,12 +5,6 @@ namespace Finova.Countries.Europe.NorthMacedonia.Models;
 /// <summary>
 /// Represents the details of a North Macedonia IBAN.
 /// </summary>
-/// <summary>
-/// Represents the details of a North Macedonia IBAN.
-/// </summary>
-/// <param name="SifraBanka">The 3-digit bank code.</param>
-/// <param name="BrojSmetka">The 10-character account number.</param>
-/// <param name="KontrolenBroj">The 2-digit national check digits.</param>
 public record NorthMacedoniaIbanDetails : IbanDetails
 {
     /// <summary>

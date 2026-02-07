@@ -5,43 +5,20 @@ using Finova.Core.Iban;
 namespace Finova.Countries.Asia.Mongolia.Validators;
 
 /// <summary>
-/// Validator for Mongolia IBANs.
+/// Validator for Mongolian IBANs.
 /// Mongolia IBAN format: MN + 2 check digits + 16 digits BBAN.
-/// Length: 20 characters.
 /// </summary>
-public class MongoliaIbanValidator : IIbanValidator
+public class MongoliaIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "MN";
-    private const int IbanLength = 20;
-    private const string CountryCodeVal = "MN";
+    /// <inheritdoc/>
+    public override string CountryCode => "MN";
 
-    public ValidationResult Validate(string? iban) => ValidateIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 20;
 
-    public static ValidationResult ValidateIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != IbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, IbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(CountryCodeVal, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        var bbanResult = MongoliaBbanValidator.Validate(normalized.Substring(4));
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized) ? ValidationResult.Success() : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return MongoliaBbanValidator.Validate(bban);
     }
 }

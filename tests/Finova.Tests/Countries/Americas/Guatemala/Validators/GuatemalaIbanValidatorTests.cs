@@ -35,5 +35,5 @@ public class GuatemalaIbanValidatorTests
     [Theory]
     [InlineData("GT82TRAJ01020000001210029690")]
     public void ValidateGuatemalaIban_WithValidIbans_ReturnsTrue(string iban)
-        => GuatemalaIbanValidator.ValidateGuatemalaIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

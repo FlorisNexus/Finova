@@ -35,5 +35,5 @@ public class IsraelIbanValidatorTests
     [Theory]
     [InlineData("IL620108000000099999999")]
     public void ValidateIsraelIban_WithValidIbans_ReturnsTrue(string iban)
-        => IsraelIbanValidator.ValidateIsraelIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

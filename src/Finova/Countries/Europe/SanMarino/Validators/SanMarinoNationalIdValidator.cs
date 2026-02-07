@@ -5,55 +5,28 @@ namespace Finova.Countries.Europe.SanMarino.Validators;
 
 /// <summary>
 /// Validator for San Marino National Identification Number (SSI).
-/// Format: 5 digits (Social Security Number).
+/// Format: 5 digits.
 /// </summary>
-public class SanMarinoNationalIdValidator : INationalIdValidator
+public partial class SanMarinoNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "SM";
+        public override string CountryCode => "SM";
 
-    /// <summary>
-    /// Validates the San Marino SSI.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 5;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => long.TryParse(sanitized, out _);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the San Marino SSI (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        // SSI is typically 5 digits.
-        if (sanitized.Length != 5)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
+        // No public checksum algorithm available for SM.
         return ValidationResult.Success();
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for San Marino SSI.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new SanMarinoNationalIdValidator().Validate(nationalId);
 }

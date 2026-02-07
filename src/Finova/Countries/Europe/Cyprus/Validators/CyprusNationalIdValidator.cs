@@ -4,58 +4,29 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Europe.Cyprus.Validators;
 
 /// <summary>
-/// Validator for Cyprus National Identity Card Number.
+/// Validator for Cyprus National Identity Number.
+/// Format: 6 to 10 digits.
 /// </summary>
-public class CyprusNationalIdValidator : INationalIdValidator
+public partial class CyprusNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "CY";
+        public override string CountryCode => "CY";
 
-    /// <summary>
-    /// Validates the Cyprus National ID.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length >= 6 && sanitized.Length <= 10;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => long.TryParse(sanitized, out _);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Cyprus National ID (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        // Cyprus ID numbers are typically 6 to 8 digits.
-        // Allowing 6-10 to be safe.
-        if (sanitized.Length < 6 || sanitized.Length > 10)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        // No known public checksum algorithm for the ID number itself.
-
+        // No known public checksum algorithm available for the ID number itself.
         return ValidationResult.Success();
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Cypriot National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new CyprusNationalIdValidator().Validate(nationalId);
 }

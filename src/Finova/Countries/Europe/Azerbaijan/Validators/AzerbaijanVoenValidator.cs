@@ -37,7 +37,7 @@ public class AzerbaijanVoenValidator : ITaxIdValidator
             return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidAzerbaijanVoenFormatSameDigits);
         }
 
-        return AzerbaijanVatValidator.Validate(normalized);
+        return AzerbaijanVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

@@ -7,58 +7,30 @@ namespace Finova.Countries.Europe.Turkey.Validators;
 /// Validator for Turkey National Identification Number (T.C. Kimlik No).
 /// Format: 11 digits.
 /// </summary>
-public class TurkeyNationalIdValidator : INationalIdValidator
+public partial class TurkeyNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "TR";
+        public override string CountryCode => "TR";
 
-    /// <summary>
-    /// Validates the Turkey T.C. Kimlik No.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 11;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateStatic(nationalId);
+        return sanitized[0] != '0' && long.TryParse(sanitized, out _);
     }
 
-    /// <summary>
-    /// Validates the Turkey T.C. Kimlik No (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 11)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        if (sanitized[0] == '0')
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
         int[] digits = new int[11];
         for (int i = 0; i < 11; i++)
         {
             digits[i] = sanitized[i] - '0';
         }
 
-        // Algorithm:
-        // d10 = ((d1+d3+d5+d7+d9)*7 - (d2+d4+d6+d8)) % 10
+        // d10 calculation
         int sumOdd = digits[0] + digits[2] + digits[4] + digits[6] + digits[8];
         int sumEven = digits[1] + digits[3] + digits[5] + digits[7];
 
@@ -73,7 +45,7 @@ public class TurkeyNationalIdValidator : INationalIdValidator
             return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
         }
 
-        // d11 = (d1+d2+d3+d4+d5+d6+d7+d8+d9+d10) % 10
+        // d11 calculation
         int sumAll = 0;
         for (int i = 0; i < 10; i++)
         {
@@ -82,18 +54,13 @@ public class TurkeyNationalIdValidator : INationalIdValidator
 
         int d11 = sumAll % 10;
 
-        if (digits[10] != d11)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return digits[10] == d11
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Turkish T.C. Kimlik No.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new TurkeyNationalIdValidator().Validate(nationalId);
 }

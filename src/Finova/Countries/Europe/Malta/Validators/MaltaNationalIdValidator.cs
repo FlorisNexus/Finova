@@ -8,49 +8,29 @@ namespace Finova.Countries.Europe.Malta.Validators;
 /// Validator for Malta Identity Card Number.
 /// Format: 1 to 7 digits followed by a letter (A, B, G, H, L, M, P, Z).
 /// </summary>
-public class MaltaNationalIdValidator : INationalIdValidator
+public partial class MaltaNationalIdValidator : NationalIdValidatorBase
 {
+    [GeneratedRegex(@"^\d{1,7}[ABGHLMPZ]$")]
+    private static partial Regex FormatRegex();
+
     /// <inheritdoc/>
-    public string CountryCode => "MT";
+        public override string CountryCode => "MT";
 
-    /// <summary>
-    /// Validates the Malta Identity Card Number.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length >= 2 && sanitized.Length <= 8;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => FormatRegex().IsMatch(sanitized);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Malta Identity Card Number (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = nationalId.Trim().ToUpperInvariant();
-
-        // Format: 1 to 7 digits followed by 1 letter.
-        // Regex: ^\d{1,7}[ABGHLMPZ]$
-        if (!Regex.IsMatch(sanitized, @"^\d{1,7}[ABGHLMPZ]$"))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
+        // No known public checksum algorithm for the ID number itself.
         return ValidationResult.Success();
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? input?.Trim().ToUpperInvariant() : null;
-    }
+    /// <summary>
+    /// Static validation method for Maltese National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new MaltaNationalIdValidator().Validate(nationalId);
 }

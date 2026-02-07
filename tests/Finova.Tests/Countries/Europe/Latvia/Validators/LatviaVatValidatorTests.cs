@@ -11,7 +11,7 @@ public class LatviaVatValidatorTests
     [InlineData("40003521600")] // Without prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = LatviaVatValidator.Validate(vat);
+        var result = LatviaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -21,7 +21,7 @@ public class LatviaVatValidatorTests
     [InlineData("")]
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = LatviaVatValidator.Validate(vat);
+        var result = LatviaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

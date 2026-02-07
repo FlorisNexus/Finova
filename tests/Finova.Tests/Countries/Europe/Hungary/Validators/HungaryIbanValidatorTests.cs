@@ -76,7 +76,7 @@ public class HungaryIbanValidatorTests
     public void ValidateHungaryIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = HungaryIbanValidator.ValidateHungaryIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -88,7 +88,7 @@ public class HungaryIbanValidatorTests
     public void ValidateHungaryIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = HungaryIbanValidator.ValidateHungaryIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -105,7 +105,7 @@ public class HungaryIbanValidatorTests
     public void ValidateHungaryIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = HungaryIbanValidator.ValidateHungaryIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -174,5 +174,3 @@ public class HungaryIbanValidatorTests
 
     #endregion
 }
-
-

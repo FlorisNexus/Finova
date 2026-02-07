@@ -35,5 +35,5 @@ public class BrazilIbanValidatorTests
     [Theory]
     [InlineData("BR1800360305000010009795493C1")]
     public void ValidateBrazilIban_WithValidIbans_ReturnsTrue(string iban)
-        => BrazilIbanValidator.ValidateBrazilIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

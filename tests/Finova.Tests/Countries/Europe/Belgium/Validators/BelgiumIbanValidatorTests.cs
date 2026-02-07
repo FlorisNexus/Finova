@@ -78,7 +78,7 @@ public class BelgiumIbanValidatorTests
     public void ValidateBelgianIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -90,7 +90,7 @@ public class BelgiumIbanValidatorTests
     public void ValidateBelgianIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -107,7 +107,7 @@ public class BelgiumIbanValidatorTests
     public void ValidateBelgianIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -123,7 +123,7 @@ public class BelgiumIbanValidatorTests
     public void ValidateBelgianIban_WithValidStructure_ReturnsTrue(string iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -136,7 +136,7 @@ public class BelgiumIbanValidatorTests
     public void ValidateBelgianIban_WithLettersInNumericPart_ReturnsFalse(string iban)
     {
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -153,7 +153,7 @@ public class BelgiumIbanValidatorTests
         var iban = "BE00000000000000";
 
         // Act
-        var result = BelgiumIbanValidator.ValidateBelgiumIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse("Checksum should be invalid");
@@ -177,5 +177,3 @@ public class BelgiumIbanValidatorTests
 
     #endregion
 }
-
-

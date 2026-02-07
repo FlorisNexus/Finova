@@ -5,87 +5,99 @@ using Finova.Countries.Europe.Italy.Models;
 
 namespace Finova.Countries.Europe.Italy.Validators;
 
-public partial class ItalyVatValidator : IVatValidator
+/// <summary>
+/// Validator for Italian VAT numbers (Partita IVA).
+/// Format: 11 digits.
+/// </summary>
+public partial class ItalyVatValidator : VatValidatorBase
 {
-    [GeneratedRegex(@"[^\d]")]
-    private static partial Regex DigitsOnlyRegex();
+    [GeneratedRegex(@"^\d{11}$")]
+    private static partial Regex VatRegex();
 
     private const string CountryCodePrefix = "IT";
 
-    public string CountryCode => CountryCodePrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new ItalyVatValidator().ValidateInternal(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var normalized = vat.Trim().ToUpperInvariant();
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
 
-        if (!normalized.StartsWith(CountryCodePrefix))
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            if (normalized.Length == 11 && long.TryParse(normalized, out _))
-            {
-                // Proceed
-            }
-            else
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, string.Format(ValidationMessages.InvalidVatFormat, "Italy"));
-            }
-        }
-        else
-        {
-            normalized = normalized[2..];
+            cleaned = cleaned[2..];
         }
 
-        normalized = DigitsOnlyRegex().Replace(normalized, "");
-
-        if (normalized.Length != 11)
+        if (!IsValidLength(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, 11, normalized.Length));
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                string.Format(ValidationMessages.InvalidLength, CountryCode));
         }
 
-        if (normalized == "00000000000")
+        if (!ValidateFormat(cleaned))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Italy"));
+            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat,
+                string.Format(ValidationMessages.InvalidVatFormat, CountryCode));
         }
 
-        if (!ChecksumHelper.ValidateLuhn(normalized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Italy"));
-        }
-
-        return ValidationResult.Success();
+        return ValidateChecksum(cleaned);
     }
 
-    public static ItalyVatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 11;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        var result = Validate(vat);
-        if (!result.IsValid)
+        if (cleaned == "00000000000")
         {
-            return null;
+            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Italy"));
         }
 
-        var normalized = vat!.Trim().ToUpperInvariant();
-        if (normalized.StartsWith(CountryCodePrefix))
-        {
-            normalized = normalized[2..];
-        }
-        normalized = DigitsOnlyRegex().Replace(normalized, "");
+        return ChecksumHelper.ValidateLuhn(cleaned)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "Italy"));
+    }
 
-        var officeCode = normalized.Substring(7, 3);
-
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
+    {
+        var officeCode = cleaned.Substring(7, 3);
         return new ItalyVatDetails
         {
-            VatNumber = $"{CountryCodePrefix}{normalized}",
+            VatNumber = $"{CountryCodePrefix}{cleaned}",
             CountryCode = CountryCodePrefix,
             IsValid = true,
             OfficeCode = officeCode
         };
+    }
+
+    /// <summary>
+    /// Static validation method for Italian VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new ItalyVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for an Italian VAT number.
+    /// </summary>
+    public static ItalyVatDetails? GetVatDetails(string? vat)
+    {
+        var validator = new ItalyVatValidator();
+        return (ItalyVatDetails?)validator.Parse(vat);
     }
 }

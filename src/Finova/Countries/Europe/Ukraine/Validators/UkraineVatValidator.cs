@@ -4,62 +4,45 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Ukraine.Validators;
 
-public partial class UkraineVatValidator : IVatValidator
+/// <summary>
+/// Validator for Ukrainian VAT numbers (IPN).
+/// Format: 8, 9, or 12 digits.
+/// </summary>
+public partial class UkraineVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^(\d{8}|\d{9}|\d{12})$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "UA";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new UkraineVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 8 || cleaned.Length == 9 || cleaned.Length == 12;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, string.Format(ValidationMessages.InvalidVatFormat, "Ukraine"));
-        }
-
+        // No public checksum algorithm available for UA.
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Ukrainian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new UkraineVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Ukrainian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new UkraineVatValidator().Parse(vat);
 }

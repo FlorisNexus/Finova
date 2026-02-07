@@ -1286,7 +1286,7 @@
     <value>Invalid Bulgaria IBAN control character.</value>
   </data>
   <data name="InvalidLengthDigit" xml:space="preserve">
-    <value>Invalid length digit.</value>
+    <value>Invalid length digit. The second-to-last digit must match the total length of the reference (mod 10).</value>
   </data>
   <data name="InvalidPvmLength" xml:space="preserve">
     <value>PVM must be 9 digits.</value>

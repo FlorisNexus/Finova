@@ -11,7 +11,7 @@ public class CyprusVatValidatorTests
     [InlineData("CY10259033P")] // Valid with prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = CyprusVatValidator.Validate(vat);
+        var result = CyprusVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -20,7 +20,7 @@ public class CyprusVatValidatorTests
     [InlineData("12345678X")] // Invalid format
     public void Validate_WithInvalidVat_ReturnsFailure(string vat)
     {
-        var result = CyprusVatValidator.Validate(vat);
+        var result = CyprusVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 }

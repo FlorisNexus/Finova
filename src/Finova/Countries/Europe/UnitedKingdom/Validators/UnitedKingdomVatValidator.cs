@@ -4,49 +4,44 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.UnitedKingdom.Validators;
 
-public partial class UnitedKingdomVatValidator : IVatValidator
+/// <summary>
+/// Validator for United Kingdom VAT numbers.
+/// Format: GB followed by 9 or 12 digits, or special prefixes GD or HA.
+/// </summary>
+public partial class UnitedKingdomVatValidator : VatValidatorBase
 {
-    [GeneratedRegex(@"^GB(\d{9}|\d{12}|GD\d{3}|HA\d{3})$")]
+    [GeneratedRegex(@"^(\d{9}|\d{12}|GD\d{3}|HA\d{3})$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "GB";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new UnitedKingdomVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        // Basic format check
         if (cleaned.StartsWith("GD") || cleaned.StartsWith("HA"))
         {
-            // Government departments / Health authorities - 5 chars total
-            if (cleaned.Length != 5)
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, string.Format(ValidationMessages.InvalidVatFormat, "UK"));
-            }
-
-            return ValidationResult.Success(); // No checksum for these
+            return cleaned.Length == 5;
         }
+        return cleaned.Length == 9 || cleaned.Length == 12;
+    }
 
-        if (cleaned.Length != 9 && cleaned.Length != 12)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
+    {
+        if (cleaned.StartsWith("GD") || cleaned.StartsWith("HA"))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
+            return ValidationResult.Success(); // No checksum for these
         }
 
         if (!long.TryParse(cleaned, out _))
@@ -77,30 +72,16 @@ public partial class UnitedKingdomVatValidator : IVatValidator
             return ValidationResult.Success();
         }
 
-        // If both fail
         return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, string.Format(ValidationMessages.InvalidVatChecksum, "UK"));
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for United Kingdom VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new UnitedKingdomVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a United Kingdom VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new UnitedKingdomVatValidator().Parse(vat);
 }

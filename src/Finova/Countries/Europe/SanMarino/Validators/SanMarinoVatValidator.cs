@@ -4,57 +4,45 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.SanMarino.Validators;
 
-public partial class SanMarinoVatValidator : IVatValidator
+/// <summary>
+/// Validator for San Marino VAT numbers (Codice Operatore Economico).
+/// Format: 5 digits.
+/// </summary>
+public partial class SanMarinoVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{5}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "SM";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new SanMarinoVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 5;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidSanMarinoVatFormat);
-        }
-
-        // No public checksum available.
+        // No public checksum algorithm available for SM.
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        var result = Validate(vat);
-        if (!result.IsValid)
-        {
-            return null;
-        }
+    /// <summary>
+    /// Static validation method for San Marino VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new SanMarinoVatValidator().Validate(vat);
 
-        var cleaned = VatSanitizer.Sanitize(vat)!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails { CountryCode = VatPrefix, VatNumber = cleaned, IsValid = true };
-    }
+    /// <summary>
+    /// Gets details for a San Marino VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new SanMarinoVatValidator().Parse(vat);
 }

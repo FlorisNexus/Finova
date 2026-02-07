@@ -4,69 +4,48 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Denmark.Validators;
 
-public partial class DenmarkVatValidator : IVatValidator
+/// <summary>
+/// Validator for Danish VAT numbers (CVR).
+/// Format: 8 digits.
+/// </summary>
+public partial class DenmarkVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "DK";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new DenmarkVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 8;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidDenmarkVatFormat);
-        }
-
         int[] weights = { 2, 7, 6, 5, 4, 3, 2, 1 };
 
-        if (!ChecksumHelper.ValidateWeightedModulo11(cleaned, weights, r => r == 0))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidDenmarkVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return ChecksumHelper.ValidateWeightedModulo11(cleaned, weights, r => r == 0)
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidDenmarkVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Danish VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new DenmarkVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Danish VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new DenmarkVatValidator().Parse(vat);
 }

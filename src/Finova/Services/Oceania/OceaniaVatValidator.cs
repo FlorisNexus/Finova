@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Vat;
 using Finova.Countries.Oceania.Australia.Validators;
@@ -10,18 +11,10 @@ namespace Finova.Services;
 /// Unified validator for Oceania VAT/GST numbers.
 /// Delegates validation to specific country validators based on the country code prefix.
 /// </summary>
-/// <example>
-/// <code>
-/// // Static usage
-/// var result = OceaniaVatValidator.ValidateVat("AU12345678901");
-///
-/// // Instance usage
-/// var validator = new OceaniaVatValidator();
-/// var result = validator.Validate("NZ123456789");
-/// </code>
-/// </example>
 public class OceaniaVatValidator : IVatValidator
 {
+    private static readonly ConcurrentDictionary<string, IVatValidator> _staticValidators = new();
+
     private readonly IServiceProvider? _serviceProvider;
     private IEnumerable<IVatValidator>? _validators;
 
@@ -83,12 +76,6 @@ public class OceaniaVatValidator : IVatValidator
         return GetVatDetails(input);
     }
 
-    /// <summary>
-    /// Validates an Oceania VAT/GST number based on country code prefix.
-    /// </summary>
-    /// <param name="vat">The VAT number with country prefix.</param>
-    /// <param name="countryCode">Optional explicit country code.</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
     public static ValidationResult ValidateVat(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -109,17 +96,21 @@ public class OceaniaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        return countryCode switch
+        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
         {
-            "AU" => AustraliaGstValidator.Validate(vat),
-            "NZ" => NewZealandGstValidator.Validate(vat),
-            _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
-        };
+            "AU" => new AustraliaGstValidator(),
+            "NZ" => new NewZealandGstValidator(),
+            _ => null!
+        });
+
+        if (validator != null)
+        {
+            return validator.Validate(vat);
+        }
+
+        return ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}");
     }
 
-    /// <summary>
-    /// Gets details of a validated Oceania VAT/GST number.
-    /// </summary>
     public static VatDetails? GetVatDetails(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -140,11 +131,12 @@ public class OceaniaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        return countryCode switch
+        var validator = _staticValidators.GetValueOrDefault(countryCode);
+        if (validator != null)
         {
-            "AU" => AustraliaGstValidator.GetVatDetails(vat),
-            "NZ" => NewZealandGstValidator.GetVatDetails(vat),
-            _ => null
-        };
+            return validator.Parse(vat);
+        }
+
+        return null;
     }
 }

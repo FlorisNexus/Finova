@@ -4,43 +4,20 @@ using Finova.Core.Iban;
 
 namespace Finova.Countries.Europe.Malta.Validators;
 
-public class MaltaIbanValidator : IIbanValidator
+/// <summary>
+/// Validator for Maltese IBANs.
+/// </summary>
+public class MaltaIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "MT";
-    private const int MaltaIbanLength = 31;
-    private const string MaltaCountryCode = "MT";
+    /// <inheritdoc/>
+    public override string CountryCode => "MT";
 
-    public ValidationResult Validate(string? iban) => ValidateMaltaIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 31;
 
-    public static ValidationResult ValidateMaltaIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != MaltaIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, MaltaIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(MaltaCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidMaltaCountryCode);
-        }
-
-        // Validate BBAN
-        string bban = normalized.Substring(4);
-        var bbanResult = MaltaBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return MaltaBbanValidator.Validate(bban);
     }
 }

@@ -1076,7 +1076,7 @@
     <value>Ungültige schwedische OCR-Länge.</value>
   </data>
   <data name="InvalidLengthDigit" xml:space="preserve">
-    <value>Ungültige Längenziffer.</value>
+    <value>Ungültige Längenziffer. Die vorletzte Ziffer muss der Gesamtlänge der Referenz entsprechen (Mod 10).</value>
   </data>
   <data name="InvalidBelgiumBbanStructure" xml:space="preserve">
     <value>Ungültige belgische BBAN-Struktur.</value>

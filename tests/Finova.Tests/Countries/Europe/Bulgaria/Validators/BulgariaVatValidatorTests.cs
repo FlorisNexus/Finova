@@ -12,7 +12,7 @@ public class BulgariaVatValidatorTests
     [InlineData("0041010002")] // Valid 10 digit (EGN)
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = BulgariaVatValidator.Validate(vat);
+        var result = BulgariaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -21,7 +21,7 @@ public class BulgariaVatValidatorTests
     [InlineData("0041010003")] // Invalid checksum 10 digit
     public void Validate_WithInvalidVat_ReturnsFailure(string vat)
     {
-        var result = BulgariaVatValidator.Validate(vat);
+        var result = BulgariaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 }

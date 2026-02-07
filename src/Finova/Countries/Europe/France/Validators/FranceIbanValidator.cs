@@ -5,49 +5,20 @@ using Finova.Core.Iban;
 namespace Finova.Countries.Europe.France.Validators;
 
 /// <summary>
-/// Validator for France bank accounts.
+/// Validator for French IBANs.
 /// France IBAN format: FR + 2 check digits + 5 bank code + 5 branch code + 11 account number + 2 RIB key.
 /// </summary>
-public class FranceIbanValidator : IIbanValidator
+public class FranceIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "FR";
+    /// <inheritdoc/>
+    public override string CountryCode => "FR";
 
-    private const int FranceIbanLength = 27;
-    private const string FranceCountryCode = "FR";
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 27;
 
-    public ValidationResult Validate(string? iban) => ValidateFranceIban(iban);
-
-    public static ValidationResult ValidateFranceIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != FranceIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, FranceIbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(FranceCountryCode, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidFranceCountryCode);
-        }
-
-        // Validate BBAN (Bank + Branch + Account + Key)
-        // BBAN starts at index 4
-        string bban = normalized.Substring(4);
-        var bbanResult = FranceBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return FranceBbanValidator.Validate(bban);
     }
-
 }

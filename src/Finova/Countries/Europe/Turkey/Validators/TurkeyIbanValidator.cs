@@ -8,57 +8,20 @@ using Finova.Core.Iban;
 namespace Finova.Countries.Europe.Turkey.Validators;
 
 /// <summary>
-/// Validator for Turkey IBANs.
+/// Validator for Turkish IBANs.
 /// </summary>
-public class TurkeyIbanValidator : IIbanValidator
+public class TurkeyIbanValidator : IbanValidatorBase
 {
-    /// <summary>
-    /// Gets the country code for Turkey.
-    /// </summary>
-    public string CountryCode => "TR";
+    /// <inheritdoc/>
+    public override string CountryCode => "TR";
 
-    /// <summary>
-    /// Validates the Turkey IBAN.
-    /// </summary>
-    /// <param name="iban">The IBAN to validate.</param>
-    /// <returns>ValidationResult indicating success or failure.</returns>
-    public ValidationResult Validate(string? iban) => ValidateTurkeyIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 26;
 
-    /// <summary>
-    /// Static validation method for Turkey IBANs.
-    /// </summary>
-    /// <param name="iban">The IBAN to validate.</param>
-    /// <returns>True if the IBAN is valid; otherwise, false.</returns>
-    public static ValidationResult ValidateTurkeyIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != 26)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidIbanLength, 26, normalized.Length));
-        }
-
-        if (!normalized.StartsWith("TR", StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        // Validate BBAN
-        string bban = normalized.Substring(4);
-        var bbanResult = TurkeyBbanValidator.Validate(bban);
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized)
-            ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return TurkeyBbanValidator.Validate(bban);
     }
 }
 

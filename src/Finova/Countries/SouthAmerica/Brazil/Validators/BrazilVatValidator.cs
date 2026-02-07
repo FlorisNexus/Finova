@@ -4,70 +4,39 @@ using Finova.Core.Vat;
 namespace Finova.Countries.SouthAmerica.Brazil.Validators;
 
 /// <summary>
-/// Validates Brazilian VAT identifier (CNPJ).
-/// Brazil does not have a traditional VAT system like Europe, but uses
-/// CNPJ (Cadastro Nacional da Pessoa Jurídica) for business identification
-/// which is used for tax purposes including ICMS (state sales tax),
-/// IPI (federal excise tax), and ISS (municipal services tax).
+/// Validator for Brazilian VAT identifier (CNPJ).
+/// Format: 14 digits.
 /// </summary>
-public class BrazilVatValidator : IVatValidator
+public partial class BrazilVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "BR";
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a Brazilian VAT/CNPJ number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The CNPJ number string (14 digits).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new BrazilVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 14;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => cleaned.All(char.IsDigit);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "").Replace(".", "").Replace("/", "");
-
-        // Remove BR prefix if present
-        if (clean.StartsWith("BR", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
-        // Use the existing CNPJ validator
-        return BrazilCnpjValidator.ValidateCnpj(clean);
+        return BrazilCnpjValidator.ValidateCnpj(cleaned);
     }
 
-    /// <summary>
-    /// Gets details of a validated Brazilian VAT/CNPJ number.
-    /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "").Replace(".", "").Replace("/", "");
-
-        // Remove BR prefix if present
-        if (clean.StartsWith("BR", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
         return new VatDetails
         {
-            VatNumber = clean,
+            VatNumber = cleaned,
             CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "CNPJ",
@@ -76,4 +45,14 @@ public class BrazilVatValidator : IVatValidator
             Notes = "Brazilian business tax identifier (CNPJ)"
         };
     }
+
+    /// <summary>
+    /// Static validation method for Brazilian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new BrazilVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for a Brazilian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new BrazilVatValidator().Parse(vat);
 }

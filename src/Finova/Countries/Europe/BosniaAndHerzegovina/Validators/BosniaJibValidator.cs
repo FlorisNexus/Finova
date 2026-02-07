@@ -25,7 +25,7 @@ public class BosniaJibValidator : ITaxIdValidator
     public static ValidationResult ValidateJib(string? jib)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(jib, "BA");
-        return BosniaAndHerzegovinaVatValidator.Validate(normalized);
+        return BosniaAndHerzegovinaVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

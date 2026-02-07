@@ -13,15 +13,15 @@ public class AlbaniaVatValidatorTests
     public void IsValid_WithValidVatNumbers_ReturnsTrue(string vat)
     {
         // Act
-        var result = AlbaniaVatValidator.Validate(vat);
+        var result = AlbaniaVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
     }
 
     [Theory]
-    [InlineData("K31415037M", "ALK31415037M")]
-    [InlineData("ALK31415037M", "ALK31415037M")]
+    [InlineData("K31415037M", "K31415037M")]
+    [InlineData("ALK31415037M", "K31415037M")]
     public void Parse_ReturnsCorrectDetails(string input, string expectedVatNumber)
     {
         // Act
@@ -44,7 +44,7 @@ public class AlbaniaVatValidatorTests
     public void IsValid_WithInvalidVatNumbers_ReturnsFalse(string? vat)
     {
         // Act
-        var result = AlbaniaVatValidator.Validate(vat);
+        var result = AlbaniaVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeFalse();

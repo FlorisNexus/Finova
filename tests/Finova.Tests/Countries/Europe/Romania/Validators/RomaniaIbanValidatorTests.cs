@@ -79,7 +79,7 @@ public class RomaniaIbanValidatorTests
     public void ValidateRomaniaIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = RomaniaIbanValidator.ValidateRomaniaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -91,7 +91,7 @@ public class RomaniaIbanValidatorTests
     public void ValidateRomaniaIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = RomaniaIbanValidator.ValidateRomaniaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -107,7 +107,7 @@ public class RomaniaIbanValidatorTests
     public void ValidateRomaniaIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = RomaniaIbanValidator.ValidateRomaniaIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();

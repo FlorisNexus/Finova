@@ -137,14 +137,14 @@ public class GreeceIbanValidatorTests
     [Fact]
     public void ValidateGreeceIban_StaticMethod_WorksCorrectly()
     {
-        var result = GreeceIbanValidator.ValidateGreeceIban("GR1601101250000000012300695");
+        var result = _validator.Validate("GR1601101250000000012300695");
         result.IsValid.Should().BeTrue();
     }
 
     [Fact]
     public void ValidateGreeceIban_StaticMethod_WithInvalid_ReturnsFalse()
     {
-        var result = GreeceIbanValidator.ValidateGreeceIban("GR0001101250000000012300695");
+        var result = _validator.Validate("GR0001101250000000012300695");
         result.IsValid.Should().BeFalse();
     }
 

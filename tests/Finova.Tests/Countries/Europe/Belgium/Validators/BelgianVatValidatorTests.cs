@@ -14,7 +14,7 @@ public class BelgianVatValidatorTests
     public void IsValid_WithValidVatNumbers_ReturnsTrue(string vat)
     {
         // Act
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -28,7 +28,7 @@ public class BelgianVatValidatorTests
     public void IsValid_WithFormattedVatNumbers_ReturnsTrue(string vat)
     {
         // Act
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -39,7 +39,7 @@ public class BelgianVatValidatorTests
     public void IsValid_WithoutBEPrefix_ReturnsTrue(string vat)
     {
         // Act
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -58,7 +58,7 @@ public class BelgianVatValidatorTests
     public void IsValid_WithInvalidVatNumbers_ReturnsFalse(string? vat)
     {
         // Act
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -180,7 +180,7 @@ public class BelgianVatValidatorTests
     public void IsValid_WithRealVatNumbers_ReturnsTrue(string vat)
     {
         // Act
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -206,7 +206,7 @@ public class BelgianVatValidatorTests
     public void VatNumber_IsEquivalentToKboNumber(string vat, string kbo)
     {
         // Act
-        var vatValid = BelgiumVatValidator.Validate(vat).IsValid;
+        var vatValid = BelgiumVatValidator.ValidateStatic(vat).IsValid;
         var kboValid = BelgiumEnterpriseValidator.ValidateEnterpriseNumber(kbo).IsValid;
         var extractedKbo = BelgiumVatValidator.GetEnterpriseNumber(vat);
 
@@ -225,7 +225,7 @@ public class BelgianVatValidatorTests
 
         // Act
         var kboResult = BelgiumEnterpriseValidator.ValidateEnterpriseNumber(kbo).IsValid;
-        var vatResult = BelgiumVatValidator.Validate(vat).IsValid;
+        var vatResult = BelgiumVatValidator.ValidateStatic(vat).IsValid;
 
         // Assert
         kboResult.Should().Be(vatResult);
@@ -242,7 +242,7 @@ public class BelgianVatValidatorTests
         var vat = "BE";
 
         // Act
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -292,7 +292,7 @@ public class BelgianVatValidatorTests
     }
 
     [Theory]
-    [InlineData("BE0123456749", "BE0123456749")]
+    [InlineData("BE0123456749", "0123456749")]
     public void Parse_ReturnsCorrectDetails(string input, string expectedVatNumber)
     {
         // Arrange

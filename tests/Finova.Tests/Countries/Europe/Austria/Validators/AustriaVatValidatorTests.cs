@@ -12,7 +12,7 @@ public class AustriaVatValidatorTests
     [InlineData("ATU12345675")] // Valid example
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = AustriaVatValidator.Validate(vat);
+        var result = AustriaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -22,7 +22,7 @@ public class AustriaVatValidatorTests
     [InlineData(" ATU13585627 ")] // With whitespace
     public void Validate_WithFormattedVat_ReturnsSuccess(string vat)
     {
-        var result = AustriaVatValidator.Validate(vat);
+        var result = AustriaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -37,13 +37,13 @@ public class AustriaVatValidatorTests
     [InlineData("XX13585627")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = AustriaVatValidator.Validate(vat);
+        var result = AustriaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 
     [Theory]
-    [InlineData("ATU13585627", "AT", "ATU13585627")]
-    [InlineData("U13585627", "AT", "ATU13585627")]
+    [InlineData("ATU13585627", "AT", "U13585627")]
+    [InlineData("U13585627", "AT", "U13585627")]
     public void Parse_WithValidVat_ReturnsDetails(string vat, string expectedCountryCode, string expectedVatNumber)
     {
         var result = new AustriaVatValidator().Parse(vat);

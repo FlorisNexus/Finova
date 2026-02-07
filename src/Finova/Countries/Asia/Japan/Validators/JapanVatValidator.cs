@@ -4,82 +4,65 @@ using Finova.Core.Vat;
 namespace Finova.Countries.Asia.Japan.Validators;
 
 /// <summary>
-/// Validates Japanese Consumption Tax registration numbers.
-/// Japan's consumption tax (消費税, shōhizei) uses the Corporate Number (法人番号)
-/// prefixed with 'T' for registered invoice issuers.
-/// Format: T + 13 digits (Corporate Number).
+/// Validator for Japanese Consumption Tax registration numbers.
+/// Japan's consumption tax uses the Corporate Number prefixed with 'T'.
+/// Format: T + 13 digits.
 /// </summary>
-public class JapanVatValidator : IVatValidator
+public partial class JapanVatValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "JP";
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a Japanese Consumption Tax registration number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="vat">The registration number (T + 13 digits).</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new JapanVatValidator().ValidateInternal(input);
+
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
         if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = vat.Trim().Replace(" ", "").Replace("-", "");
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
 
         // Remove JP prefix if present
-        if (clean.StartsWith("JP", StringComparison.OrdinalIgnoreCase))
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            clean = clean[2..];
-        }
-
-        // Format: T + 13-digit corporate number
-        if (clean.Length < 1)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidJapanVatFormat);
+            cleaned = cleaned[2..];
         }
 
         // Check for T prefix (required for qualified invoice issuer)
-        bool hasPrefix = clean[0] is 'T' or 't';
-        var corporateNumber = hasPrefix ? clean[1..] : clean;
+        bool hasPrefix = cleaned.StartsWith("T", StringComparison.OrdinalIgnoreCase);
+        var corporateNumber = hasPrefix ? cleaned[1..] : cleaned;
 
-        // Validate the corporate number portion
+        // Delegate to Corporate Number validator
         return JapanCorporateNumberValidator.ValidateStatic(corporateNumber);
     }
 
-    /// <summary>
-    /// Gets details of a validated Japanese Consumption Tax number.
-    /// </summary>
-    public static VatDetails? GetVatDetails(string? vat)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => true; // Handled by JapanCorporateNumberValidator
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by JapanCorporateNumberValidator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned) => ValidationResult.Success(); // Handled by JapanCorporateNumberValidator
+
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var clean = vat!.Trim().Replace(" ", "").Replace("-", "");
-
-        // Remove JP prefix if present
-        if (clean.StartsWith("JP", StringComparison.OrdinalIgnoreCase))
-        {
-            clean = clean[2..];
-        }
-
         // Ensure T prefix for standardized format
-        clean = "T" + (clean[0] is 'T' or 't' ? clean[1..] : clean);
+        var result = cleaned.StartsWith("T", StringComparison.OrdinalIgnoreCase) ? cleaned : "T" + cleaned;
 
         return new VatDetails
         {
-            VatNumber = clean,
+            VatNumber = result.ToUpperInvariant(),
             CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "Invoice Registration Number",
@@ -88,4 +71,14 @@ public class JapanVatValidator : IVatValidator
             Notes = "Japanese qualified invoice issuer registration number (適格請求書発行事業者登録番号)"
         };
     }
+
+    /// <summary>
+    /// Static validation method for Japanese VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new JapanVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for a Japanese VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new JapanVatValidator().Parse(vat);
 }

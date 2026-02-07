@@ -6,58 +6,46 @@ namespace Finova.Countries.Europe.Bulgaria.Validators;
 
 /// <summary>
 /// Validator for Bulgarian VAT numbers.
-/// Format: BG + 9 or 10 digits depending on the type of VAT number.
+/// Format: 9 or 10 digits.
 /// </summary>
-public partial class BulgariaVatValidator : IVatValidator
+public partial class BulgariaVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{9,10}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "BG";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new BulgariaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 9 || cleaned.Length == 10;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidBulgariaVatFormat);
-        }
-
-        bool isValidChecksum;
+        bool isValid;
         if (cleaned.Length == 9)
         {
-            isValidChecksum = Validate9DigitVat(cleaned);
+            isValid = Validate9DigitVat(cleaned);
         }
         else
         {
             // 10 digits: Try EGN (Physical) first, then PNF (Foreigner)
-            isValidChecksum = Validate10DigitVat(cleaned);
+            isValid = Validate10DigitVat(cleaned);
         }
 
-        if (!isValidChecksum)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidBulgariaVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return isValid
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidBulgariaVatChecksum);
     }
 
     private static bool Validate9DigitVat(string vat)
@@ -123,26 +111,17 @@ public partial class BulgariaVatValidator : IVatValidator
         return remainder == (vat[9] - '0');
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Bulgarian VAT numbers.
+    /// </summary>
+    /// <param name="vat">The VAT number to validate.</param>
+    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
+        public static ValidationResult ValidateVat(string? vat) => new BulgariaVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Bulgarian VAT number.
+    /// </summary>
+    /// <param name="vat">The VAT number to parse.</param>
+    /// <returns>A <see cref="VatDetails"/> object or null if invalid.</returns>
+    public static VatDetails? GetVatDetails(string? vat) => new BulgariaVatValidator().Parse(vat);
 }

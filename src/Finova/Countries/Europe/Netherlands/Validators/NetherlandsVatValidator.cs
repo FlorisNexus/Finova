@@ -5,48 +5,36 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Netherlands.Validators;
 
-public partial class NetherlandsVatValidator : IVatValidator, ITaxIdValidator
+/// <summary>
+/// Validator for Dutch VAT numbers (BTW-identificatienummer).
+/// Format: 12 characters. 9 digits + 'B' + 2 digits.
+/// </summary>
+public partial class NetherlandsVatValidator : VatValidatorBase, ITaxIdValidator
 {
     [GeneratedRegex(@"^\d{9}B\d{2}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "NL";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new NetherlandsVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => ValidateBtw(instance);
 
-    public ValidationResult Validate(string? instance) => ValidateBtw(instance);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 12;
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
 
-    string? IValidator<string>.Parse(string? instance) => Normalize(instance);
-
-    public static ValidationResult ValidateBtw(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidNetherlandsVatFormat);
-        }
-
-        // Checksum Validation
         // 1. Mod 97 (New format / Standard)
         // Convert letters to numbers (A=10, B=11...)
-        // NL VAT usually has 'B' at pos 10.
-
         System.Text.StringBuilder sb = new();
         foreach (char c in cleaned)
         {
@@ -87,29 +75,19 @@ public partial class NetherlandsVatValidator : IVatValidator, ITaxIdValidator
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Dutch VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new NetherlandsVatValidator().Validate(vat);
 
-        if (!ValidateBtw(vat).IsValid)
-        {
-            return null;
-        }
+    /// <summary>
+    /// Gets details for a Dutch VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new NetherlandsVatValidator().Parse(vat);
 
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
-
+    /// <summary>
+    /// Normalizes a Dutch VAT number.
+    /// </summary>
     public static string Normalize(string? number)
     {
         if (string.IsNullOrWhiteSpace(number))
@@ -117,17 +95,14 @@ public partial class NetherlandsVatValidator : IVatValidator, ITaxIdValidator
             return string.Empty;
         }
 
-        var cleaned = number.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
+        var sanitized = VatSanitizer.Sanitize(number)!;
+        if (sanitized.StartsWith(VatPrefix))
         {
-            cleaned = cleaned[2..];
+            return sanitized[2..];
         }
-
-        // Remove non-alphanumeric (dots, spaces, hyphens)
-        // VatSanitizer does this, but we want to return just the cleaned string.
-        // But wait, Normalize usually returns digits only?
-        // NL VAT has 'B'. So we should keep 'B'.
-        // VatSanitizer keeps alphanumeric.
-        return VatSanitizer.Sanitize(cleaned) ?? string.Empty;
+        return sanitized;
     }
+
+    ValidationResult IValidator<string>.Validate(string? number) => Validate(number);
+    string? IValidator<string>.Parse(string? number) => Normalize(number);
 }

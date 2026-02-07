@@ -48,7 +48,7 @@ public class CyprusNationalIdValidatorTests
         var result = _validator.Validate(input);
         result.IsValid.Should().BeFalse();
         result.Errors.Should().ContainSingle()
-            .Which.Message.Should().Be("Input must contain only digits.");
+            .Which.Message.Should().Be("Invalid format.");
     }
 
     [Fact]

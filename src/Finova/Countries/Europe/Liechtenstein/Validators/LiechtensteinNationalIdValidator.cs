@@ -5,53 +5,25 @@ namespace Finova.Countries.Europe.Liechtenstein.Validators;
 
 /// <summary>
 /// Validator for Liechtenstein Personal Identification Number (PEID).
-/// Liechtenstein uses the same AHV number (OASI number) as Switzerland.
-/// Format: 756.XXXX.XXXX.XX (13 digits, starts with 756).
+/// Format: 13 digits starting with 756.
 /// </summary>
-public class LiechtensteinNationalIdValidator : INationalIdValidator
+public partial class LiechtensteinNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "LI";
+        public override string CountryCode => "LI";
 
-    /// <summary>
-    /// Validates the Liechtenstein PEID (AHV number).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 13;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateStatic(nationalId);
+        return long.TryParse(sanitized, out _) && sanitized.StartsWith("756");
     }
 
-    /// <summary>
-    /// Validates the Liechtenstein PEID (AHV number) (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        if (sanitized.Length != 13)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        if (!sanitized.StartsWith("756"))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
         // EAN-13 Checksum
         int sum = 0;
         for (int i = 0; i < 12; i++)
@@ -63,18 +35,13 @@ public class LiechtensteinNationalIdValidator : INationalIdValidator
         int remainder = sum % 10;
         int checkDigit = (remainder == 0) ? 0 : 10 - remainder;
 
-        if (checkDigit != (sanitized[12] - '0'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == (sanitized[12] - '0')
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Liechtenstein PEID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new LiechtensteinNationalIdValidator().Validate(nationalId);
 }

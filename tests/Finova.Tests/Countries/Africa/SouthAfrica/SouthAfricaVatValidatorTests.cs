@@ -13,7 +13,7 @@ public class SouthAfricaVatValidatorTests
     public void Validate_WithValidFormat_But_InvalidChecksum_ReturnsFailure()
     {
         // 4000000000 has correct format but invalid Luhn
-        var result = SouthAfricaVatValidator.Validate("4000000000");
+        var result = SouthAfricaVatValidator.ValidateStatic("4000000000");
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Message.Contains("checksum", StringComparison.OrdinalIgnoreCase));
     }
@@ -28,7 +28,7 @@ public class SouthAfricaVatValidatorTests
     [InlineData("0123456789")] // Starts with 0
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = SouthAfricaVatValidator.Validate(vat);
+        var result = SouthAfricaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 
@@ -36,7 +36,7 @@ public class SouthAfricaVatValidatorTests
     public void Validate_WithInvalidChecksum_ReturnsFailure()
     {
         // 4111111111 - valid format, but likely invalid checksum
-        var result = SouthAfricaVatValidator.Validate("4111111111");
+        var result = SouthAfricaVatValidator.ValidateStatic("4111111111");
         result.IsValid.Should().BeFalse();
     }
 
@@ -52,10 +52,10 @@ public class SouthAfricaVatValidatorTests
     public void Validate_ChecksFormatRequirements()
     {
         // Verify the format check (must start with 4)
-        var result1 = SouthAfricaVatValidator.Validate("3123456789");
+        var result1 = SouthAfricaVatValidator.ValidateStatic("3123456789");
         result1.IsValid.Should().BeFalse();
 
-        var result2 = SouthAfricaVatValidator.Validate("5123456789");
+        var result2 = SouthAfricaVatValidator.ValidateStatic("5123456789");
         result2.IsValid.Should().BeFalse();
     }
 

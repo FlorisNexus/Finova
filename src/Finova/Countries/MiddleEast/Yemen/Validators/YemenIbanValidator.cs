@@ -5,43 +5,20 @@ using Finova.Core.Iban;
 namespace Finova.Countries.MiddleEast.Yemen.Validators;
 
 /// <summary>
-/// Validator for Yemen IBANs.
+/// Validator for Yemenite IBANs.
 /// Yemen IBAN format: YE + 2 check digits + 26 characters BBAN (4 letters bank, 22 digits account).
-/// Length: 30 characters.
 /// </summary>
-public class YemenIbanValidator : IIbanValidator
+public class YemenIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "YE";
-    private const int IbanLength = 30;
-    private const string CountryCodeVal = "YE";
+    /// <inheritdoc/>
+    public override string CountryCode => "YE";
 
-    public ValidationResult Validate(string? iban) => ValidateIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 30;
 
-    public static ValidationResult ValidateIban([NotNullWhen(true)] string? iban)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != IbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, IbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(CountryCodeVal, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        var bbanResult = YemenBbanValidator.Validate(normalized.Substring(4));
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized) ? ValidationResult.Success() : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        return YemenBbanValidator.Validate(bban);
     }
 }

@@ -9,7 +9,7 @@ public class NorthMacedoniaVatValidatorTests
     [InlineData("4030992255006")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = NorthMacedoniaVatValidator.Validate(vat);
+        var result = NorthMacedoniaVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class NorthMacedoniaVatValidatorTests
     [InlineData("XX1234567890123")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = NorthMacedoniaVatValidator.Validate(vat);
+        var result = NorthMacedoniaVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

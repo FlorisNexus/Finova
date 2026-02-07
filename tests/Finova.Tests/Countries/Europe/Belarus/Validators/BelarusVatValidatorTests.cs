@@ -9,7 +9,7 @@ public class BelarusVatValidatorTests
     [InlineData("BY100000007")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = BelarusVatValidator.Validate(vat);
+        var result = BelarusVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class BelarusVatValidatorTests
     [InlineData("XX123456789")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = BelarusVatValidator.Validate(vat);
+        var result = BelarusVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

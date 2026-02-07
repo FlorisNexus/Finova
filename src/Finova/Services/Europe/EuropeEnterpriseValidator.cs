@@ -112,7 +112,7 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
             EnterpriseNumberType.GreeceAfm => GreeceAfmValidator.ValidateAfm(number),
             EnterpriseNumberType.GreenlandCvr => GreenlandCvrValidator.ValidateCvr(number),
             EnterpriseNumberType.HungaryAdoszam => HungaryAdoszamValidator.ValidateAdoszam(number),
-            EnterpriseNumberType.IcelandKennitala => IcelandKennitalaValidator.ValidateKennitala(number),
+            EnterpriseNumberType.IcelandKennitala => IcelandKennitalaValidator.ValidateStatic(number),
             EnterpriseNumberType.IrelandCro => IrelandCroValidator.ValidateCro(number),
             EnterpriseNumberType.ItalyCodiceFiscale => ItalyPartitaIvaValidator.ValidatePartitaIvaStatic(number),
             EnterpriseNumberType.KosovoFiscalNumber => KosovoFiscalNumberValidator.ValidateFiscalNumber(number),

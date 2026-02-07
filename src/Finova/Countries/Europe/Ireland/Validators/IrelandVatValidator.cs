@@ -5,9 +5,10 @@ using Finova.Core.Vat;
 namespace Finova.Countries.Europe.Ireland.Validators;
 
 /// <summary>
-/// Validator for Ireland VAT numbers.
+/// Validator for Irish VAT numbers.
+/// Format: pre-2013 and post-2013 formats supported.
 /// </summary>
-public partial class IrelandVatValidator : IVatValidator
+public partial class IrelandVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^(\d{7}[A-W][A-I]?|\d[A-Z+*]\d{5}[A-W])$")]
     private static partial Regex VatRegex();
@@ -15,36 +16,23 @@ public partial class IrelandVatValidator : IVatValidator
     private const string VatPrefix = "IE";
     private static readonly int[] Weights = [8, 7, 6, 5, 4, 3, 2];
 
-    public string CountryCode => VatPrefix;
-
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
     /// <summary>
-    /// Validates an Irish VAT number using the weighted Modulo 23 algorithm.
-    /// Handles both pre-2013 and post-2013 formats.
+    /// Static validation method for tests.
     /// </summary>
-    public static ValidationResult Validate(string? vat)
+    public static ValidationResult ValidateStatic(string? input) => new IrelandVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 8 || cleaned.Length == 9;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIrelandVatFormat);
-        }
-
         int sum;
         char checkChar;
 
@@ -98,26 +86,13 @@ public partial class IrelandVatValidator : IVatValidator
         return c - 'A' + 1;
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Irish VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new IrelandVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for an Irish VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new IrelandVatValidator().Parse(vat);
 }

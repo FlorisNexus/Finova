@@ -9,39 +9,15 @@ namespace Finova.Countries.Africa.Angola.Validators;
 /// Angola IBAN format: AO + 2 check digits + 21 digits (BBAN).
 /// Length: 25 characters.
 /// </summary>
-public class AngolaIbanValidator : IIbanValidator
+public class AngolaIbanValidator : IbanValidatorBase
 {
-    public string CountryCode => "AO";
-    private const int IbanLength = 25;
-    private const string CountryCodeVal = "AO";
+    /// <inheritdoc/>
+    public override string CountryCode => "AO";
 
-    public ValidationResult Validate(string? iban) => ValidateIban(iban);
+    /// <inheritdoc/>
+    protected override int ExpectedLength => 25;
 
-    public static ValidationResult ValidateIban([NotNullWhen(true)] string? iban)
-    {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        if (normalized.Length != IbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidLengthExpectedXGotY, IbanLength, normalized.Length));
-        }
-
-        if (!normalized.StartsWith(CountryCodeVal, StringComparison.OrdinalIgnoreCase))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidCountryCode);
-        }
-
-        var bbanResult = AngolaBbanValidator.Validate(normalized.Substring(4));
-        if (!bbanResult.IsValid)
-        {
-            return bbanResult;
-        }
-
-        return IbanHelper.IsValidIban(normalized) ? ValidationResult.Success() : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-    }
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateBban(string bban)
+        => AngolaBbanValidator.Validate(bban);
 }

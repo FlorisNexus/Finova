@@ -1,32 +1,62 @@
 using Finova.Core.Common;
 using Finova.Core.Vat;
-using Finova.Countries.SoutheastAsia.Vietnam.Validators;
 
 namespace Finova.Countries.SoutheastAsia.Vietnam.Validators;
 
 /// <summary>
-/// Validates Vietnam VAT (GTGT) number.
+/// Validator for Vietnam VAT (GTGT) number.
 /// Reuses the MST (Tax Code) validator.
 /// </summary>
-public class VietnamVatValidator : IVatValidator
+public partial class VietnamVatValidator : VatValidatorBase
 {
-    public string CountryCode => "VN";
+    private const string CountryCodePrefix = "VN";
 
-    public ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new VietnamVatValidator().ValidateInternal(input);
+
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        return new VietnamTaxIdValidator().Validate(vat);
+        if (string.IsNullOrWhiteSpace(vat))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+
+        // Remove VN prefix if present
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            cleaned = cleaned[2..];
+        }
+
+        // Delegate to MST validator
+        return new VietnamTaxIdValidator().Validate(cleaned);
     }
 
-    public VatDetails? Parse(string? vat)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => true; // Handled by VietnamTaxIdValidator
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by VietnamTaxIdValidator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned) => ValidationResult.Success(); // Handled by VietnamTaxIdValidator
+
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid) return null;
-        
-        var mst = new VietnamTaxIdValidator().Parse(vat);
-        
+        var mst = new VietnamTaxIdValidator().Parse(cleaned);
         return new VatDetails
         {
-            VatNumber = mst ?? vat!,
-            CountryCode = "VN",
+            VatNumber = mst ?? cleaned,
+            CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "MST",
             IsEuVat = false,
@@ -34,4 +64,14 @@ public class VietnamVatValidator : IVatValidator
             Notes = "Vietnam VAT uses the Tax Code (MST)."
         };
     }
+
+    /// <summary>
+    /// Static validation method for Vietnamese VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new VietnamVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for a Vietnamese VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new VietnamVatValidator().Parse(vat);
 }

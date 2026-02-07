@@ -11,7 +11,7 @@ public class ColombiaVatValidatorTests
     [InlineData("CO123456789")] // With CO prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = ColombiaVatValidator.Validate(vat);
+        var result = ColombiaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -24,14 +24,14 @@ public class ColombiaVatValidatorTests
     [InlineData("ABCDEFGHIJ")] // Non-numeric
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = ColombiaVatValidator.Validate(vat);
+        var result = ColombiaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 
     [Fact]
     public void Validate_With9Digits_ReturnsSuccess()
     {
-        var result = ColombiaVatValidator.Validate("123456789");
+        var result = ColombiaVatValidator.ValidateStatic("123456789");
         result.IsValid.Should().BeTrue();
     }
 

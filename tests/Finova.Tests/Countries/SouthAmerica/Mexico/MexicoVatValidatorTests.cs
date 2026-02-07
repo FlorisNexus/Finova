@@ -12,7 +12,7 @@ public class MexicoVatValidatorTests
     [InlineData("XEXX010101000")] // Generic foreign RFC
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = MexicoVatValidator.Validate(vat);
+        var result = MexicoVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -25,7 +25,7 @@ public class MexicoVatValidatorTests
     [InlineData("12345678901234")] // All numeric
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = MexicoVatValidator.Validate(vat);
+        var result = MexicoVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
 using Finova.Core.Vat;
 using Finova.Countries.NorthAmerica.Canada.Validators;
@@ -20,18 +21,10 @@ namespace Finova.Services;
 /// Unified validator for Americas VAT/GST numbers.
 /// Delegates validation to specific country validators based on the country code prefix.
 /// </summary>
-/// <example>
-/// <code>
-/// // Static usage
-/// var result = AmericasVatValidator.ValidateVat("BR12345678901234");
-///
-/// // Instance usage
-/// var validator = new AmericasVatValidator();
-/// var result = validator.Validate("MX ABC123456AB1");
-/// </code>
-/// </example>
 public class AmericasVatValidator : IVatValidator
 {
+    private static readonly ConcurrentDictionary<string, IVatValidator> _staticValidators = new();
+
     private readonly IServiceProvider? _serviceProvider;
     private IEnumerable<IVatValidator>? _validators;
 
@@ -93,12 +86,6 @@ public class AmericasVatValidator : IVatValidator
         return GetVatDetails(input);
     }
 
-    /// <summary>
-    /// Validates an Americas VAT/GST number based on country code prefix.
-    /// </summary>
-    /// <param name="vat">The VAT number with country prefix.</param>
-    /// <param name="countryCode">Optional explicit country code.</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
     public static ValidationResult ValidateVat(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -119,28 +106,35 @@ public class AmericasVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        {
+            "AR" => new ArgentinaVatValidator(),
+            "BR" => new BrazilVatValidator(),
+            "CL" => new ChileVatValidator(),
+            "CO" => new ColombiaVatValidator(),
+            "MX" => new MexicoVatValidator(),
+            _ => null!
+        });
+
+        if (validator != null)
+        {
+            return validator.Validate(vat);
+        }
+
         return countryCode switch
         {
-            "AR" => ArgentinaVatValidator.Validate(vat),
-            "BR" => BrazilVatValidator.Validate(vat),
-            "CA" => CanadaGstValidator.Validate(vat),
-            "CL" => ChileVatValidator.Validate(vat),
-            "CO" => ColombiaVatValidator.Validate(vat),
-            "MX" => MexicoVatValidator.Validate(vat),
+            "CA" => CanadaGstValidator.ValidateStatic(vat),
             "CR" => CostaRicaNiteValidator.ValidateNite(vat),
             "DO" => DominicanRepublicRncValidator.ValidateRnc(vat),
             "SV" => ElSalvadorNitValidator.ValidateNit(vat),
             "GT" => GuatemalaNitValidator.ValidateNit(vat),
             "HN" => HondurasRtnValidator.ValidateRtn(vat),
             "NI" => NicaraguaRucValidator.ValidateRuc(vat),
-            "VG" or "VP" => ValidationResult.Success(), // British Virgin Islands has no VAT system, but we support the identifier
+            "VG" or "VP" => ValidationResult.Success(),
             _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
         };
     }
 
-    /// <summary>
-    /// Gets details of a validated Americas VAT/GST number.
-    /// </summary>
     public static VatDetails? GetVatDetails(string? vat, string? countryCode = null)
     {
         vat = VatSanitizer.Sanitize(vat);
@@ -161,14 +155,15 @@ public class AmericasVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
+        var validator = _staticValidators.GetValueOrDefault(countryCode);
+        if (validator != null)
+        {
+            return validator.Parse(vat);
+        }
+
         return countryCode switch
         {
-            "AR" => ArgentinaVatValidator.GetVatDetails(vat),
-            "BR" => BrazilVatValidator.GetVatDetails(vat),
             "CA" => CanadaGstValidator.GetVatDetails(vat),
-            "CL" => ChileVatValidator.GetVatDetails(vat),
-            "CO" => ColombiaVatValidator.GetVatDetails(vat),
-            "MX" => MexicoVatValidator.GetVatDetails(vat),
             "CR" => new VatDetails { VatNumber = vat!, CountryCode = "CR", IsValid = true, IdentifierKind = "NITE" },
             "DO" => new VatDetails { VatNumber = vat!, CountryCode = "DO", IsValid = true, IdentifierKind = "RNC" },
             "SV" => new VatDetails { VatNumber = vat!, CountryCode = "SV", IsValid = true, IdentifierKind = "NIT" },

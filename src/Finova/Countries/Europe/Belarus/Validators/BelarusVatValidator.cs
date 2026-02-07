@@ -4,39 +4,35 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Belarus.Validators;
 
-public partial class BelarusVatValidator : IVatValidator
+/// <summary>
+/// Validator for Belarusian VAT numbers (УНП).
+/// Format: 9 digits.
+/// </summary>
+public partial class BelarusVatValidator : VatValidatorBase
 {
+    private const string CountryCodePrefix = "BY";
+    private const int VatLength = 9;
+
     [GeneratedRegex(@"^\d{9}$")]
     private static partial Regex VatRegex();
 
-    private const string VatPrefix = "BY";
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new BelarusVatValidator().Validate(input);
 
-    public string CountryCode => VatPrefix;
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == VatLength;
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.VatNumberEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.BelarusVatInvalidFormat);
-        }
-
         int[] weights = { 29, 23, 19, 17, 13, 7, 5, 3 };
         string digits = cleaned[..8];
         int checkDigit = cleaned[8] - '0';
@@ -57,26 +53,13 @@ public partial class BelarusVatValidator : IVatValidator
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Belarusian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new BelarusVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Belarusian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new BelarusVatValidator().Parse(vat);
 }

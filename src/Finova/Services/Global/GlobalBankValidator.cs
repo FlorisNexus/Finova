@@ -29,7 +29,7 @@ public static class GlobalBankValidator
             "US" or "CA" => NorthAmericaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
 
             // Asia
-            "CN" or "IN" => AsiaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
+            "CN" or "IN" or "SG" or "JP" or "KR" => AsiaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),
 
             // Oceania
             "AU" => OceaniaBankValidator.ValidateRoutingNumber(countryCode, routingNumber),

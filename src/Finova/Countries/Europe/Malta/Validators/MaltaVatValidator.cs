@@ -1,84 +1,60 @@
 using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Malta.Validators;
 
-public partial class MaltaVatValidator : IVatValidator, ITaxIdValidator
+/// <summary>
+/// Validator for Maltese VAT numbers.
+/// Format: 8 digits.
+/// </summary>
+public partial class MaltaVatValidator : VatValidatorBase
 {
-    [GeneratedRegex(@"^MT\d{8}$")]
+    [GeneratedRegex(@"^\d{8}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "MT";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new MaltaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => ValidateVat(instance);
 
-    public ValidationResult Validate(string? instance) => ValidateVat(instance);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 8;
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
 
-    string? IValidator<string>.Parse(string? instance) => Normalize(instance);
-
-    public static ValidationResult ValidateVat(string? vat)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (cleaned.Length != 8 || !long.TryParse(cleaned, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidMaltaVatFormat);
-        }
-
-        // Checksum Validation (Weighted Mod 37)
         // Weights: 3, 4, 6, 7, 8, 9, 10, 1 applied to the 8 digits.
         int[] weights = { 3, 4, 6, 7, 8, 9, 10, 1 };
 
         int sum = ChecksumHelper.CalculateWeightedSum(cleaned, weights);
 
-        if (sum % 37 != 0)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidMaltaVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return sum % 37 == 0
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidMaltaVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Maltese VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new MaltaVatValidator().Validate(vat);
 
-        if (!ValidateVat(vat).IsValid)
-        {
-            return null;
-        }
+    /// <summary>
+    /// Gets details for a Maltese VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new MaltaVatValidator().Parse(vat);
 
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
-
+    /// <summary>
+    /// Normalizes a Maltese VAT number.
+    /// </summary>
     public static string Normalize(string? number)
     {
         if (string.IsNullOrWhiteSpace(number))
@@ -86,12 +62,11 @@ public partial class MaltaVatValidator : IVatValidator, ITaxIdValidator
             return string.Empty;
         }
 
-        var cleaned = number.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
+        var sanitized = VatSanitizer.Sanitize(number)!;
+        if (sanitized.StartsWith(VatPrefix))
         {
-            cleaned = cleaned[2..];
+            return sanitized[2..];
         }
-
-        return VatSanitizer.Sanitize(cleaned) ?? string.Empty;
+        return sanitized;
     }
 }

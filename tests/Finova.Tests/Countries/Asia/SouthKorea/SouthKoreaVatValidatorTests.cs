@@ -16,14 +16,14 @@ public class SouthKoreaVatValidatorTests
         //           = 1 + 6 + 21 + 4 + 15 + 42 + 7 + 24 + 45 + 4 = 169
         // Check: (10 - 169%10) % 10 = (10 - 9) % 10 = 1
         // So last digit should be 1 -> 1234567891
-        var result = SouthKoreaVatValidator.Validate("1234567891");
+        var result = SouthKoreaVatValidator.ValidateStatic("1234567891");
         result.IsValid.Should().BeTrue();
     }
 
     [Fact]
     public void Validate_WithKRPrefixedValidBrn_ReturnsSuccess()
     {
-        var result = SouthKoreaVatValidator.Validate("KR1234567891");
+        var result = SouthKoreaVatValidator.ValidateStatic("KR1234567891");
         result.IsValid.Should().BeTrue();
     }
 
@@ -36,7 +36,7 @@ public class SouthKoreaVatValidatorTests
     [InlineData("ABCDEFGHIJ")] // Non-numeric
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = SouthKoreaVatValidator.Validate(vat);
+        var result = SouthKoreaVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 
@@ -44,7 +44,7 @@ public class SouthKoreaVatValidatorTests
     public void Validate_WithInvalidChecksum_ReturnsFailure()
     {
         // 1234567890 has invalid checksum (should be 1)
-        var result = SouthKoreaVatValidator.Validate("1234567890");
+        var result = SouthKoreaVatValidator.ValidateStatic("1234567890");
         result.IsValid.Should().BeFalse();
     }
 

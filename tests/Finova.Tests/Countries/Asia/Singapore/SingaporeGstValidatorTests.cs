@@ -13,7 +13,7 @@ public class SingaporeGstValidatorTests
     [InlineData("T08LL0001A")] // Valid local company UEN
     public void Validate_WithValidGst_ReturnsSuccess(string gst)
     {
-        var result = SingaporeGstValidator.Validate(gst);
+        var result = SingaporeGstValidator.ValidateStatic(gst);
         result.IsValid.Should().BeTrue();
     }
 
@@ -22,7 +22,7 @@ public class SingaporeGstValidatorTests
     [InlineData("SG200312345A-GST")] // With prefix and suffix
     public void Validate_WithGstSuffix_ReturnsSuccess(string gst)
     {
-        var result = SingaporeGstValidator.Validate(gst);
+        var result = SingaporeGstValidator.ValidateStatic(gst);
         result.IsValid.Should().BeTrue();
     }
 
@@ -34,7 +34,7 @@ public class SingaporeGstValidatorTests
     [InlineData("ABCDEFGHIJK")] // Invalid format
     public void Validate_WithInvalidGst_ReturnsFailure(string? gst)
     {
-        var result = SingaporeGstValidator.Validate(gst);
+        var result = SingaporeGstValidator.ValidateStatic(gst);
         result.IsValid.Should().BeFalse();
     }
 

@@ -78,7 +78,7 @@ public class CzechRepublicIbanValidatorTests
     public void ValidateCzechIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = CzechRepublicIbanValidator.ValidateCzechIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -90,7 +90,7 @@ public class CzechRepublicIbanValidatorTests
     public void ValidateCzechIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = CzechRepublicIbanValidator.ValidateCzechIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -107,7 +107,7 @@ public class CzechRepublicIbanValidatorTests
     public void ValidateCzechIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = CzechRepublicIbanValidator.ValidateCzechIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -205,5 +205,3 @@ public class CzechRepublicIbanValidatorTests
 
     #endregion
 }
-
-

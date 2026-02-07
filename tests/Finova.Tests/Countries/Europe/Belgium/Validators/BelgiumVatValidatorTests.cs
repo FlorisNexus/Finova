@@ -12,7 +12,7 @@ public class BelgiumVatValidatorTests
     [InlineData("BE0403019261")] // Valid with prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -21,7 +21,7 @@ public class BelgiumVatValidatorTests
     [InlineData("123")] // Too short
     public void Validate_WithInvalidVat_ReturnsFailure(string vat)
     {
-        var result = BelgiumVatValidator.Validate(vat);
+        var result = BelgiumVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 }

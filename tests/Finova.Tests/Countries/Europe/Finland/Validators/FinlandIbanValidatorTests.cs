@@ -78,7 +78,7 @@ public class FinlandIbanValidatorTests
     public void ValidateFinlandIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = FinlandIbanValidator.ValidateFinlandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -90,7 +90,7 @@ public class FinlandIbanValidatorTests
     public void ValidateFinlandIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = FinlandIbanValidator.ValidateFinlandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -107,7 +107,7 @@ public class FinlandIbanValidatorTests
     public void ValidateFinlandIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = FinlandIbanValidator.ValidateFinlandIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();

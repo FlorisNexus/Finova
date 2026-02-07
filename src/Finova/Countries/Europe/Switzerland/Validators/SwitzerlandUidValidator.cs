@@ -25,7 +25,7 @@ public class SwitzerlandUidValidator : ITaxIdValidator
     public static ValidationResult ValidateUid(string? number)
     {
         // Reuse the logic from SwitzerlandVatValidator as UID and VAT are the same number.
-        return SwitzerlandVatValidator.Validate(number);
+        return SwitzerlandVatValidator.ValidateVat(number);
     }
 
     public static string Format(string? number)

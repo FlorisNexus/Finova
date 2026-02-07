@@ -36,7 +36,7 @@ public class GermanyIbanValidatorTests
     [Theory]
     [InlineData("DE89370400440532013000")]
     public void ValidateGermanyIban_WithValidIbans_ReturnsTrue(string iban)
-        => GermanyIbanValidator.ValidateGermanyIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }
 
 

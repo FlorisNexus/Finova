@@ -73,3 +73,4 @@ public class LatviaBbanValidator : IBbanValidator
         };
     }
 }
+

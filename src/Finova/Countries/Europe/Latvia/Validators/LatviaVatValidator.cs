@@ -4,39 +4,34 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Latvia.Validators;
 
-public partial class LatviaVatValidator : IVatValidator
+/// <summary>
+/// Validator for Latvian VAT numbers (PVN).
+/// Format: 11 digits.
+/// </summary>
+public partial class LatviaVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{11}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "LV";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new LatviaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 11;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidLatviaVatFormat);
-        }
-
         int[] weights = { 9, 1, 4, 8, 3, 10, 2, 5, 7, 6 };
 
         int sum = ChecksumHelper.CalculateWeightedSum(cleaned.Substring(0, 10), weights);
@@ -54,34 +49,18 @@ public partial class LatviaVatValidator : IVatValidator
         }
 
         int lastDigit = cleaned[10] - '0';
-        if (checkDigit != lastDigit)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidLatviaVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == lastDigit
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidLatviaVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Latvian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new LatviaVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a Latvian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new LatviaVatValidator().Parse(vat);
 }

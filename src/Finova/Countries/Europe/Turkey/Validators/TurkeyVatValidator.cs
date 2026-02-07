@@ -1,32 +1,65 @@
 using Finova.Core.Common;
 using Finova.Core.Vat;
-using Finova.Countries.Europe.Turkey.Validators;
 
 namespace Finova.Countries.Europe.Turkey.Validators;
 
 /// <summary>
-/// Validates Turkey VAT (KDV) number.
-/// Reuses the VKN (Tax ID) validator.
+/// Validator for Turkish VAT numbers (KDV).
+/// Turkish VAT numbers are identical to VKN (Vergi Kimlik Numarası).
+/// Format: 10 digits.
 /// </summary>
-public class TurkeyVatValidator : IVatValidator
+public partial class TurkeyVatValidator : VatValidatorBase
 {
-    public string CountryCode => "TR";
+    private const string CountryCodePrefix = "TR";
 
-    public ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new TurkeyVatValidator().ValidateInternal(input);
+
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        return new TurkeyVknValidator().Validate(vat);
+        if (string.IsNullOrWhiteSpace(vat))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+
+        // Remove TR prefix if present
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            cleaned = cleaned[2..];
+        }
+
+        // Delegate to VKN validator
+        return new TurkeyVknValidator().Validate(cleaned);
     }
 
-    public VatDetails? Parse(string? vat)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => true; // Handled by TurkeyVknValidator
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by TurkeyVknValidator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned) => ValidationResult.Success(); // Handled by TurkeyVknValidator
+
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid) return null;
-        
-        var vknDetails = new TurkeyVknValidator().Parse(vat);
+        var vknValidator = new TurkeyVknValidator() as IValidator<string>;
+        var vknNormalized = vknValidator.Parse(cleaned);
         
         return new VatDetails
         {
-            VatNumber = vknDetails?.VatNumber ?? vat!,
-            CountryCode = "TR",
+            VatNumber = vknNormalized ?? cleaned,
+            CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "VKN",
             IsEuVat = false,
@@ -34,4 +67,14 @@ public class TurkeyVatValidator : IVatValidator
             Notes = "Turkey VAT (KDV) uses the VKN number."
         };
     }
+
+    /// <summary>
+    /// Static validation method for Turkish VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new TurkeyVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for a Turkish VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new TurkeyVatValidator().Parse(vat);
 }

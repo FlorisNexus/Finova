@@ -4,85 +4,63 @@ using Finova.Core.Vat;
 namespace Finova.Countries.Asia.Singapore.Validators;
 
 /// <summary>
-/// Validates Singapore Goods and Services Tax (GST) registration number.
-/// In Singapore, GST-registered businesses use their UEN (Unique Entity Number)
-/// followed by a suffix for GST identification.
-/// Format: UEN + optional GST suffix (e.g., "M90312345A" or "201234567K" or "201234567K-GST")
+/// Validator for Singapore Goods and Services Tax (GST) registration number.
+/// GST registration uses UEN (Unique Entity Number).
 /// </summary>
-public class SingaporeGstValidator : IVatValidator
+public partial class SingaporeGstValidator : VatValidatorBase
 {
     private const string CountryCodePrefix = "SG";
 
     /// <inheritdoc/>
-    public string CountryCode => CountryCodePrefix;
-
-    /// <inheritdoc/>
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
-
-    /// <inheritdoc/>
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
-
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Validates a Singapore GST registration number.
+    /// Static validation method for tests.
     /// </summary>
-    /// <param name="gst">The GST registration number string.</param>
-    /// <returns>A ValidationResult indicating success or failure.</returns>
-    public static ValidationResult Validate(string? gst)
+    public static ValidationResult ValidateStatic(string? input) => new SingaporeGstValidator().ValidateInternal(input);
+
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        if (string.IsNullOrWhiteSpace(gst))
+        if (string.IsNullOrWhiteSpace(vat))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        var clean = gst.Trim().ToUpperInvariant()
-                       .Replace(" ", "")
-                       .Replace("-", "");
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
 
         // Remove common GST suffixes if present
-        if (clean.EndsWith("GST"))
+        if (cleaned.EndsWith("GST", StringComparison.OrdinalIgnoreCase))
         {
-            clean = clean[..^3];
+            cleaned = cleaned[..^3];
         }
 
         // Remove SG prefix if present
-        if (clean.StartsWith("SG"))
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
         {
-            clean = clean[2..];
+            cleaned = cleaned[2..];
         }
 
-        // Use the existing UEN validator since GST registration uses UEN
-        return SingaporeUenValidator.ValidateStatic(clean);
+        // Delegate to UEN validator
+        return SingaporeUenValidator.ValidateStatic(cleaned);
     }
 
-    /// <summary>
-    /// Gets details of a validated Singapore GST number.
-    /// </summary>
-    public static VatDetails? GetVatDetails(string? gst)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => true; // Handled by SingaporeUenValidator
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by SingaporeUenValidator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned) => ValidationResult.Success(); // Handled by SingaporeUenValidator
+
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(gst).IsValid)
-        {
-            return null;
-        }
-
-        var clean = gst!.Trim().ToUpperInvariant()
-                        .Replace(" ", "")
-                        .Replace("-", "");
-
-        // Remove common GST suffixes if present
-        if (clean.EndsWith("GST"))
-        {
-            clean = clean[..^3];
-        }
-
-        // Remove SG prefix if present
-        if (clean.StartsWith("SG"))
-        {
-            clean = clean[2..];
-        }
-
         return new VatDetails
         {
-            VatNumber = clean,
+            VatNumber = cleaned,
             CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "GST",
@@ -91,4 +69,14 @@ public class SingaporeGstValidator : IVatValidator
             Notes = "Singapore Goods and Services Tax (based on UEN)"
         };
     }
+
+    /// <summary>
+    /// Static validation method for Singaporean GST numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new SingaporeGstValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for a Singaporean GST number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new SingaporeGstValidator().Parse(vat);
 }

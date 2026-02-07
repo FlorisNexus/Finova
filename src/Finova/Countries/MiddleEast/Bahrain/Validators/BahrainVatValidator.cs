@@ -1,5 +1,5 @@
+using System.Text.RegularExpressions;
 using Finova.Core.Common;
-using Finova.Core.Identifiers;
 using Finova.Core.Vat;
 
 namespace Finova.Countries.MiddleEast.Bahrain.Validators;
@@ -8,61 +8,41 @@ namespace Finova.Countries.MiddleEast.Bahrain.Validators;
 /// Validator for Bahrain VAT Number / Tax Registration Number (TRN).
 /// Format: 15 digits. Usually starts with 3.
 /// </summary>
-public class BahrainVatValidator : ITaxIdValidator, IVatValidator
+public partial class BahrainVatValidator : VatValidatorBase
 {
-    public string CountryCode => "BH";
+    [GeneratedRegex(@"^3\d{14}$")]
+    private static partial Regex VatRegex();
 
-    public ValidationResult Validate(string? input) => ValidateVat(input);
+    private const string CountryCodePrefix = "BH";
 
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
     /// <summary>
-    /// Explicit implementation for IVatValidator.
+    /// Static validation method for tests.
     /// </summary>
-    VatDetails? IValidator<VatDetails>.Parse(string? input)
+    public static ValidationResult ValidateStatic(string? input) => new BahrainVatValidator().Validate(input);
+
+
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 15;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        var result = Validate(input);
-        if (!result.IsValid)
-        {
-            return null;
-        }
-
-        return new VatDetails
-        {
-            CountryCode = "BH",
-            VatNumber = input!.Trim(),
-            IsValid = true,
-            IdentifierKind = "VAT"
-        };
-    }
-
-    /// <summary>
-    /// Implementation for ITaxIdValidator / IValidator&lt;string&gt;.
-    /// </summary>
-    public string? Parse(string? input) => Validate(input).IsValid ? input?.Trim().ToUpperInvariant() : null;
-
-    public static ValidationResult ValidateVat(string? vat)
-    {
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var clean = vat.Trim();
-
-        if (!clean.All(char.IsDigit))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        if (clean.Length != 15)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidBahrainVatLength);
-        }
-
-        if (!clean.StartsWith('3'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidBahrainVatFormat);
-        }
-
+        // No public checksum algorithm available for BH.
         return ValidationResult.Success();
     }
+
+    /// <summary>
+    /// Static validation method for Bahraini VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new BahrainVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for a Bahraini VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new BahrainVatValidator().Parse(vat);
 }

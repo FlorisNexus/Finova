@@ -1,8 +1,61 @@
+using System.Collections.Concurrent;
 using Finova.Core.Common;
+using Finova.Core.Identifiers;
 using Finova.Countries.Africa.Egypt.Validators;
 using Finova.Countries.Africa.Kenya.Validators;
 using Finova.Countries.Asia.China.Validators;
 using Finova.Countries.Asia.India.Validators;
+using Finova.Countries.Europe.Albania.Validators;
+using Finova.Countries.Europe.Andorra.Validators;
+using Finova.Countries.Europe.Austria.Validators;
+using Finova.Countries.Europe.Azerbaijan.Validators;
+using Finova.Countries.Europe.Belarus.Validators;
+using Finova.Countries.Europe.Belgium.Validators;
+using Finova.Countries.Europe.BosniaAndHerzegovina.Validators;
+using Finova.Countries.Europe.Bulgaria.Validators;
+using Finova.Countries.Europe.Croatia.Validators;
+using Finova.Countries.Europe.Cyprus.Validators;
+using Finova.Countries.Europe.CzechRepublic.Validators;
+using Finova.Countries.Europe.Denmark.Validators;
+using Finova.Countries.Europe.Estonia.Validators;
+using Finova.Countries.Europe.FaroeIslands.Validators;
+using Finova.Countries.Europe.Finland.Validators;
+using Finova.Countries.Europe.France.Validators;
+using Finova.Countries.Europe.Georgia.Validators;
+using Finova.Countries.Europe.Germany.Validators;
+using Finova.Countries.Europe.Gibraltar.Validators;
+using Finova.Countries.Europe.Greece.Validators;
+using Finova.Countries.Europe.Greenland.Validators;
+using Finova.Countries.Europe.Hungary.Validators;
+using Finova.Countries.Europe.Iceland.Validators;
+using Finova.Countries.Europe.Ireland.Validators;
+using Finova.Countries.Europe.Italy.Validators;
+using Finova.Countries.Europe.Kosovo.Validators;
+using Finova.Countries.Europe.Latvia.Validators;
+using Finova.Countries.Europe.Liechtenstein.Validators;
+using Finova.Countries.Europe.Lithuania.Validators;
+using Finova.Countries.Europe.Luxembourg.Validators;
+using Finova.Countries.Europe.Malta.Validators;
+using Finova.Countries.Europe.Moldova.Validators;
+using Finova.Countries.Europe.Monaco.Validators;
+using Finova.Countries.Europe.Montenegro.Validators;
+using Finova.Countries.Europe.Netherlands.Validators;
+using Finova.Countries.Europe.NorthMacedonia.Validators;
+using Finova.Countries.Europe.Norway.Validators;
+using Finova.Countries.Europe.Poland.Validators;
+using Finova.Countries.Europe.Portugal.Validators;
+using Finova.Countries.Europe.Romania.Validators;
+using Finova.Countries.Europe.SanMarino.Validators;
+using Finova.Countries.Europe.Serbia.Validators;
+using Finova.Countries.Europe.Slovakia.Validators;
+using Finova.Countries.Europe.Slovenia.Validators;
+using Finova.Countries.Europe.Spain.Validators;
+using Finova.Countries.Europe.Sweden.Validators;
+using Finova.Countries.Europe.Switzerland.Validators;
+using Finova.Countries.Europe.Turkey.Validators;
+using Finova.Countries.Europe.Ukraine.Validators;
+using Finova.Countries.Europe.UnitedKingdom.Validators;
+using Finova.Countries.Europe.Vatican.Validators;
 using Finova.Countries.NorthAmerica.Canada.Validators;
 using Finova.Countries.NorthAmerica.UnitedStates.Validators;
 using Finova.Countries.Oceania.Australia.Validators;
@@ -24,6 +77,9 @@ namespace Finova.Services;
 /// </summary>
 public static class GlobalIdentityValidator
 {
+    private static readonly ConcurrentDictionary<string, INationalIdValidator> _nationalIdValidators = new();
+    private static readonly ConcurrentDictionary<string, ITaxIdValidator> _taxIdValidators = new();
+
     /// <summary>
     /// Validates a National ID for the specified country.
     /// </summary>
@@ -36,12 +92,75 @@ public static class GlobalIdentityValidator
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        return countryCode.ToUpperInvariant() switch
+        string country = countryCode.ToUpperInvariant();
+
+        var validator = _nationalIdValidators.GetOrAdd(country, code => code switch
         {
-            "CN" => new ChinaResidentIdentityCardValidator().Validate(nationalId),
-            "IN" => new IndiaAadhaarValidator().Validate(nationalId),
-            "CA" => new CanadaSinValidator().Validate(nationalId),
-            "BR" => new BrazilCpfValidator().Validate(nationalId),
+            "AL" => new AlbaniaNationalIdValidator(),
+            "AD" => new AndorraNationalIdValidator(),
+            "AT" => new AustriaNationalIdValidator(),
+            "AZ" => new AzerbaijanNationalIdValidator(),
+            "BY" => new BelarusNationalIdValidator(),
+            "BE" => new BelgiumNationalIdValidator(),
+            "BA" => new BosniaAndHerzegovinaNationalIdValidator(),
+            "BG" => new BulgariaNationalIdValidator(),
+            "CY" => new CyprusNationalIdValidator(),
+            "CZ" => new CzechRepublicNationalIdValidator(),
+            "DK" => new DenmarkCprValidator(),
+            "EE" => new EstoniaNationalIdValidator(),
+            "FO" => new FaroeIslandsNationalIdValidator(),
+            "FI" => new FinlandHenkilotunnusValidator(),
+            "FR" => new FranceNationalIdValidator(),
+            "GE" => new GeorgiaNationalIdValidator(),
+            "DE" => new GermanyNationalIdValidator(),
+            "GI" => new GibraltarNationalIdValidator(),
+            "GR" or "EL" => new GreeceNationalIdValidator(),
+            "GL" => new GreenlandNationalIdValidator(),
+            "HU" => new HungaryNationalIdValidator(),
+            "IS" => new IcelandKennitalaValidator(),
+            "IE" => new IrelandNationalIdValidator(),
+            "IT" => new ItalyNationalIdValidator(),
+            "XK" => new KosovoNationalIdValidator(),
+            "LV" => new LatviaNationalIdValidator(),
+            "LI" => new LiechtensteinNationalIdValidator(),
+            "LT" => new LithuaniaNationalIdValidator(),
+            "LU" => new LuxembourgNationalIdValidator(),
+            "MT" => new MaltaNationalIdValidator(),
+            "MD" => new MoldovaNationalIdValidator(),
+            "MC" => new MonacoNationalIdValidator(),
+            "ME" => new MontenegroNationalIdValidator(),
+            "NL" => new NetherlandsNationalIdValidator(),
+            "MK" => new NorthMacedoniaNationalIdValidator(),
+            "NO" => new NorwayNationalIdValidator(),
+            "PL" => new PolandNationalIdValidator(),
+            "PT" => new PortugalNationalIdValidator(),
+            "RO" => new RomaniaNationalIdValidator(),
+            "SM" => new SanMarinoNationalIdValidator(),
+            "RS" => new SerbiaNationalIdValidator(),
+            "SK" => new SlovakiaNationalIdValidator(),
+            "SI" => new SloveniaNationalIdValidator(),
+            "ES" => new SpainNationalIdValidator(),
+            "SE" => new SwedenNationalIdValidator(),
+            "CH" => new SwitzerlandNationalIdValidator(),
+            "TR" => new TurkeyNationalIdValidator(),
+            "UA" => new UkraineNationalIdValidator(),
+            "GB" or "UK" => new UnitedKingdomNationalIdValidator(),
+            "VA" => new VaticanNationalIdValidator(),
+            "CN" => new ChinaResidentIdentityCardValidator(),
+            "IN" => new IndiaAadhaarValidator(),
+            "CA" => new CanadaSinValidator(),
+            "BR" => new BrazilCpfValidator(),
+            _ => null!
+        });
+
+        if (validator != null)
+        {
+            return validator.Validate(nationalId);
+        }
+
+        // Handle cases that don't have a standard class yet
+        return country switch
+        {
             "EG" => EgyptNationalIdValidator.ValidateStatic(nationalId),
             "KE" => KenyaNationalIdValidator.ValidateStatic(nationalId),
             "ID" => IndonesiaNikValidator.ValidateStatic(nationalId),
@@ -68,25 +187,37 @@ public static class GlobalIdentityValidator
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        return countryCode.ToUpperInvariant() switch
+        string country = countryCode.ToUpperInvariant();
+
+        var validator = _taxIdValidators.GetOrAdd(country, code => code switch
+        {
+            "IN" => new IndiaPanValidator(),
+            "CA" => new CanadaBusinessNumberValidator(),
+            "US" => new UnitedStatesEinValidator(),
+            "BR" => new BrazilCnpjValidator(),
+            "CO" => new ColombiaVatValidator(),
+            "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator(),
+            "VN" => new VietnamTaxIdValidator(),
+            "EG" => new EgyptTaxRegistrationNumberValidator(),
+            "MA" => new Finova.Countries.Africa.Morocco.Validators.MoroccoIceValidator(),
+            "DZ" => new Finova.Countries.Africa.Algeria.Validators.AlgeriaNifValidator(),
+            "TN" => new Finova.Countries.Africa.Tunisia.Validators.TunisiaMatriculeFiscalValidator(),
+            "NG" => new Finova.Countries.Africa.Nigeria.Validators.NigeriaTinValidator(),
+            _ => null!
+        });
+
+        if (validator != null)
+        {
+            return validator.Validate(taxId);
+        }
+
+        return country switch
         {
             "CN" => ChinaUnifiedSocialCreditCodeValidator.ValidateUscc(taxId),
-            "IN" => new IndiaPanValidator().Validate(taxId),
-            "CA" => new CanadaBusinessNumberValidator().Validate(taxId),
-            "US" => new UnitedStatesEinValidator().Validate(taxId),
             "AU" => ValidateAustraliaTaxId(taxId),
-            "BR" => new BrazilCnpjValidator().Validate(taxId),
             "AR" => ArgentinaCuitValidator.ValidateStatic(taxId),
             "CL" => ChileRutValidator.ValidateStatic(taxId),
-            "CO" => ColombiaVatValidator.Validate(taxId),
             "MX" => MexicoRfcValidator.ValidateStatic(taxId),
-            "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator().Validate(taxId),
-            "VN" => new VietnamTaxIdValidator().Validate(taxId),
-            "EG" => new EgyptTaxRegistrationNumberValidator().Validate(taxId),
-            "MA" => new Finova.Countries.Africa.Morocco.Validators.MoroccoIceValidator().Validate(taxId),
-            "DZ" => new Finova.Countries.Africa.Algeria.Validators.AlgeriaNifValidator().Validate(taxId),
-            "TN" => new Finova.Countries.Africa.Tunisia.Validators.TunisiaMatriculeFiscalValidator().Validate(taxId),
-            "NG" => new Finova.Countries.Africa.Nigeria.Validators.NigeriaTinValidator().Validate(taxId),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }

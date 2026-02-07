@@ -3,37 +3,39 @@ using Finova.Core.Identifiers;
 
 namespace Finova.Countries.Europe.Vatican.Validators;
 
-public class VaticanNationalIdValidator : INationalIdValidator
+/// <summary>
+/// Validator for Vatican National Identity Number.
+/// </summary>
+public partial class VaticanNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "VA";
+        public override string CountryCode => "VA";
 
-    /// <summary>
-    /// Validates the Vatican National ID.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? nationalId)
     {
-        return ValidateStatic(nationalId);
-    }
+        if (string.IsNullOrWhiteSpace(nationalId))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
 
-    /// <summary>
-    /// Validates the Vatican National ID (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        // Since there is no standard public format, we will return failure for now
-        // or maybe just check for non-empty.
-        // Let's assume it's not supported for now to be safe.
         return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.VaticanNationalIdNotSupported);
     }
 
     /// <inheritdoc/>
-    public string? Parse(string? input)
+    protected override bool IsValidLength(string sanitized) => false;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => false;
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return null;
+        return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.VaticanNationalIdNotSupported);
     }
+
+    /// <summary>
+    /// Static validation method for Vatican National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new VaticanNationalIdValidator().Validate(nationalId);
 }

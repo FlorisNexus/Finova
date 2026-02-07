@@ -38,7 +38,7 @@ public class UnitedKingdomIbanValidatorTests
     [Theory]
     [InlineData("GB29NWBK60161331926819")]
     public void ValidateUnitedKingdomIban_WithValidIbans_ReturnsTrue(string iban)
-        => UnitedKingdomIbanValidator.ValidateUnitedKingdomIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 
     [Fact]
     public void IsValidIban_CalledMultipleTimes_ReturnsConsistentResults()

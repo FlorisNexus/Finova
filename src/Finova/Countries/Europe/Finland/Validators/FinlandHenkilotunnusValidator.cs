@@ -5,89 +5,100 @@ namespace Finova.Countries.Europe.Finland.Validators;
 
 /// <summary>
 /// Validator for Finland Personal Identity Code (Henkilötunnus).
+/// Format: DDMMYY{century_sign}NNNC (11 characters).
+/// The century sign (+, -, A) is meaningful and must be preserved during sanitization.
 /// </summary>
-public class FinlandHenkilotunnusValidator : INationalIdValidator
+public partial class FinlandHenkilotunnusValidator : NationalIdValidatorBase
 {
-    /// <inheritdoc/>
-    public string CountryCode => "FI";
-
     private const string CheckChars = "0123456789ABCDEFHJKLMNPRSTUVWXY";
 
-    /// <summary>
-    /// Validates the Finnish Henkilötunnus.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
-    {
-        return ValidateStatic(nationalId);
-    }
+    /// <inheritdoc/>
+        public override string CountryCode => "FI";
 
     /// <summary>
-    /// Validates the Finnish Henkilötunnus (Static).
+    /// Sanitizes Finnish Henkilötunnus input, preserving the century sign characters (+, -).
+    /// Only removes whitespace and converts letters to uppercase.
     /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
+    private static string? SanitizeHetu(string? input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return input;
+        }
+
+        // Only trim whitespace and uppercase; preserve +, -, A (century signs)
+        return input.Trim().ToUpperInvariant();
+    }
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? nationalId)
     {
         if (string.IsNullOrWhiteSpace(nationalId))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        // Normalize: Remove spaces, uppercase
-        string normalized = nationalId.Trim().ToUpperInvariant();
+        var sanitized = SanitizeHetu(nationalId)!;
 
-        if (normalized.Length != 11)
+        if (!IsValidLength(sanitized))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength,
+                string.Format(ValidationMessages.InvalidLength, CountryCode));
         }
 
-        // Check century sign
-        char centurySign = normalized[6];
-        if (centurySign != '+' && centurySign != '-' && centurySign != 'A')
+        if (!ValidateFormat(sanitized))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidCenturySign);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat,
+                string.Format(ValidationMessages.InvalidFormat, CountryCode));
         }
 
-        // Extract date and individual number
-        string dateAndIndividual = normalized.Substring(0, 6) + normalized.Substring(7, 3);
-
-        if (!long.TryParse(dateAndIndividual, out long number))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFormat);
-        }
-
-        // Validate Date
-        int day = int.Parse(normalized.Substring(0, 2));
-        int month = int.Parse(normalized.Substring(2, 2));
-
-        if (month < 1 || month > 12 || day < 1 || day > 31)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidDatePart);
-        }
-
-        // Calculate Checksum (Mod 31)
-        int remainder = (int)(number % 31);
-        char expectedCheckChar = CheckChars[remainder];
-
-        if (normalized[10] != expectedCheckChar)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return ValidateChecksum(sanitized);
     }
 
     /// <inheritdoc/>
-    public string? Parse(string? input)
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 11;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(input))
+        // Check century sign
+        char centurySign = sanitized[6];
+        if (centurySign != '+' && centurySign != '-' && centurySign != 'A')
         {
-            return null;
+            return false;
         }
 
-        string normalized = input.Trim().ToUpperInvariant();
-        return normalized;
+        // Extract date and individual number
+        string dateAndIndividual = sanitized.Substring(0, 6) + sanitized.Substring(7, 3);
+
+        if (!long.TryParse(dateAndIndividual, out _))
+        {
+            return false;
+        }
+
+        // Validate Date
+        int day = int.Parse(sanitized.Substring(0, 2));
+        int month = int.Parse(sanitized.Substring(2, 2));
+
+        return month >= 1 && month <= 12 && day >= 1 && day <= 31;
     }
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
+    {
+        string dateAndIndividual = sanitized.Substring(0, 6) + sanitized.Substring(7, 3);
+        long number = long.Parse(dateAndIndividual);
+
+        int remainder = (int)(number % 31);
+        char expectedCheckChar = CheckChars[remainder];
+
+        return sanitized[10] == expectedCheckChar
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+    }
+
+    /// <summary>
+    /// Static validation method for Finnish Henkilötunnus.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? nationalId) => new FinlandHenkilotunnusValidator().Validate(nationalId);
 }

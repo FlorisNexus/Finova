@@ -11,7 +11,7 @@ public class JapanVatValidatorTests
     [InlineData("JPT8040001083697")] // With JP prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = JapanVatValidator.Validate(vat);
+        var result = JapanVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -23,7 +23,7 @@ public class JapanVatValidatorTests
     [InlineData("T12345678901234")] // Too long (14 digits after T)
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = JapanVatValidator.Validate(vat);
+        var result = JapanVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

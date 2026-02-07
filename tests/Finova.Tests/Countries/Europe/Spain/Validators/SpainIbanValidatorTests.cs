@@ -58,7 +58,7 @@ public class SpainIbanValidatorTests
     [InlineData("ES6621000418401234567891")]
     public void ValidateSpainIban_WithValidIbans_ReturnsTrue(string iban)
     {
-        SpainIbanValidator.ValidateSpainIban(iban).IsValid.Should().BeTrue();
+        _validator.Validate(iban).IsValid.Should().BeTrue();
     }
 
     [Theory]
@@ -67,7 +67,7 @@ public class SpainIbanValidatorTests
     [InlineData(null)] // Null
     public void ValidateSpainIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
-        SpainIbanValidator.ValidateSpainIban(iban).IsValid.Should().BeFalse();
+        _validator.Validate(iban).IsValid.Should().BeFalse();
     }
 
     [Fact]

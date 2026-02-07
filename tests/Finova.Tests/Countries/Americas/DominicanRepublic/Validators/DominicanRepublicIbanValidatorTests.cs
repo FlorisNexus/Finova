@@ -35,5 +35,5 @@ public class DominicanRepublicIbanValidatorTests
     [Theory]
     [InlineData("DO22ACAU00000000000123456789")]
     public void ValidateDominicanRepublicIban_WithValidIbans_ReturnsTrue(string iban)
-        => DominicanRepublicIbanValidator.ValidateDominicanRepublicIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

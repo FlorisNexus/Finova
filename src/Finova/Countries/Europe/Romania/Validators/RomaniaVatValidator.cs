@@ -4,42 +4,36 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Romania.Validators;
 
-public partial class RomaniaVatValidator : IVatValidator
+/// <summary>
+/// Validator for Romanian VAT numbers (CIF).
+/// Format: 2 to 10 digits.
+/// </summary>
+public partial class RomaniaVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{2,10}$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "RO";
     // Weights for Romanian CIF (applied to the first 9 digits, padded with 0 if needed)
-    // 7, 5, 3, 2, 1, 7, 5, 3, 2
     private static readonly int[] Weights = { 7, 5, 3, 2, 1, 7, 5, 3, 2 };
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new RomaniaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length >= 2 && cleaned.Length <= 10;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidRomaniaVatFormat);
-        }
-
         string padded = cleaned.PadLeft(10, '0');
 
         string dataPart = padded[..9];
@@ -53,26 +47,18 @@ public partial class RomaniaVatValidator : IVatValidator
             calculated = 0;
         }
 
-        if (calculated != checkDigit)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidRomaniaVatChecksum);
-        }
-
-        return ValidationResult.Success();
+        return calculated == checkDigit
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidRomaniaVatChecksum);
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        var result = Validate(vat);
-        if (!result.IsValid)
-        {
-            return null;
-        }
-        var cleaned = VatSanitizer.Sanitize(vat)!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-        return new VatDetails { CountryCode = VatPrefix, VatNumber = cleaned, IsValid = true };
-    }
+    /// <summary>
+    /// Static validation method for Romanian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new RomaniaVatValidator().Validate(vat);
+
+    /// <summary>
+    /// Gets details for a Romanian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new RomaniaVatValidator().Parse(vat);
 }

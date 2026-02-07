@@ -4,62 +4,45 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.Iceland.Validators;
 
-public partial class IcelandVatValidator : IVatValidator
+/// <summary>
+/// Validator for Icelandic VAT numbers (VSK-númer).
+/// Format: 5, 6, or 10 digits.
+/// </summary>
+public partial class IcelandVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^(\d{5,6}|\d{10})$")]
     private static partial Regex VatRegex();
 
     private const string VatPrefix = "IS";
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new IcelandVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 5 || cleaned.Length == 6 || cleaned.Length == 10;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIcelandVatFormat);
-        }
-
+        // No public checksum algorithm available.
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for Icelandic VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new IcelandVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for an Icelandic VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new IcelandVatValidator().Parse(vat);
 }

@@ -76,7 +76,7 @@ public class NorwayIbanValidatorTests
     public void ValidateNorwayIban_WithValidIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = NorwayIbanValidator.ValidateNorwayIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -88,7 +88,7 @@ public class NorwayIbanValidatorTests
     public void ValidateNorwayIban_WithFormattedIbans_ReturnsTrue(string iban)
     {
         // Act
-        var result = NorwayIbanValidator.ValidateNorwayIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeTrue();
@@ -105,7 +105,7 @@ public class NorwayIbanValidatorTests
     public void ValidateNorwayIban_WithInvalidIbans_ReturnsFalse(string? iban)
     {
         // Act
-        var result = NorwayIbanValidator.ValidateNorwayIban(iban);
+        var result = _validator.Validate(iban);
 
         // Assert
         result.IsValid.Should().BeFalse();

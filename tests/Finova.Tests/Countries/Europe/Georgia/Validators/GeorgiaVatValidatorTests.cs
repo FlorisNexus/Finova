@@ -9,7 +9,7 @@ public class GeorgiaVatValidatorTests
     [InlineData("GE123456789")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = GeorgiaVatValidator.Validate(vat);
+        var result = GeorgiaVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class GeorgiaVatValidatorTests
     [InlineData("XX123456789")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = GeorgiaVatValidator.Validate(vat);
+        var result = GeorgiaVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

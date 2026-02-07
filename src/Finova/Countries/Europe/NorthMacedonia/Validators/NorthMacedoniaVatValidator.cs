@@ -4,7 +4,11 @@ using Finova.Core.Vat;
 
 namespace Finova.Countries.Europe.NorthMacedonia.Validators;
 
-public partial class NorthMacedoniaVatValidator : IVatValidator
+/// <summary>
+/// Validator for North Macedonian VAT numbers (EDB).
+/// Format: 13 digits.
+/// </summary>
+public partial class NorthMacedoniaVatValidator : VatValidatorBase
 {
     [GeneratedRegex(@"^\d{13}$")]
     private static partial Regex VatRegex();
@@ -12,32 +16,23 @@ public partial class NorthMacedoniaVatValidator : IVatValidator
     private const string VatPrefix = "MK";
     private static readonly int[] Weights = { 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
 
-    public string CountryCode => VatPrefix;
+    /// <inheritdoc/>
+        public override string CountryCode => VatPrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new NorthMacedoniaVatValidator().Validate(input);
 
-    ValidationResult IValidator<VatDetails>.Validate(string? instance) => Validate(instance);
 
-    public VatDetails? Parse(string? vat) => GetVatDetails(vat);
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => cleaned.Length == 13;
 
-    public static ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => VatRegex().IsMatch(cleaned);
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned)
     {
-        vat = VatSanitizer.Sanitize(vat);
-
-        if (string.IsNullOrWhiteSpace(vat))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var cleaned = vat.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        if (!VatRegex().IsMatch(cleaned))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidNorthMacedoniaVatFormat);
-        }
-
         int sum = ChecksumHelper.CalculateWeightedSum(cleaned[..12], Weights);
         int remainder = sum % 11;
         int checkDigit = 11 - remainder;
@@ -59,26 +54,13 @@ public partial class NorthMacedoniaVatValidator : IVatValidator
         return ValidationResult.Success();
     }
 
-    public static VatDetails? GetVatDetails(string? vat)
-    {
-        vat = VatSanitizer.Sanitize(vat);
+    /// <summary>
+    /// Static validation method for North Macedonian VAT numbers.
+    /// </summary>
+        public static ValidationResult ValidateVat(string? vat) => new NorthMacedoniaVatValidator().Validate(vat);
 
-        if (!Validate(vat).IsValid)
-        {
-            return null;
-        }
-
-        var cleaned = vat!.Trim().ToUpperInvariant();
-        if (cleaned.StartsWith(VatPrefix))
-        {
-            cleaned = cleaned[2..];
-        }
-
-        return new VatDetails
-        {
-            CountryCode = VatPrefix,
-            VatNumber = cleaned,
-            IsValid = true
-        };
-    }
+    /// <summary>
+    /// Gets details for a North Macedonian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new NorthMacedoniaVatValidator().Parse(vat);
 }

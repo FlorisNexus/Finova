@@ -35,5 +35,5 @@ public class BahrainIbanValidatorTests
     [Theory]
     [InlineData("BH67BMAG00001299123456")]
     public void ValidateBahrainIban_WithValidIbans_ReturnsTrue(string iban)
-        => BahrainIbanValidator.ValidateBahrainIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

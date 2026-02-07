@@ -11,7 +11,7 @@ public class FranceVatValidatorTests
     [InlineData("40303265045")] // Without prefix
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = FranceVatValidator.Validate(vat);
+        var result = FranceVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeTrue();
     }
 
@@ -21,7 +21,7 @@ public class FranceVatValidatorTests
     [InlineData("")]
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = FranceVatValidator.Validate(vat);
+        var result = FranceVatValidator.ValidateStatic(vat);
         result.IsValid.Should().BeFalse();
     }
 

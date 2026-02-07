@@ -3,6 +3,7 @@ using Finova.Countries.Asia.China.Validators;
 using Finova.Countries.Asia.India.Validators;
 using Finova.Countries.Asia.Japan.Validators;
 using Finova.Countries.Asia.Singapore.Validators;
+using Finova.Countries.Asia.SouthKorea.Validators;
 
 namespace Finova.Services;
 
@@ -25,6 +26,9 @@ public class AsiaBankValidator
         {
             "CN" => new ChinaCnapsValidator().Validate(routingNumber),
             "IN" => new IndiaIfscValidator().Validate(routingNumber),
+            "SG" => new SingaporeBankCodeValidator().Validate(routingNumber),
+            "JP" => new JapanZenginCodeValidator().Validate(routingNumber),
+            "KR" => new SouthKoreaBankCodeValidator().Validate(routingNumber),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }

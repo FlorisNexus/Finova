@@ -16,7 +16,7 @@ public class IcelandEnterpriseValidatorTests
     [InlineData("12345", false)] // Too short
     public void Validate_ValidKennitala_ReturnsExpectedResult(string? input, bool expectedIsValid)
     {
-        var result = IcelandKennitalaValidator.ValidateKennitala(input);
+        var result = IcelandKennitalaValidator.ValidateStatic(input);
         Assert.Equal(expectedIsValid, result.IsValid);
     }
 

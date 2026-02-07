@@ -1,32 +1,65 @@
 using Finova.Core.Common;
 using Finova.Core.Vat;
-using Finova.Countries.Europe.Russia.Validators;
 
 namespace Finova.Countries.Europe.Russia.Validators;
 
 /// <summary>
-/// Validates Russia VAT (NDS) number.
-/// Reuses the INN (Tax ID) validator.
+/// Validator for Russian VAT numbers (NDS).
+/// Russian VAT numbers are identical to INN (Individual Taxpayer Number).
+/// Format: 10 or 12 digits.
 /// </summary>
-public class RussiaVatValidator : IVatValidator
+public partial class RussiaVatValidator : VatValidatorBase
 {
-    public string CountryCode => "RU";
+    private const string CountryCodePrefix = "RU";
 
-    public ValidationResult Validate(string? vat)
+    /// <inheritdoc/>
+        public override string CountryCode => CountryCodePrefix;
+    /// <summary>
+    /// Static validation method for tests.
+    /// </summary>
+    public static ValidationResult ValidateStatic(string? input) => new RussiaVatValidator().ValidateInternal(input);
+
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateInternal(string? vat)
     {
-        return new RussiaInnValidator().Validate(vat);
+        if (string.IsNullOrWhiteSpace(vat))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
+        var sanitized = VatSanitizer.Sanitize(vat)!;
+        var cleaned = sanitized;
+
+        // Remove RU prefix if present
+        if (cleaned.StartsWith(CountryCodePrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            cleaned = cleaned[2..];
+        }
+
+        // Delegate to INN validator
+        return new RussiaInnValidator().Validate(cleaned);
     }
 
-    public VatDetails? Parse(string? vat)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string cleaned) => true; // Handled by RussiaInnValidator
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string cleaned) => true; // Handled by RussiaInnValidator
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string cleaned) => ValidationResult.Success(); // Handled by RussiaInnValidator
+
+    /// <inheritdoc/>
+    protected override VatDetails CreateDetails(string cleaned)
     {
-        if (!Validate(vat).IsValid) return null;
-        
-        var inn = new RussiaInnValidator().Parse(vat);
+        var innValidator = new RussiaInnValidator() as IValidator<string>;
+        var inn = innValidator.Parse(cleaned);
         
         return new VatDetails
         {
-            VatNumber = inn ?? vat!,
-            CountryCode = "RU",
+            VatNumber = inn ?? cleaned,
+            CountryCode = CountryCodePrefix,
             IsValid = true,
             IdentifierKind = "INN",
             IsEuVat = false,
@@ -34,4 +67,14 @@ public class RussiaVatValidator : IVatValidator
             Notes = "Russia VAT (NDS) uses the INN number."
         };
     }
+
+    /// <summary>
+    /// Static validation method for Russian VAT numbers.
+    /// </summary>
+    public static ValidationResult ValidateVat(string? vat) => new RussiaVatValidator().ValidateInternal(vat);
+
+    /// <summary>
+    /// Gets details for a Russian VAT number.
+    /// </summary>
+    public static VatDetails? GetVatDetails(string? vat) => new RussiaVatValidator().Parse(vat);
 }

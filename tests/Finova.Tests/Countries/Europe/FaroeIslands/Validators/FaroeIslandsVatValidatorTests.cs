@@ -9,7 +9,7 @@ public class FaroeIslandsVatValidatorTests
     [InlineData("FO123456")]
     public void Validate_WithValidVat_ReturnsSuccess(string vat)
     {
-        var result = FaroeIslandsVatValidator.Validate(vat);
+        var result = FaroeIslandsVatValidator.ValidateStatic(vat);
         Assert.True(result.IsValid);
     }
 
@@ -21,7 +21,7 @@ public class FaroeIslandsVatValidatorTests
     [InlineData("XX123456")] // Wrong prefix
     public void Validate_WithInvalidVat_ReturnsFailure(string? vat)
     {
-        var result = FaroeIslandsVatValidator.Validate(vat);
+        var result = FaroeIslandsVatValidator.ValidateStatic(vat);
         Assert.False(result.IsValid);
     }
 }

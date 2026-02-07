@@ -6,50 +6,28 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Europe.France.Validators;
 
 /// <summary>
-/// Validates the French National ID (Numéro de Sécurité Sociale / NIR).
+/// Validator for French National ID (Numéro de Sécurité Sociale / NIR).
+/// Format: 15 characters (13 digits/chars + 2 key digits).
 /// </summary>
-public class FranceNationalIdValidator : INationalIdValidator
+public partial class FranceNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "FR";
+        public override string CountryCode => "FR";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input) => ValidateStatic(input);
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 15;
 
-    /// <summary>
-    /// Validates the French National ID format and checksum.
-    /// </summary>
-    /// <param name="input">The NIR string to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/>.</returns>
-    public static ValidationResult ValidateStatic(string? input)
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        // 1. Sanitize: Remove spaces, dots, dashes
-        string? sanitized = InputSanitizer.Sanitize(input);
-
-        if (string.IsNullOrEmpty(sanitized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        // 2. Length Check: Must be 15 characters (13 digits + 2 key digits)
-        if (sanitized.Length != 15)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidFranceNationalIdLength);
-        }
-
-        // 3. Format Check: 13 chars (digits or 2A/2B) + 2 digits
         // Regex: First digit (1/2), then 12 digits OR specific Corsica pattern, then 2 digits key
-        if (!Regex.IsMatch(sanitized, @"^[12]\d{14}$") && !Regex.IsMatch(sanitized, @"^[12]\d{4}(2A|2B)\d{6}\d{2}$"))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidFranceNationalIdFormat);
-        }
+        return Regex.IsMatch(sanitized, @"^[12]\d{14}$") || 
+               Regex.IsMatch(sanitized, @"^[12]\d{4}(2A|2B)\d{6}\d{2}$");
+    }
 
-        // 4. Checksum Calculation
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
+    {
         string numberPart = sanitized.Substring(0, 13);
         string keyPart = sanitized.Substring(13, 2);
 
@@ -77,18 +55,13 @@ public class FranceNationalIdValidator : INationalIdValidator
         // NIR Key Formula: 97 - (Number % 97)
         long calculatedKey = 97 - (long)(number % 97);
 
-        if (calculatedKey != key)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidFranceNationalIdChecksum);
-        }
-
-        return ValidationResult.Success();
+        return calculatedKey == key
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidFranceNationalIdChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = ValidateStatic(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for French National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? input) => new FranceNationalIdValidator().Validate(input);
 }

@@ -25,7 +25,7 @@ public class PortugalNifValidator : ITaxIdValidator
     public static ValidationResult ValidateNif(string? nif)
     {
         var normalized = EnterpriseNumberNormalizer.Normalize(nif, "PT");
-        return PortugalVatValidator.Validate(normalized);
+        return PortugalVatValidator.ValidateVat(normalized);
     }
 
     public static string? Format(string? instance)

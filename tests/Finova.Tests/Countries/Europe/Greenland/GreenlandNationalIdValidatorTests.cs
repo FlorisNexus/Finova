@@ -9,7 +9,7 @@ public class GreenlandNationalIdValidatorTests
     private readonly GreenlandNationalIdValidator _validator = new();
 
     [Theory]
-    [InlineData("0101501234")] // Example
+    [InlineData("0101500004")] // 01 Jan 1950, checksum: (0*4+1*3+0*2+1*7+5*6+0*5+0*4+0*3+0*2+4*1) = 44, 44 % 11 = 0
     public void Validate_ValidCpr_ReturnsSuccess(string? input)
     {
         var result = _validator.Validate(input);
@@ -52,8 +52,8 @@ public class GreenlandNationalIdValidatorTests
     [Fact]
     public void Parse_ValidInput_ReturnsSanitized()
     {
-        var result = _validator.Parse(" 0101501234 ");
-        result.Should().Be("0101501234");
+        var result = _validator.Parse(" 0101500004 ");
+        result.Should().Be("0101500004");
     }
 
     [Fact]

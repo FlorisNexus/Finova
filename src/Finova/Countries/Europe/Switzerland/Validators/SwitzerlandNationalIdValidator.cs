@@ -4,55 +4,27 @@ using Finova.Core.Identifiers;
 namespace Finova.Countries.Europe.Switzerland.Validators;
 
 /// <summary>
-/// Validates the Swiss Social Security Number (AHV/AVS).
+/// Validator for Swiss Social Security Number (AHV/AVS).
+/// Format: 13 digits starting with 756.
 /// </summary>
-public class SwitzerlandNationalIdValidator : INationalIdValidator
+public partial class SwitzerlandNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "CH";
+        public override string CountryCode => "CH";
 
     /// <inheritdoc/>
-    public ValidationResult Validate(string? input)
+    protected override bool IsValidLength(string sanitized) => sanitized.Length == 13;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized)
     {
-        return ValidateStatic(input);
+        return sanitized.StartsWith("756") && long.TryParse(sanitized, out _);
     }
 
-    /// <summary>
-    /// Validates the Swiss Social Security Number (AHV/AVS) (Static).
-    /// </summary>
-    /// <param name="input">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? input)
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        // Remove dots
-        string? sanitized = InputSanitizer.Sanitize(input);
-        if (string.IsNullOrEmpty(sanitized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        if (sanitized.Length != 13)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
-        if (!sanitized.StartsWith("756"))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidSwitzerlandNationalIdFormat);
-        }
-
-        if (!long.TryParse(sanitized, out _))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.MustContainOnlyDigits);
-        }
-
-        // EAN-13 Checksum (Mod 10)
-        // Weights: 1, 3, 1, 3...
+        // EAN-13 Checksum
         int sum = 0;
         for (int i = 0; i < 12; i++)
         {
@@ -63,18 +35,13 @@ public class SwitzerlandNationalIdValidator : INationalIdValidator
         int remainder = sum % 10;
         int checkDigit = remainder == 0 ? 0 : 10 - remainder;
 
-        if (checkDigit != (sanitized[12] - '0'))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        return ValidationResult.Success();
+        return checkDigit == (sanitized[12] - '0')
+            ? ValidationResult.Success()
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Swiss AHV/AVS.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? input) => new SwitzerlandNationalIdValidator().Validate(input);
 }

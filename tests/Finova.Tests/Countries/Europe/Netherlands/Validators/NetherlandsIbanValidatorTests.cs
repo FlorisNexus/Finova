@@ -37,8 +37,5 @@ public class NetherlandsIbanValidatorTests
     [Theory]
     [InlineData("NL91ABNA0417164300")]
     public void ValidateDutchIban_WithValidIbans_ReturnsTrue(string iban)
-        => NetherlandsIbanValidator.ValidateNetherlandsIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }
-
-
-

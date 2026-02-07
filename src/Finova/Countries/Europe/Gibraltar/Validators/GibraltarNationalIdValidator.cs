@@ -5,54 +5,28 @@ namespace Finova.Countries.Europe.Gibraltar.Validators;
 
 /// <summary>
 /// Validator for Gibraltar Identity Card Number.
-/// Format: G1-1234567-A? Or similar.
-/// Actually, Gibraltar ID cards have a number.
-/// Format: 7 digits? Or G followed by digits?
-/// Information is scarce. Assuming simple alphanumeric or length check.
-/// Let's assume 7-9 digits/chars.
+/// Format: 5 to 12 characters.
 /// </summary>
-public class GibraltarNationalIdValidator : INationalIdValidator
+public partial class GibraltarNationalIdValidator : NationalIdValidatorBase
 {
     /// <inheritdoc/>
-    public string CountryCode => "GI";
+        public override string CountryCode => "GI";
 
-    /// <summary>
-    /// Validates the Gibraltar Identity Card Number.
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public ValidationResult Validate(string? nationalId)
+    /// <inheritdoc/>
+    protected override bool IsValidLength(string sanitized) => sanitized.Length >= 5 && sanitized.Length <= 12;
+
+    /// <inheritdoc/>
+    protected override bool ValidateFormat(string sanitized) => true; // Basic length check is enough for GI currently.
+
+    /// <inheritdoc/>
+    protected override ValidationResult ValidateChecksum(string sanitized)
     {
-        return ValidateStatic(nationalId);
-    }
-
-    /// <summary>
-    /// Validates the Gibraltar Identity Card Number (Static).
-    /// </summary>
-    /// <param name="nationalId">The ID to validate.</param>
-    /// <returns>A <see cref="ValidationResult"/> indicating success or failure.</returns>
-    public static ValidationResult ValidateStatic(string? nationalId)
-    {
-        if (string.IsNullOrWhiteSpace(nationalId))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        string sanitized = InputSanitizer.Sanitize(nationalId) ?? string.Empty;
-
-        // Assuming length check for now as specific format is not well-documented publicly.
-        if (sanitized.Length < 5 || sanitized.Length > 12)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidLength);
-        }
-
+        // No public checksum algorithm available for GI.
         return ValidationResult.Success();
     }
 
-    /// <inheritdoc/>
-    public string? Parse(string? input)
-    {
-        var result = Validate(input);
-        return result.IsValid ? InputSanitizer.Sanitize(input) : null;
-    }
+    /// <summary>
+    /// Static validation method for Gibraltar National ID.
+    /// </summary>
+        public static ValidationResult ValidateStatic(string? nationalId) => new GibraltarNationalIdValidator().Validate(nationalId);
 }

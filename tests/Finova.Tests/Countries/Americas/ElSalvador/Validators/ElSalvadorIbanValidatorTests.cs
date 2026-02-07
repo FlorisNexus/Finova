@@ -35,5 +35,5 @@ public class ElSalvadorIbanValidatorTests
     [Theory]
     [InlineData("SV62CENR00000000000000700025")]
     public void ValidateElSalvadorIban_WithValidIbans_ReturnsTrue(string iban)
-        => ElSalvadorIbanValidator.ValidateElSalvadorIban(iban).IsValid.Should().BeTrue();
+        => _validator.Validate(iban).IsValid.Should().BeTrue();
 }

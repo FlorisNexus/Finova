@@ -13,7 +13,7 @@ public class NetherlandsEnterpriseValidatorTests
     [InlineData("", false)]
     public void Btw_Validate_ReturnsExpectedResult(string? input, bool expectedIsValid)
     {
-        var result = NetherlandsVatValidator.ValidateBtw(input);
+        var result = NetherlandsVatValidator.ValidateStatic(input);
         Assert.Equal(expectedIsValid, result.IsValid);
     }
 
@@ -42,7 +42,7 @@ public class NetherlandsEnterpriseValidatorTests
 
         // So `123456782B01` should be valid via Elfproef fallback.
 
-        var result = NetherlandsVatValidator.ValidateBtw("123456782B01");
+        var result = NetherlandsVatValidator.ValidateStatic("123456782B01");
         Assert.True(result.IsValid);
     }
 
