@@ -49,6 +49,7 @@ using Finova.Countries.Europe.Spain.Validators;
 using Finova.Countries.Europe.Sweden.Validators;
 using Finova.Countries.Europe.Switzerland.Validators;
 using Finova.Countries.Europe.Turkey.Validators;
+using Finova.Countries.Europe.Russia.Validators;
 using Finova.Countries.Europe.Ukraine.Validators;
 using Finova.Countries.Europe.UnitedKingdom.Validators;
 using Finova.Countries.Europe.Vatican.Validators;
@@ -191,6 +192,7 @@ public class EuropeIbanValidator : IIbanValidator
             "MD" => new MoldovaIbanValidator(),
             "BY" => new BelarusIbanValidator(),
             "AZ" => new AzerbaijanIbanValidator(),
+            "RU" => new RussiaIbanValidator(),
             _ => null!
         });
 

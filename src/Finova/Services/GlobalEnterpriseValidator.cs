@@ -56,7 +56,7 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
             "ZA" => new Finova.Countries.Africa.SouthAfrica.Validators.SouthAfricaCompanyValidator().Validate(number),
 
             // Asia
-            "CN" or "ID" or "IN" or "JP" or "KR" or "PK" or "SG" or "VN" or "KZ"
+            "CN" or "ID" or "IN" or "JP" or "KR" or "PH" or "PK" or "SG" or "VN" or "KZ"
                 => AsiaTaxIdValidator.Validate(number, country),
 
             // North America

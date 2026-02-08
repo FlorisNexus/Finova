@@ -5,6 +5,8 @@ using Finova.Countries.Africa.Egypt.Validators;
 using Finova.Countries.Africa.Kenya.Validators;
 using Finova.Countries.Asia.China.Validators;
 using Finova.Countries.Asia.India.Validators;
+using Finova.Countries.Asia.SouthKorea.Validators;
+using Finova.Countries.Europe.Russia.Validators;
 using Finova.Countries.Europe.Albania.Validators;
 using Finova.Countries.Europe.Andorra.Validators;
 using Finova.Countries.Europe.Austria.Validators;
@@ -104,6 +106,7 @@ public static class GlobalIdentityValidator
             "BE" => new BelgiumNationalIdValidator(),
             "BA" => new BosniaAndHerzegovinaNationalIdValidator(),
             "BG" => new BulgariaNationalIdValidator(),
+            "HR" => new CroatiaOibValidator(),
             "CY" => new CyprusNationalIdValidator(),
             "CZ" => new CzechRepublicNationalIdValidator(),
             "DK" => new DenmarkCprValidator(),
@@ -146,8 +149,10 @@ public static class GlobalIdentityValidator
             "UA" => new UkraineNationalIdValidator(),
             "GB" or "UK" => new UnitedKingdomNationalIdValidator(),
             "VA" => new VaticanNationalIdValidator(),
+            "RU" => new RussiaNationalIdValidator(),
             "CN" => new ChinaResidentIdentityCardValidator(),
             "IN" => new IndiaAadhaarValidator(),
+            "KR" => new SouthKoreaNationalIdValidator(),
             "CA" => new CanadaSinValidator(),
             "BR" => new BrazilCpfValidator(),
             _ => null!
