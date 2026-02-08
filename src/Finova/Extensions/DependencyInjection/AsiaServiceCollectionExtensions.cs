@@ -15,6 +15,7 @@ public static class AsiaServiceCollectionExtensions
     public static IServiceCollection AddFinovaAsia(this IServiceCollection services)
     {
         services.AddSingleton<AsiaBankValidator>();
+        services.AddSingleton<IIbanValidator, AsiaIbanValidator>();
 
         // Auto-register all validators under the Finova.Countries.Asia namespace
         var assembly = Assembly.GetAssembly(typeof(AsiaServiceCollectionExtensions)) ?? Assembly.GetExecutingAssembly();

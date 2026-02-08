@@ -15,6 +15,7 @@ public static class NorthAmericaServiceCollectionExtensions
     public static IServiceCollection AddFinovaNorthAmerica(this IServiceCollection services)
     {
         services.AddSingleton<NorthAmericaBankValidator>();
+        services.AddSingleton<IIbanValidator, AmericasIbanValidator>();
 
         var assembly = Assembly.GetAssembly(typeof(NorthAmericaServiceCollectionExtensions)) ?? Assembly.GetExecutingAssembly();
 

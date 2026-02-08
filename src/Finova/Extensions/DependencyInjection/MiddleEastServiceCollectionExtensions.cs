@@ -1,6 +1,7 @@
 using System.Reflection;
 using Finova.Core.Iban;
 using Finova.Core.Identifiers;
+using Finova.Services;
 using Finova.Countries.MiddleEast.Israel.Validators;
 using Finova.Countries.MiddleEast.SaudiArabia.Validators;
 using Finova.Countries.MiddleEast.UAE.Validators;
@@ -16,6 +17,8 @@ public static class MiddleEastServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddFinovaMiddleEast(this IServiceCollection services)
     {
+        services.AddSingleton<IIbanValidator, MiddleEastIbanValidator>();
+
         var assembly = Assembly.GetAssembly(typeof(MiddleEastServiceCollectionExtensions)) ?? Assembly.GetExecutingAssembly();
 
         services.RegisterValidatorsFromNamespace(

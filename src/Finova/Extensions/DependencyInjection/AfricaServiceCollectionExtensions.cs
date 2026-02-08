@@ -1,6 +1,7 @@
 using System.Reflection;
 using Finova.Core.Iban;
 using Finova.Core.Identifiers;
+using Finova.Services;
 using Finova.Countries.Africa.Egypt.Validators;
 using Finova.Countries.Africa.Kenya.Validators;
 using Finova.Countries.Africa.Nigeria.Validators;
@@ -17,6 +18,8 @@ public static class AfricaServiceCollectionExtensions
     /// </summary>
     public static IServiceCollection AddFinovaAfrica(this IServiceCollection services)
     {
+        services.AddSingleton<IIbanValidator, AfricaIbanValidator>();
+
         var assembly = Assembly.GetAssembly(typeof(AfricaServiceCollectionExtensions)) ?? Assembly.GetExecutingAssembly();
 
         services.RegisterValidatorsFromNamespace(

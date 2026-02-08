@@ -199,7 +199,27 @@ public static partial class IbanHelper
 
     public static int CalculateMod97(string rearranged)
     {
-        var numericString = ConvertLettersToDigits(rearranged);
+        var sb = new StringBuilder(rearranged.Length * 2);
+
+        foreach (char c in rearranged)
+        {
+            if (char.IsDigit(c))
+            {
+                sb.Append(c);
+            }
+            else if (char.IsLetter(c))
+            {
+                // A=10, B=11, ..., Z=35
+                int value = char.ToUpperInvariant(c) - 'A' + 10;
+                sb.Append(value);
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid character in IBAN: {c}");
+            }
+        }
+
+        var numericString = sb.ToString();
         return Modulo97Helper.Calculate(numericString);
     }
 }
