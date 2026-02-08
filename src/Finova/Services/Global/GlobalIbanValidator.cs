@@ -33,9 +33,52 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
     /// </summary>
     public static ValidationResult ValidateIban(string? iban)
     {
-        // For now, delegate to EuropeIbanValidator which handles the major country-specific rules.
-        // In the future, this can be expanded or consolidated.
-        return EuropeIbanValidator.ValidateIban(iban);
+        // 1. Basic generic validation (structure, mod97)
+        if (!IbanHelper.IsValidIban(iban))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidIban, ValidationMessages.InvalidIban);
+        }
+
+        var countryCode = IbanHelper.GetCountryCode(iban).ToUpperInvariant();
+
+        // 2. Routing to continent-specific static validators for enhanced rules
+        // Europe (Primary coverage)
+        var result = EuropeIbanValidator.ValidateIban(iban);
+        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        {
+            return result;
+        }
+
+        // Africa
+        result = AfricaIbanValidator.ValidateIban(iban);
+        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        {
+            return result;
+        }
+
+        // Middle East
+        result = MiddleEastIbanValidator.ValidateIban(iban);
+        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        {
+            return result;
+        }
+
+        // Americas
+        result = AmericasIbanValidator.ValidateIban(iban);
+        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        {
+            return result;
+        }
+
+        // Asia
+        result = AsiaIbanValidator.ValidateIban(iban);
+        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        {
+            return result;
+        }
+
+        // 3. Fallback: If it passed the generic Mod97 check above, we consider it valid (generic IBAN support).
+        return ValidationResult.Success();
     }
 
     public ValidationResult Validate(string? iban)
