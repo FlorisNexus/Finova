@@ -54,7 +54,6 @@ public static class ServiceCollectionExtensions
         // This must be registered LAST to override any partial validators registered by regional extensions
         // We register the concrete type first so we can forward both interfaces to the same singleton instance
         services.AddSingleton<GlobalIbanValidator>();
-        services.AddSingleton<IIbanValidator>(sp => sp.GetRequiredService<GlobalIbanValidator>());
         services.AddSingleton<IIbanService>(sp => sp.GetRequiredService<GlobalIbanValidator>());
 
         return services;
