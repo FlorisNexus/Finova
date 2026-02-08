@@ -36,7 +36,7 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        string country = countryCode.ToUpperInvariant();
+        string country = countryCode.Trim().ToUpperInvariant();
 
         // Check Europe (Most comprehensive enterprise validation)
         var europeValidator = new EuropeEnterpriseValidator();
@@ -52,7 +52,7 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
             // Africa
             "DZ" or "AO" or "CI" or "EG" or "KE" or "MA" or "NG" or "SN" or "TN"
                 => AfricaTaxIdValidator.Validate(number, country),
-            
+
             "ZA" => new Finova.Countries.Africa.SouthAfrica.Validators.SouthAfricaCompanyValidator().Validate(number),
 
             // Asia
@@ -68,7 +68,7 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
                 => SouthAmericaTaxIdValidator.Validate(number, country),
 
             // Oceania
-            "AU" or "NZ" 
+            "AU" or "NZ"
                 => Finova.Services.Oceania.OceaniaTaxIdValidator.Validate(number, country),
 
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, $"Country code {countryCode} is not supported for enterprise validation.")
@@ -83,12 +83,12 @@ public class GlobalEnterpriseValidator : IGlobalEnterpriseValidator
             return null;
         }
 
-        string country = countryCode.ToUpperInvariant();
+        string country = countryCode.Trim().ToUpperInvariant();
 
         // Europe normalization
         var europeValidator = new EuropeEnterpriseValidator();
-        var normalized = europeValidator.Validate(number, country).IsValid 
-            ? EuropeEnterpriseValidator.GetNormalizedNumber(number, country) 
+        var normalized = europeValidator.Validate(number, country).IsValid
+            ? EuropeEnterpriseValidator.GetNormalizedNumber(number, country)
             : null;
 
         if (normalized != null)

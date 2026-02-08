@@ -12,7 +12,7 @@ using Finova.Countries.SouthAmerica.Argentina.Validators;
 using Finova.Countries.SouthAmerica.Brazil.Validators;
 using Finova.Countries.SouthAmerica.Chile.Validators;
 using Finova.Countries.SouthAmerica.Colombia.Validators;
-using Finova.Countries.SouthAmerica.Mexico.Validators;
+using Finova.Countries.NorthAmerica.Mexico.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Finova.Services;
@@ -131,7 +131,7 @@ public class AmericasVatValidator : IVatValidator
             "HN" => HondurasRtnValidator.ValidateRtn(vat),
             "NI" => NicaraguaRucValidator.ValidateRuc(vat),
             "VG" or "VP" => ValidationResult.Success(),
-            _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
+            _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, string.Format(ValidationMessages.UnsupportedCountryCodeFormat, countryCode))
         };
     }
 

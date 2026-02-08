@@ -63,7 +63,7 @@ using Finova.Countries.SouthAmerica.Brazil.Validators;
 using Finova.Countries.SouthAmerica.Argentina.Validators;
 using Finova.Countries.SouthAmerica.Chile.Validators;
 using Finova.Countries.SouthAmerica.Colombia.Validators;
-using Finova.Countries.SouthAmerica.Mexico.Validators;
+using Finova.Countries.NorthAmerica.Mexico.Validators;
 using Finova.Countries.SoutheastAsia.Indonesia.Validators;
 using Finova.Countries.SoutheastAsia.Malaysia.Validators;
 using Finova.Countries.SoutheastAsia.Thailand.Validators;

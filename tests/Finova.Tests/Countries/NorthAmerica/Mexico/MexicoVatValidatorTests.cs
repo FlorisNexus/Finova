@@ -1,8 +1,8 @@
-using Finova.Countries.SouthAmerica.Mexico.Validators;
+using Finova.Countries.NorthAmerica.Mexico.Validators;
 using FluentAssertions;
 using Xunit;
 
-namespace Finova.Tests.Countries.SouthAmerica.Mexico;
+namespace Finova.Tests.Countries.NorthAmerica.Mexico;
 
 public class MexicoVatValidatorTests
 {

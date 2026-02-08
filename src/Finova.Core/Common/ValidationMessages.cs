@@ -599,4 +599,8 @@ public static class ValidationMessages
     public static string InvalidKazakhstanBinLength => GetString("InvalidKazakhstanBinLength");
     public static string InvalidNewZealandGstFormat => GetString("InvalidNewZealandGstFormat");
     public static string InvalidVietnamMstLength => GetString("InvalidVietnamMstLength");
+    public static string InvalidSsnArea => GetString("InvalidSsnArea");
+    public static string InvalidSsnGroup => GetString("InvalidSsnGroup");
+    public static string InvalidSsnSerial => GetString("InvalidSsnSerial");
+    public static string UnsupportedCountryCodeFormat => GetString("UnsupportedCountryCodeFormat");
 }

@@ -1559,4 +1559,16 @@
   <data name="InvalidVietnamMstLength" xml:space="preserve">
     <value>Le MST doit comporter 10 ou 13 chiffres.</value>
   </data>
+  <data name="InvalidSsnArea" xml:space="preserve">
+    <value>Numéro de zone SSN invalide (AAA).</value>
+  </data>
+  <data name="InvalidSsnGroup" xml:space="preserve">
+    <value>Numéro de groupe SSN invalide (GG).</value>
+  </data>
+  <data name="InvalidSsnSerial" xml:space="preserve">
+    <value>Numéro de série SSN invalide (SSSS).</value>
+  </data>
+  <data name="UnsupportedCountryCodeFormat" xml:space="preserve">
+    <value>Code pays non supporté : {0}.</value>
+  </data>
 </root>

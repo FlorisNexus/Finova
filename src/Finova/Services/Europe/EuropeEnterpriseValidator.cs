@@ -157,7 +157,7 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
         }
 
-        string country = countryCode.ToUpperInvariant();
+        string country = countryCode.Trim().ToUpperInvariant();
 
         switch (country)
         {
@@ -221,8 +221,8 @@ public class EuropeEnterpriseValidator : IEuropeEnterpriseValidator
 
                 // If it clearly looks like a Handelsregisternummer (has prefix), return that error
                 var trimmed = number?.Trim().ToUpperInvariant() ?? "";
-                if (trimmed.StartsWith("HRA") || trimmed.StartsWith("HRB") || 
-                    trimmed.StartsWith("PR") || trimmed.StartsWith("GNR") || 
+                if (trimmed.StartsWith("HRA") || trimmed.StartsWith("HRB") ||
+                    trimmed.StartsWith("PR") || trimmed.StartsWith("GNR") ||
                     trimmed.StartsWith("VR"))
                 {
                     return hrResult;

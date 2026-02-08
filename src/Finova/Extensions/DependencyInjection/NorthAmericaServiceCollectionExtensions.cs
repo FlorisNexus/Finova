@@ -10,7 +10,7 @@ namespace Finova.Extensions.DependencyInjection;
 public static class NorthAmericaServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers North American financial validators (USA, Canada, Costa Rica, Dominican Republic, El Salvador, Guatemala, Virgin Islands British).
+    /// Registers North American financial validators (USA, Canada, Mexico, Costa Rica, Dominican Republic, El Salvador, Guatemala, Virgin Islands British).
     /// </summary>
     public static IServiceCollection AddFinovaNorthAmerica(this IServiceCollection services)
     {

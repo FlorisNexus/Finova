@@ -1,6 +1,6 @@
 using Finova.Core.Common;
 using Finova.Countries.SouthAmerica.Brazil.Validators;
-using Finova.Countries.SouthAmerica.Mexico.Validators;
+
 
 namespace Finova.Services.SouthAmerica;
 
@@ -25,7 +25,7 @@ public static class SouthAmericaTaxIdValidator
         return countryCode.ToUpperInvariant() switch
         {
             "BR" => BrazilCnpjValidator.ValidateCnpj(taxId),
-            "MX" => MexicoRfcValidator.ValidateStatic(taxId),
+
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };
     }
