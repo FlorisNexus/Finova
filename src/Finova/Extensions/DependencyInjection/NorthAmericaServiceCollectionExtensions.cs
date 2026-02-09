@@ -1,6 +1,7 @@
 using System.Reflection;
 using Finova.Core.Iban;
 using Finova.Core.Identifiers;
+using Finova.Core.Vat;
 using Finova.Services;
 using Finova.Services.Adapters;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,7 @@ public static class NorthAmericaServiceCollectionExtensions
                 }
             },
             typeof(ITaxIdValidator),
+            typeof(IVatValidator),
             typeof(INationalIdValidator),
             typeof(IBankRoutingValidator),
             typeof(IBankRoutingParser),

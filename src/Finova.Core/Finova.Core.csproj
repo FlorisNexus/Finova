@@ -4,7 +4,7 @@
         <IsPackable>true</IsPackable>
 
         <PackageId>Finova.Core</PackageId>
-        <Version>1.4.13</Version>
+        <Version>1.4.16</Version>
         <Title>Finova.Core: Financial Primitives &amp; Algorithms</Title>
         <Description>
             Core interfaces and algorithms for the Finova financial toolkit.

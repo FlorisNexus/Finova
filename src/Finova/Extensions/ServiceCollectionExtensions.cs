@@ -26,6 +26,11 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IPaymentReferenceGenerator, PaymentReferenceGenerator>();
         services.AddSingleton<IBicValidator, BicValidator>();
         services.AddSingleton<IPaymentCardValidator, PaymentCardValidator>();
+        services.AddSingleton<IIsinValidator, IsinValidator>();
+        services.AddSingleton<ICusipValidator, CusipValidator>();
+        services.AddSingleton<ISedolValidator, SedolValidator>();
+        services.AddSingleton<ICurrencyValidator, CurrencyValidator>();
+        services.AddSingleton<ILeiValidator, LeiValidator>();
 
         // Register global composite services
         services.AddSingleton<ITaxIdService, TaxIdService>();
