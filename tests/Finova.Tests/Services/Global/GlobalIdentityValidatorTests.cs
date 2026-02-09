@@ -15,6 +15,21 @@ public class GlobalIdentityValidatorTests
         result.IsValid.Should().BeTrue();
     }
 
+    [Theory]
+    [InlineData("JP", "111111111118")] // Japan My Number
+    [InlineData("SG", "S1234567D")]     // Singapore NRIC
+    [InlineData("IL", "300000007")]     // Israel Teudat Zehut
+    [InlineData("SA", "1000000008")]    // Saudi Arabia National ID
+    [InlineData("AE", "784198412345674")] // UAE Emirates ID
+    [InlineData("US", "123-45-6789")]   // USA SSN
+    [InlineData("NG", "12345678901")]    // Nigeria NIN
+    [InlineData("ZA", "8001015000086")] // South Africa ID
+    public void ValidateNationalId_ShouldReturnTrue_ForValidNewlyRoutedIds(string country, string id)
+    {
+        var result = GlobalIdentityValidator.ValidateNationalId(country, id);
+        result.IsValid.Should().BeTrue();
+    }
+
     [Fact]
     public void ValidateNationalId_ShouldReturnFalse_ForInvalidCountry()
     {

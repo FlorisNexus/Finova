@@ -3,8 +3,12 @@ using Finova.Core.Common;
 using Finova.Core.Identifiers;
 using Finova.Countries.Africa.Egypt.Validators;
 using Finova.Countries.Africa.Kenya.Validators;
+using Finova.Countries.Africa.Nigeria.Validators;
+using Finova.Countries.Africa.SouthAfrica.Validators;
 using Finova.Countries.Asia.China.Validators;
 using Finova.Countries.Asia.India.Validators;
+using Finova.Countries.Asia.Japan.Validators;
+using Finova.Countries.Asia.Singapore.Validators;
 using Finova.Countries.Asia.SouthKorea.Validators;
 using Finova.Countries.Europe.Russia.Validators;
 using Finova.Countries.Europe.Albania.Validators;
@@ -58,6 +62,9 @@ using Finova.Countries.Europe.Turkey.Validators;
 using Finova.Countries.Europe.Ukraine.Validators;
 using Finova.Countries.Europe.UnitedKingdom.Validators;
 using Finova.Countries.Europe.Vatican.Validators;
+using Finova.Countries.MiddleEast.Israel.Validators;
+using Finova.Countries.MiddleEast.SaudiArabia.Validators;
+using Finova.Countries.MiddleEast.UAE.Validators;
 using Finova.Countries.NorthAmerica.Canada.Validators;
 using Finova.Countries.NorthAmerica.UnitedStates.Validators;
 using Finova.Countries.Oceania.Australia.Validators;
@@ -151,9 +158,17 @@ public static class GlobalIdentityValidator
             "VA" => new VaticanNationalIdValidator(),
             "RU" => new RussiaNationalIdValidator(),
             "CN" => new ChinaResidentIdentityCardValidator(),
+            "JP" => new JapanMyNumberValidator(),
+            "SG" => new SingaporeNricValidator(),
+            "IL" => new IsraelTeudatZehutValidator(),
+            "SA" => new SaudiArabiaIdValidator(),
+            "AE" => new UaeEmiratesIdValidator(),
             "IN" => new IndiaAadhaarValidator(),
             "KR" => new SouthKoreaNationalIdValidator(),
+            "US" => new UnitedStatesSsnValidator(),
             "CA" => new CanadaSinValidator(),
+            "NG" => new NigeriaNinValidator(),
+            "ZA" => new SouthAfricaIdValidator(),
             "BR" => new BrazilCpfValidator(),
             _ => null!
         });
