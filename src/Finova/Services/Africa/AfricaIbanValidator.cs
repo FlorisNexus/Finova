@@ -159,4 +159,15 @@ public class AfricaIbanValidator : IIbanValidator
 
     /// <inheritdoc/>
     public bool ValidateChecksum(string? iban) => IbanHelper.ValidateChecksum(iban);
+    public static bool IsCountrySupported(string countryCode)
+    {
+        return countryCode switch
+        {
+            "DZ" or "AO" or "BJ" or "BF" or "BI" or "CM" or "CV" or "CF" or "TD" or "KM" or
+            "CG" or "CI" or "DJ" or "EG" or "GQ" or "GA" or "GW" or "LY" or "MG" or "ML" or
+            "MR" or "MA" or "MZ" or "NE" or "ST" or "SN" or "SC" or "SO" or "SD" or "TG" or
+            "TN" => true,
+            _ => false
+        };
+    }
 }

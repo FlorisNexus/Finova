@@ -119,4 +119,13 @@ public class AmericasIbanValidator : IIbanValidator
 
     /// <inheritdoc/>
     public bool ValidateChecksum(string? iban) => IbanHelper.ValidateChecksum(iban);
+    public static bool IsCountrySupported(string countryCode)
+    {
+        return countryCode switch
+        {
+            "BB" or "BR" or "CR" or "DO" or "SV" or "FK" or "GT" or "HN" or "NI" or "LC" or
+            "VG" => true,
+            _ => false
+        };
+    }
 }
