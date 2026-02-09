@@ -33,7 +33,6 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
     /// </summary>
     public static ValidationResult ValidateIban(string? iban)
     {
-        // 1. Basic generic validation (structure, mod97)
         if (string.IsNullOrWhiteSpace(iban))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
@@ -41,18 +40,14 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
 
         var normalized = IbanHelper.NormalizeIban(iban);
 
-        if (normalized.Length < IbanHelper.MinIbanLength || normalized.Length > IbanHelper.MaxIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidIbanLength);
-        }
-
         // Check format: 2 letters (country) + 2 digits (check) + alphanumeric
-        if (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1]))
+        // We do this check globally because these rules apply to ALL IBANs regardless of country.
+        if (normalized.Length >= 2 && (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1])))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidIbanCountryCode);
         }
 
-        if (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3]))
+        if (normalized.Length >= 4 && (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3])))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidCheckDigit, ValidationMessages.InvalidCheckDigit);
         }
@@ -65,48 +60,51 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
             }
         }
 
-        // Validate checksum
-        if (!IbanHelper.ValidateChecksum(normalized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
         var countryCode = IbanHelper.GetCountryCode(iban).ToUpperInvariant();
 
-        // 2. Routing to continent-specific static validators for enhanced rules
+        // 1. Routing to continent-specific static validators (Primary)
+        // This ensures country-specific rules (like exact length) take precedence over generic rules.
+
         // Europe (Primary coverage)
-        var result = EuropeIbanValidator.ValidateIban(iban);
-        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        if (EuropeIbanValidator.IsCountrySupported(countryCode))
         {
-            return result;
+            return EuropeIbanValidator.ValidateIban(iban);
         }
 
         // Africa
-        result = AfricaIbanValidator.ValidateIban(iban);
-        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        if (AfricaIbanValidator.IsCountrySupported(countryCode))
         {
-            return result;
+            return AfricaIbanValidator.ValidateIban(iban);
         }
 
         // Middle East
-        result = MiddleEastIbanValidator.ValidateIban(iban);
-        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        if (MiddleEastIbanValidator.IsCountrySupported(countryCode))
         {
-            return result;
+            return MiddleEastIbanValidator.ValidateIban(iban);
         }
 
         // Americas
-        result = AmericasIbanValidator.ValidateIban(iban);
-        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        if (AmericasIbanValidator.IsCountrySupported(countryCode))
         {
-            return result;
+            return AmericasIbanValidator.ValidateIban(iban);
         }
 
         // Asia
-        result = AsiaIbanValidator.ValidateIban(iban);
-        if (result.IsValid || result.Errors.All(e => e.Code != ValidationErrorCode.UnsupportedCountry))
+        if (AsiaIbanValidator.IsCountrySupported(countryCode))
         {
-            return result;
+            return AsiaIbanValidator.ValidateIban(iban);
+        }
+
+        // 2. Fallback: Basic generic validation (structure, generic length 15-34, mod97)
+        if (normalized.Length < IbanHelper.MinIbanLength || normalized.Length > IbanHelper.MaxIbanLength)
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidIbanLength, $"{IbanHelper.MinIbanLength}-{IbanHelper.MaxIbanLength}", normalized.Length));
+        }
+
+        // Validate checksum if no specific validator found
+        if (!IbanHelper.ValidateChecksum(normalized))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
         }
 
         // 3. Fallback: If it passed the generic Mod97 check above, we consider it valid (generic IBAN support).
@@ -123,18 +121,13 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
 
         var normalized = IbanHelper.NormalizeIban(iban);
 
-        if (normalized.Length < IbanHelper.MinIbanLength || normalized.Length > IbanHelper.MaxIbanLength)
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidIbanLength);
-        }
-
         // Check format: 2 letters (country) + 2 digits (check) + alphanumeric
-        if (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1]))
+        if (normalized.Length >= 2 && (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1])))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidIbanCountryCode);
         }
 
-        if (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3]))
+        if (normalized.Length >= 4 && (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3])))
         {
             return ValidationResult.Failure(ValidationErrorCode.InvalidCheckDigit, ValidationMessages.InvalidCheckDigit);
         }
@@ -147,21 +140,27 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
             }
         }
 
-        // Validate checksum
-        if (!IbanHelper.ValidateChecksum(normalized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
+        var countryCode = IbanHelper.GetCountryCode(iban).ToUpperInvariant();
 
         // 2. Routing to specific country validator
-        var countryCode = IbanHelper.GetCountryCode(iban);
-
         if (_validators.TryGetValue(countryCode, out var validator))
         {
             return validator.Validate(iban);
         }
 
-        // 3. Fallback: If no specific validator exists, but it passed the generic Mod97 check above,
+        // 3. Fallback: Basic generic validation (generic length 15-34, mod97)
+        if (normalized.Length < IbanHelper.MinIbanLength || normalized.Length > IbanHelper.MaxIbanLength)
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidIbanLength, $"{IbanHelper.MinIbanLength}-{IbanHelper.MaxIbanLength}", normalized.Length));
+        }
+
+        // Validate checksum if no specific validator found (or if specific validator logic allows fallback, but here we return result of validator)
+        if (!IbanHelper.ValidateChecksum(normalized))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
+        }
+
+        // 4. Fallback: If no specific validator exists, but it passed the generic Mod97 check above,
         // we consider it valid (generic IBAN support).
         return ValidationResult.Success();
     }

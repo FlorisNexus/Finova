@@ -38,8 +38,8 @@ public class GlobalIbanValidatorTests
     [Fact]
     public void ValidateIban_WithTooShortIban_ReturnsInvalidLength()
     {
-        // "invalid" is 7 chars, min is 15
-        var result = GlobalIbanValidator.ValidateIban("invalid");
+        // "XX00123" is 7 chars, min is 15. Structure is valid (XX letters, 00 digits).
+        var result = GlobalIbanValidator.ValidateIban("XX00123");
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidLength);
     }
@@ -88,5 +88,47 @@ public class GlobalIbanValidatorTests
         var result = GlobalIbanValidator.ValidateIban("BE68539007547035");
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidChecksum);
+    }
+
+    [Fact]
+    public void ValidateIban_WithBelgiumIbanInvalidLength_ReturnsInvalidLengthError()
+    {
+        // BE68 5390 0754 70345 (17 chars, expected 16)
+        // This should fail on length, NOT checksum.
+        var result = GlobalIbanValidator.ValidateIban("BE685390075470345");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidLength);
+        result.Errors.Should().NotContain(e => e.Code == ValidationErrorCode.InvalidChecksum);
+    }
+
+    [Fact]
+    public void ValidateIban_WithShortGermanIban_ReturnsFormattedErrorMessage()
+    {
+        // DE89 37546456 (12 chars). 
+        // Previously this hit global check (min 15).
+        // NOW it should hit Germany validator (Expected 22).
+        var result = GlobalIbanValidator.ValidateIban("DE8937546456");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidLength);
+
+        var error = result.Errors.First(e => e.Code == ValidationErrorCode.InvalidLength);
+        // "Invalid length. Expected 22, got 12."
+        error.Message.Should().Contain("22");
+        error.Message.Should().NotContain("15-34");
+    }
+
+    [Fact]
+    public void ValidateIban_WithVeryShortGermanIban_ReturnsCountrySpecificError()
+    {
+        // DE12 (4 chars)
+        // Global check would say "Min 15".
+        // Country check should say "Expected 22".
+        var result = GlobalIbanValidator.ValidateIban("DE12");
+        result.IsValid.Should().BeFalse();
+
+        var error = result.Errors.FirstOrDefault(e => e.Code == ValidationErrorCode.InvalidLength);
+        error.Should().NotBeNull();
+        error!.Message.Should().Contain("22");
+        error.Message.Should().NotContain("15-34");
     }
 }

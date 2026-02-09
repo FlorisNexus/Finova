@@ -121,4 +121,13 @@ public class MiddleEastIbanValidator : IIbanValidator
 
     /// <inheritdoc/>
     public bool ValidateChecksum(string? iban) => IbanHelper.ValidateChecksum(iban);
+    public static bool IsCountrySupported(string countryCode)
+    {
+        return countryCode switch
+        {
+            "AE" or "BH" or "IL" or "IQ" or "JO" or "KW" or "LB" or "OM" or "PS" or "QA" or
+            "SA" or "YE" => true,
+            _ => false
+        };
+    }
 }

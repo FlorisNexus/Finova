@@ -200,4 +200,17 @@ public class EuropeIbanValidator : IIbanValidator
             ? validator.Validate(iban)
             : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
     }
+    public static bool IsCountrySupported(string countryCode)
+    {
+        return countryCode switch
+        {
+            "DE" or "IT" or "ES" or "FR" or "BE" or "NL" or "GB" or "LU" or "IE" or "AT" or
+            "GR" or "FI" or "PT" or "SE" or "DK" or "NO" or "PL" or "CZ" or "HU" or "RO" or
+            "BG" or "HR" or "SI" or "SK" or "EE" or "LV" or "LT" or "CY" or "MT" or "CH" or
+            "MC" or "AD" or "VA" or "SM" or "GI" or "IS" or "LI" or "RS" or "UA" or "ME" or
+            "MK" or "AL" or "TR" or "BA" or "GE" or "FO" or "GL" or "XK" or "MD" or "BY" or
+            "AZ" or "RU" => true,
+            _ => false
+        };
+    }
 }

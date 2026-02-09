@@ -105,4 +105,12 @@ public class AsiaIbanValidator : IIbanValidator
 
     /// <inheritdoc/>
     public bool ValidateChecksum(string? iban) => IbanHelper.ValidateChecksum(iban);
+    public static bool IsCountrySupported(string countryCode)
+    {
+        return countryCode switch
+        {
+            "KZ" or "MN" or "PK" or "TL" => true,
+            _ => false
+        };
+    }
 }
