@@ -1,5 +1,6 @@
 using Finova.Core.Iban;
 using Finova.Core.Identifiers;
+using Finova.Core.Vat;
 using Finova.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +20,7 @@ public static class OceaniaServiceCollectionExtensions
             "Finova.Countries.Oceania",
             null,
             typeof(ITaxIdValidator),
+            typeof(IVatValidator),
             typeof(INationalIdValidator),
             typeof(IBankRoutingValidator),
             typeof(IBankAccountValidator),

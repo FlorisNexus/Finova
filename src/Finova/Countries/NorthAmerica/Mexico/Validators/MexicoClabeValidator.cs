@@ -1,7 +1,7 @@
 using Finova.Core.Common;
 using Finova.Core.Identifiers;
 
-namespace Finova.Countries.SouthAmerica.Mexico.Validators;
+namespace Finova.Countries.NorthAmerica.Mexico.Validators;
 
 /// <summary>
 /// Validates Mexican CLABE (Clave Bancaria Estandarizada).

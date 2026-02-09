@@ -3,6 +3,7 @@ using Finova.Countries.Asia.China.Validators;
 using Finova.Countries.Asia.India.Validators;
 using Finova.Countries.Asia.Japan.Validators;
 using Finova.Countries.Asia.Singapore.Validators;
+using Finova.Countries.Asia.SouthKorea.Validators;
 
 namespace Finova.Services.Asia;
 
@@ -33,6 +34,8 @@ public static class AsiaTaxIdValidator
             "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator().Validate(taxId),
             "PK" => new Finova.Countries.Asia.Pakistan.Validators.PakistanNtnValidator().Validate(taxId),
             "SG" => SingaporeUenValidator.ValidateStatic(taxId),
+            "KR" => SouthKoreaVatValidator.ValidateStatic(taxId),
+            "PH" => new Finova.Countries.SoutheastAsia.Philippines.Validators.PhilippinesTinValidator().Validate(taxId),
             "VN" => new Finova.Countries.SoutheastAsia.Vietnam.Validators.VietnamTaxIdValidator().Validate(taxId),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry)
         };

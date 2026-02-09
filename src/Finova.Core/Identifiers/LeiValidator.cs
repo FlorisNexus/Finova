@@ -7,7 +7,7 @@ namespace Finova.Core.Identifiers;
 /// <summary>
 /// Validator for Legal Entity Identifier (LEI) based on ISO 17442.
 /// </summary>
-public partial class LeiValidator : IValidator<string>
+public partial class LeiValidator : IValidator<string>, ILeiValidator
 {
     [GeneratedRegex(@"^[A-Z0-9]{20}$")]
     private static partial Regex LeiRegex();

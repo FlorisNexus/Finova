@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Finova.Core.Common;
 using Finova.Core.Identifiers;
 
-namespace Finova.Countries.SouthAmerica.Mexico.Validators;
+namespace Finova.Countries.NorthAmerica.Mexico.Validators;
 
 /// <summary>
 /// Validates Mexican CURP (Clave Única de Registro de Población).

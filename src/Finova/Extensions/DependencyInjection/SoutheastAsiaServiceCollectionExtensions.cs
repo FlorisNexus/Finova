@@ -1,8 +1,9 @@
+using System.Reflection;
+using Finova.Core.Iban;
 using Finova.Core.Identifiers;
-using Finova.Countries.SoutheastAsia.Indonesia.Validators;
-using Finova.Countries.SoutheastAsia.Malaysia.Validators;
-using Finova.Countries.SoutheastAsia.Thailand.Validators;
-using Finova.Countries.SoutheastAsia.Vietnam.Validators;
+using Finova.Core.Vat;
+using Finova.Services;
+using Finova.Services.Adapters;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Finova.Extensions.DependencyInjection;
@@ -19,11 +20,28 @@ public static class SoutheastAsiaServiceCollectionExtensions
     /// <returns>The <see cref="IServiceCollection" /> so that additional calls can be chained.</returns>
     public static IServiceCollection AddFinovaSoutheastAsia(this IServiceCollection services)
     {
-        services.AddSingleton<INationalIdValidator, ThailandIdValidator>();
-        services.AddSingleton<INationalIdValidator, MalaysiaMyKadValidator>();
-        services.AddSingleton<INationalIdValidator, IndonesiaNikValidator>();
-        services.AddSingleton<INationalIdValidator, VietnamCitizenIdValidator>();
-        services.AddSingleton<ITaxIdValidator, VietnamTaxIdValidator>();
+        var assembly = Assembly.GetAssembly(typeof(SoutheastAsiaServiceCollectionExtensions)) ?? Assembly.GetExecutingAssembly();
+
+        services.RegisterValidatorsFromNamespace(
+            assembly,
+            "Finova.Countries.SoutheastAsia",
+            (s, type) =>
+            {
+                if (typeof(IIbanValidator).IsAssignableFrom(type))
+                {
+                    s.AddSingleton<IBankAccountValidator>(sp =>
+                        new IbanBankAccountAdapter((IIbanValidator)sp.GetRequiredService(type)));
+                }
+            },
+            typeof(ITaxIdValidator),
+            typeof(IVatValidator),
+            typeof(INationalIdValidator),
+            typeof(IBankRoutingValidator),
+            typeof(IBankAccountValidator),
+            typeof(IIbanValidator),
+            typeof(IBbanValidator)
+        );
+
         return services;
     }
 }

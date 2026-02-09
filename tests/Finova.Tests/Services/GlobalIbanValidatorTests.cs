@@ -1,3 +1,4 @@
+using Finova.Core.Common;
 using Finova.Core.Iban;
 using Finova.Services.Global;
 using FluentAssertions;
@@ -27,21 +28,65 @@ public class GlobalIbanValidatorTests
     }
 
     [Fact]
-    public void ValidateIban_WithNullIban_ReturnsFalse()
+    public void ValidateIban_WithNullIban_ReturnsInvalidInput()
     {
-        GlobalIbanValidator.ValidateIban(null).IsValid.Should().BeFalse();
+        var result = GlobalIbanValidator.ValidateIban(null);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidInput);
     }
 
     [Fact]
-    public void ValidateIban_WithInvalidIban_ReturnsFalse()
+    public void ValidateIban_WithTooShortIban_ReturnsInvalidLength()
     {
-        GlobalIbanValidator.ValidateIban("invalid").IsValid.Should().BeFalse();
+        // "invalid" is 7 chars, min is 15
+        var result = GlobalIbanValidator.ValidateIban("invalid");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidLength);
     }
 
     [Fact]
-    public void ValidateIban_WithUnsupportedCountry_ReturnsFalse()
+    public void ValidateIban_WithTooLongIban_ReturnsInvalidLength()
     {
-        // Use a country code that is definitely not supported and a string that is too short to be a valid IBAN
-        GlobalIbanValidator.ValidateIban("ZZ123").IsValid.Should().BeFalse();
+        // 35 chars
+        var result = GlobalIbanValidator.ValidateIban("BE68539007547034BE68539007547034123");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidLength);
+    }
+
+    [Fact]
+    public void ValidateIban_WithInvalidCountryCode_ReturnsInvalidCountryCode()
+    {
+        // Starts with digits: 1268539007547034 (16 chars, valid length)
+        var result = GlobalIbanValidator.ValidateIban("1268539007547034");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidCountryCode);
+    }
+
+    [Fact]
+    public void ValidateIban_WithInvalidCheckDigits_ReturnsInvalidCheckDigit()
+    {
+        // Check digits are letters: BEXX539007547034
+        var result = GlobalIbanValidator.ValidateIban("BEXX539007547034");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidCheckDigit);
+    }
+
+    [Fact]
+    public void ValidateIban_WithInvalidFormat_ReturnsInvalidFormat()
+    {
+        // Contains special char: BE6853900754703-
+        var result = GlobalIbanValidator.ValidateIban("BE6853900754703-");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidFormat);
+    }
+
+    [Fact]
+    public void ValidateIban_WithInvalidChecksum_ReturnsInvalidChecksum()
+    {
+        // BE68 5390 0754 7034 is valid. Change last digit to 5.
+        // BE68 5390 0754 7035 -> Checksum should fail
+        var result = GlobalIbanValidator.ValidateIban("BE68539007547035");
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.InvalidChecksum);
     }
 }

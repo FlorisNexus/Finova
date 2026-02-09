@@ -3,6 +3,7 @@ using Finova.Examples.ConsoleApp.Helpers;
 using Finova.Extensions;
 using Finova.Services;
 using Finova.Core.Iban;
+using Finova.Services.Global;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Finova.Examples.ConsoleApp.Scenarios;

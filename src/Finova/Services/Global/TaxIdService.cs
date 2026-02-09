@@ -3,6 +3,7 @@ using Finova.Core.Identifiers;
 using Finova.Services.Africa;
 using Finova.Services.Asia;
 using Finova.Services.NorthAmerica;
+using Finova.Services.Oceania;
 using Finova.Services.SouthAmerica;
 
 namespace Finova.Services;
@@ -54,14 +55,16 @@ public class TaxIdService : ITaxIdService
         // Fallback to static regional routers
         return country switch
         {
-            "DZ" or "AO" or "EG" or "MA" or "NG" or "SN" or "CI" or "TN" or "ZA"
+            "DZ" or "AO" or "EG" or "KE" or "MA" or "NG" or "SN" or "CI" or "TN" or "ZA"
                 => AfricaTaxIdValidator.Validate(taxId, country),
             "AR" or "BR" or "CL" or "CO" or "MX"
                 => SouthAmericaTaxIdValidator.Validate(taxId, country),
             "US" or "CA" or "CR" or "DO" or "SV" or "GT" or "HN" or "NI"
                 => NorthAmericaTaxIdValidator.Validate(taxId, country),
-            "CN" or "IN" or "JP" or "KR" or "SG" or "KZ" or "VN"
+            "CN" or "ID" or "IN" or "JP" or "KR" or "PH" or "PK" or "SG" or "KZ" or "VN"
                 => AsiaTaxIdValidator.Validate(taxId, country),
+            "AU" or "NZ"
+                => OceaniaTaxIdValidator.Validate(taxId, country),
             _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, string.Format(ValidationMessages.NoTaxIdValidatorRegistered, countryCode))
         };
     }

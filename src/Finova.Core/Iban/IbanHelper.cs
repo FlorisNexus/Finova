@@ -10,8 +10,8 @@ namespace Finova.Core.Iban;
 /// </summary>
 public static partial class IbanHelper
 {
-    private const int MinIbanLength = 15;
-    private const int MaxIbanLength = 34;
+    public const int MinIbanLength = 15;
+    public const int MaxIbanLength = 34;
 
     /// <summary>
     /// Validates an IBAN (structure and checksum).

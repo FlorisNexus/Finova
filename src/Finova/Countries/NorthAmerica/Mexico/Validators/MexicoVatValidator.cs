@@ -1,7 +1,7 @@
 using Finova.Core.Common;
 using Finova.Core.Vat;
 
-namespace Finova.Countries.SouthAmerica.Mexico.Validators;
+namespace Finova.Countries.NorthAmerica.Mexico.Validators;
 
 /// <summary>
 /// Validator for Mexican VAT identifier (RFC).
@@ -12,7 +12,7 @@ public partial class MexicoVatValidator : VatValidatorBase
     private const string CountryCodePrefix = "MX";
 
     /// <inheritdoc/>
-        public override string CountryCode => CountryCodePrefix;
+    public override string CountryCode => CountryCodePrefix;
     /// <summary>
     /// Static validation method for tests.
     /// </summary>
@@ -51,7 +51,7 @@ public partial class MexicoVatValidator : VatValidatorBase
     /// <summary>
     /// Static validation method for Mexican VAT numbers.
     /// </summary>
-        public static ValidationResult ValidateVat(string? vat) => new MexicoVatValidator().Validate(vat);
+    public static ValidationResult ValidateVat(string? vat) => new MexicoVatValidator().Validate(vat);
 
     /// <summary>
     /// Gets details for a Mexican VAT number.

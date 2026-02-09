@@ -34,9 +34,41 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
     public static ValidationResult ValidateIban(string? iban)
     {
         // 1. Basic generic validation (structure, mod97)
-        if (!IbanHelper.IsValidIban(iban))
+        if (string.IsNullOrWhiteSpace(iban))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidIban, ValidationMessages.InvalidIban);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
+        var normalized = IbanHelper.NormalizeIban(iban);
+
+        if (normalized.Length < IbanHelper.MinIbanLength || normalized.Length > IbanHelper.MaxIbanLength)
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidIbanLength);
+        }
+
+        // Check format: 2 letters (country) + 2 digits (check) + alphanumeric
+        if (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1]))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidIbanCountryCode);
+        }
+
+        if (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3]))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidCheckDigit, ValidationMessages.InvalidCheckDigit);
+        }
+
+        foreach (char c in normalized)
+        {
+            if (!char.IsLetterOrDigit(c))
+            {
+                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIbanFormatAlphanumeric);
+            }
+        }
+
+        // Validate checksum
+        if (!IbanHelper.ValidateChecksum(normalized))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
         }
 
         var countryCode = IbanHelper.GetCountryCode(iban).ToUpperInvariant();
@@ -84,9 +116,41 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
     public ValidationResult Validate(string? iban)
     {
         // 1. Basic generic validation (structure, mod97)
-        if (!IbanHelper.IsValidIban(iban))
+        if (string.IsNullOrWhiteSpace(iban))
         {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidIban, ValidationMessages.InvalidIban);
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+        }
+
+        var normalized = IbanHelper.NormalizeIban(iban);
+
+        if (normalized.Length < IbanHelper.MinIbanLength || normalized.Length > IbanHelper.MaxIbanLength)
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidLength, ValidationMessages.InvalidIbanLength);
+        }
+
+        // Check format: 2 letters (country) + 2 digits (check) + alphanumeric
+        if (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1]))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidIbanCountryCode);
+        }
+
+        if (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3]))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidCheckDigit, ValidationMessages.InvalidCheckDigit);
+        }
+
+        foreach (char c in normalized)
+        {
+            if (!char.IsLetterOrDigit(c))
+            {
+                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIbanFormatAlphanumeric);
+            }
+        }
+
+        // Validate checksum
+        if (!IbanHelper.ValidateChecksum(normalized))
+        {
+            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
         }
 
         // 2. Routing to specific country validator
