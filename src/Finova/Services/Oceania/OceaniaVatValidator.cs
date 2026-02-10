@@ -96,19 +96,27 @@ public class OceaniaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        if (!_staticValidators.TryGetValue(countryCode, out var validator))
         {
-            "AU" => new AustraliaGstValidator(),
-            "NZ" => new NewZealandGstValidator(),
-            _ => null!
-        });
+            validator = countryCode switch
+            {
+                "AU" => new AustraliaGstValidator(),
+                "NZ" => new NewZealandGstValidator(),
+                _ => null
+            };
+
+            if (validator != null)
+            {
+                _staticValidators.TryAdd(countryCode, validator);
+            }
+        }
 
         if (validator != null)
         {
             return validator.Validate(vat);
         }
 
-        return ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}");
+        return ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, string.Format(ValidationMessages.UnsupportedCountryCodeFormat, countryCode));
     }
 
     public static VatDetails? GetVatDetails(string? vat, string? countryCode = null)

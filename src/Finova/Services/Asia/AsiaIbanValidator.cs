@@ -76,19 +76,31 @@ public class AsiaIbanValidator : IIbanValidator
         }
 
         string country = IbanHelper.NormalizeIban(iban)[0..2].ToUpperInvariant();
+        var validator = GetOrCreateValidator(country);
 
-        var validator = _staticValidators.GetOrAdd(country, code => code switch
+        return validator != null
+            ? validator.Validate(iban)
+            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
+    }
+
+    private static IIbanValidator? GetOrCreateValidator(string countryCode)
+    {
+        if (_staticValidators.TryGetValue(countryCode, out var validator))
+            return validator;
+
+        validator = countryCode switch
         {
             "KZ" => new KazakhstanIbanValidator(),
             "MN" => new MongoliaIbanValidator(),
             "PK" => new PakistanIbanValidator(),
             "TL" => new TimorLesteIbanValidator(),
-            _ => null!
-        });
+            _ => null
+        };
 
-        return validator != null
-            ? validator.Validate(iban)
-            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
+        if (validator != null)
+            _staticValidators.TryAdd(countryCode, validator);
+
+        return validator;
     }
 
     /// <inheritdoc/>
@@ -105,12 +117,6 @@ public class AsiaIbanValidator : IIbanValidator
 
     /// <inheritdoc/>
     public bool ValidateChecksum(string? iban) => IbanHelper.ValidateChecksum(iban);
-    public static bool IsCountrySupported(string countryCode)
-    {
-        return countryCode switch
-        {
-            "KZ" or "MN" or "PK" or "TL" => true,
-            _ => false
-        };
-    }
+
+    public static bool IsCountrySupported(string countryCode) => GetOrCreateValidator(countryCode) != null;
 }

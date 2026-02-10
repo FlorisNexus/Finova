@@ -103,6 +103,14 @@ public class CommonCoreTests
     #region ValidationResult Tests
 
     [Fact]
+    public void ValidationResult_Success_IsSingleton()
+    {
+        var result1 = ValidationResult.Success();
+        var result2 = ValidationResult.Success();
+        result1.Should().BeSameAs(result2);
+    }
+
+    [Fact]
     public void ValidationResult_Success_HasNoErrors()
     {
         var result = ValidationResult.Success();
@@ -118,6 +126,32 @@ public class CommonCoreTests
         result.Errors.Should().ContainSingle();
         result.Errors[0].Code.Should().Be(ValidationErrorCode.InvalidChecksum);
         result.Errors[0].Message.Should().Be("Message");
+    }
+
+    [Fact]
+    public void ValidationResult_AddError_MakesResultInvalid()
+    {
+        var result = ValidationResult.Failure(ValidationErrorCode.InvalidInput, "Error 1");
+        result.AddError(ValidationErrorCode.InvalidLength, "Error 2");
+
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().HaveCount(2);
+        result.Errors[0].Code.Should().Be(ValidationErrorCode.InvalidInput);
+        result.Errors[1].Code.Should().Be(ValidationErrorCode.InvalidLength);
+    }
+
+    [Fact]
+    public void ValidationResult_Failure_FromList_Works()
+    {
+        var errors = new List<ValidationError>
+        {
+            new ValidationError(ValidationErrorCode.InvalidInput, "M1"),
+            new ValidationError(ValidationErrorCode.InvalidLength, "M2")
+        };
+
+        var result = ValidationResult.Failure(errors);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().HaveCount(2);
     }
 
     #endregion

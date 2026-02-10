@@ -83,8 +83,19 @@ public class AmericasIbanValidator : IIbanValidator
         }
 
         string country = IbanHelper.NormalizeIban(iban)[0..2].ToUpperInvariant();
+        var validator = GetOrCreateValidator(country);
 
-        var validator = _staticValidators.GetOrAdd(country, code => code switch
+        return validator != null
+            ? validator.Validate(iban)
+            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
+    }
+
+    private static IIbanValidator? GetOrCreateValidator(string countryCode)
+    {
+        if (_staticValidators.TryGetValue(countryCode, out var validator))
+            return validator;
+
+        validator = countryCode switch
         {
             "BB" => new BarbadosIbanValidator(),
             "BR" => new BrazilIbanValidator(),
@@ -97,12 +108,13 @@ public class AmericasIbanValidator : IIbanValidator
             "NI" => new NicaraguaIbanValidator(),
             "LC" => new SaintLuciaIbanValidator(),
             "VG" => new VirginIslandsBritishIbanValidator(),
-            _ => null!
-        });
+            _ => null
+        };
 
-        return validator != null
-            ? validator.Validate(iban)
-            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
+        if (validator != null)
+            _staticValidators.TryAdd(countryCode, validator);
+
+        return validator;
     }
 
     /// <inheritdoc/>
@@ -119,13 +131,6 @@ public class AmericasIbanValidator : IIbanValidator
 
     /// <inheritdoc/>
     public bool ValidateChecksum(string? iban) => IbanHelper.ValidateChecksum(iban);
-    public static bool IsCountrySupported(string countryCode)
-    {
-        return countryCode switch
-        {
-            "BB" or "BR" or "CR" or "DO" or "SV" or "FK" or "GT" or "HN" or "NI" or "LC" or
-            "VG" => true,
-            _ => false
-        };
-    }
+
+    public static bool IsCountrySupported(string countryCode) => GetOrCreateValidator(countryCode) != null;
 }

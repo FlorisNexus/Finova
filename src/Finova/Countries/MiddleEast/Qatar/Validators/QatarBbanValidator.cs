@@ -6,8 +6,9 @@ namespace Finova.Countries.MiddleEast.Qatar.Validators;
 public class QatarBbanValidator : IBbanValidator
 {
     public string CountryCode => "QA";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
 
-    public ValidationResult Validate(string? bban)
+    public static ValidationResult Validate(string? bban)
     {
         if (string.IsNullOrWhiteSpace(bban))
         {

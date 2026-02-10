@@ -6,8 +6,9 @@ namespace Finova.Countries.MiddleEast.Kuwait.Validators;
 public class KuwaitBbanValidator : IBbanValidator
 {
     public string CountryCode => "KW";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
 
-    public ValidationResult Validate(string? bban)
+    public static ValidationResult Validate(string? bban)
     {
         if (string.IsNullOrWhiteSpace(bban))
         {

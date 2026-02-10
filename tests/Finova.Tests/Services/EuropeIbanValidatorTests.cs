@@ -74,10 +74,31 @@ public class EuropeIbanValidatorTests
         _validator.Validate("invalid").IsValid.Should().BeFalse();
     }
 
-    [Fact]
-    public void Validate_WithUnsupportedCountry_ReturnsFalse()
+    [Theory]
+    [InlineData("BE68539007547034")]
+    [InlineData("FR7630006000011234567890189")]
+    public void ValidateIban_Static_WithValidIban_ReturnsTrue(string iban)
     {
-        _validator.Validate("ZZ000000000000000000").IsValid.Should().BeFalse();
+        EuropeIbanValidator.ValidateIban(iban).IsValid.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ValidateIban_Static_WithNull_ReturnsFalse()
+    {
+        EuropeIbanValidator.ValidateIban(null).IsValid.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData("BE", true)]
+    [InlineData("FR", true)]
+    [InlineData("DE", true)]
+    [InlineData("GB", true)]
+    [InlineData("US", false)]
+    [InlineData("JP", false)]
+    [InlineData("ZZ", false)]
+    public void IsCountrySupported_ReturnsExpected(string countryCode, bool expected)
+    {
+        EuropeIbanValidator.IsCountrySupported(countryCode).Should().Be(expected);
     }
 }
 

@@ -1,7 +1,5 @@
 using Finova.Core.Common;
 using Finova.Core.Iban;
-using Finova.Services;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Finova.Services.Global;
 
@@ -28,39 +26,39 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
     /// </summary>
     public string CountryCode => "";
 
+    private static ValidationResult? PreValidate(string? iban, out string normalized, out string countryCode)
+    {
+        normalized = "";
+        countryCode = "";
+
+        if (string.IsNullOrWhiteSpace(iban))
+            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
+
+        normalized = IbanHelper.NormalizeIban(iban);
+
+        if (normalized.Length >= 2 && (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1])))
+            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidIbanCountryCode);
+
+        if (normalized.Length >= 4 && (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3])))
+            return ValidationResult.Failure(ValidationErrorCode.InvalidCheckDigit, ValidationMessages.InvalidCheckDigit);
+
+        foreach (char c in normalized)
+        {
+            if (!char.IsLetterOrDigit(c))
+                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIbanFormatAlphanumeric);
+        }
+
+        countryCode = IbanHelper.GetCountryCode(iban).ToUpperInvariant();
+        return null;
+    }
+
     /// <summary>
     /// Validates an IBAN using the global static logic.
     /// </summary>
     public static ValidationResult ValidateIban(string? iban)
     {
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
-
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        // Check format: 2 letters (country) + 2 digits (check) + alphanumeric
-        // We do this check globally because these rules apply to ALL IBANs regardless of country.
-        if (normalized.Length >= 2 && (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1])))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidIbanCountryCode);
-        }
-
-        if (normalized.Length >= 4 && (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3])))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCheckDigit, ValidationMessages.InvalidCheckDigit);
-        }
-
-        foreach (char c in normalized)
-        {
-            if (!char.IsLetterOrDigit(c))
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIbanFormatAlphanumeric);
-            }
-        }
-
-        var countryCode = IbanHelper.GetCountryCode(iban).ToUpperInvariant();
+        var error = PreValidate(iban, out var normalized, out var countryCode);
+        if (error != null) return error;
 
         // 1. Routing to continent-specific static validators (Primary)
         // This ensures country-specific rules (like exact length) take precedence over generic rules.
@@ -113,36 +111,10 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
 
     public ValidationResult Validate(string? iban)
     {
-        // 1. Basic generic validation (structure, mod97)
-        if (string.IsNullOrWhiteSpace(iban))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidInput, ValidationMessages.InputCannotBeEmpty);
-        }
+        var error = PreValidate(iban, out var normalized, out var countryCode);
+        if (error != null) return error;
 
-        var normalized = IbanHelper.NormalizeIban(iban);
-
-        // Check format: 2 letters (country) + 2 digits (check) + alphanumeric
-        if (normalized.Length >= 2 && (!char.IsLetter(normalized[0]) || !char.IsLetter(normalized[1])))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCountryCode, ValidationMessages.InvalidIbanCountryCode);
-        }
-
-        if (normalized.Length >= 4 && (!char.IsDigit(normalized[2]) || !char.IsDigit(normalized[3])))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidCheckDigit, ValidationMessages.InvalidCheckDigit);
-        }
-
-        foreach (char c in normalized)
-        {
-            if (!char.IsLetterOrDigit(c))
-            {
-                return ValidationResult.Failure(ValidationErrorCode.InvalidFormat, ValidationMessages.InvalidIbanFormatAlphanumeric);
-            }
-        }
-
-        var countryCode = IbanHelper.GetCountryCode(iban).ToUpperInvariant();
-
-        // 2. Routing to specific country validator
+        // Routing to specific country validator
         if (_validators.TryGetValue(countryCode, out var validator))
         {
             return validator.Validate(iban);
@@ -154,15 +126,8 @@ public class GlobalIbanValidator : IIbanService, IIbanValidator
             return ValidationResult.Failure(ValidationErrorCode.InvalidLength, string.Format(ValidationMessages.InvalidIbanLength, $"{IbanHelper.MinIbanLength}-{IbanHelper.MaxIbanLength}", normalized.Length));
         }
 
-        // Validate checksum if no specific validator found (or if specific validator logic allows fallback, but here we return result of validator)
-        if (!IbanHelper.ValidateChecksum(normalized))
-        {
-            return ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
-        }
-
-        // 4. Fallback: If no specific validator exists, but it passed the generic Mod97 check above,
-        // we consider it valid (generic IBAN support).
-        return ValidationResult.Success();
+        // If no country found, display error unsupported country
+        return ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountry);
     }
 
     /// <inheritdoc/>

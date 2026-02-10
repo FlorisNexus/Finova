@@ -4,7 +4,6 @@ using Finova.Countries.Europe.Azerbaijan.Validators;
 using Finova.Countries.Europe.Belarus.Validators;
 using Xunit;
 using Xunit.Abstractions;
-using System.Reflection;
 
 namespace Finova.Tests.Validators;
 
@@ -67,7 +66,7 @@ public class BbanStructureTests
         // Case 1: AZ BBAN that matches BY structure
         var azBbanWithDigits = "NABZ00000000137010001944"; // 0000 are digits
         var byResult = _bbanService.Validate("BY", azBbanWithDigits);
-        
+
         // This is structurally valid for BY, so we expect True.
         // We cannot distinguish without bank code database.
         Assert.True(byResult.IsValid, "AZ BBAN with digits at 4-8 matches BY structure");
@@ -93,14 +92,14 @@ public class BbanStructureTests
 
         // Case 1: BY BBAN with Letter Bank Code
         var byBban = "NBRB3600900000002Z00AB00";
-        
+
         var azResult = _bbanService.Validate("AZ", byBban);
         Assert.True(azResult.IsValid, "BY BBAN (with letter bank code) matches AZ structure");
 
         // Case 2: BY BBAN with Digit in Bank Code (if valid in BY)
         // BY allows alphanumeric Bank Code. AZ allows only Letters.
         var byBbanWithDigit = "12343600900000002Z00AB00"; // '1234' Bank Code
-        
+
         // Assume '1234' is valid bank code for BY (structure wise)
         var byResult = _bbanService.Validate("BY", byBbanWithDigit);
         Assert.True(byResult.IsValid, "Valid BY structure");

@@ -6,8 +6,9 @@ namespace Finova.Countries.MiddleEast.Lebanon.Validators;
 public class LebanonBbanValidator : IBbanValidator
 {
     public string CountryCode => "LB";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
 
-    public ValidationResult Validate(string? bban)
+    public static ValidationResult Validate(string? bban)
     {
         if (string.IsNullOrWhiteSpace(bban))
         {

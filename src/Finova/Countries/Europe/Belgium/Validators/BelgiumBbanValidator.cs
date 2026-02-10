@@ -77,7 +77,7 @@ public class BelgiumBbanValidator : IBbanValidator
 
         return isValid
             ? ValidationResult.Success()
-            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidBelgiumBbanStructure);
+            : ValidationResult.Failure(ValidationErrorCode.InvalidChecksum, ValidationMessages.InvalidChecksum);
     }
 
     /// <inheritdoc/>

@@ -103,75 +103,83 @@ public static class GlobalIdentityValidator
 
         string country = countryCode.ToUpperInvariant();
 
-        var validator = _nationalIdValidators.GetOrAdd(country, code => code switch
+        if (!_nationalIdValidators.TryGetValue(country, out var validator))
         {
-            "AL" => new AlbaniaNationalIdValidator(),
-            "AD" => new AndorraNationalIdValidator(),
-            "AT" => new AustriaNationalIdValidator(),
-            "AZ" => new AzerbaijanNationalIdValidator(),
-            "BY" => new BelarusNationalIdValidator(),
-            "BE" => new BelgiumNationalIdValidator(),
-            "BA" => new BosniaAndHerzegovinaNationalIdValidator(),
-            "BG" => new BulgariaNationalIdValidator(),
-            "HR" => new CroatiaOibValidator(),
-            "CY" => new CyprusNationalIdValidator(),
-            "CZ" => new CzechRepublicNationalIdValidator(),
-            "DK" => new DenmarkCprValidator(),
-            "EE" => new EstoniaNationalIdValidator(),
-            "FO" => new FaroeIslandsNationalIdValidator(),
-            "FI" => new FinlandHenkilotunnusValidator(),
-            "FR" => new FranceNationalIdValidator(),
-            "GE" => new GeorgiaNationalIdValidator(),
-            "DE" => new GermanyNationalIdValidator(),
-            "GI" => new GibraltarNationalIdValidator(),
-            "GR" or "EL" => new GreeceNationalIdValidator(),
-            "GL" => new GreenlandNationalIdValidator(),
-            "HU" => new HungaryNationalIdValidator(),
-            "IS" => new IcelandKennitalaValidator(),
-            "IE" => new IrelandNationalIdValidator(),
-            "IT" => new ItalyNationalIdValidator(),
-            "XK" => new KosovoNationalIdValidator(),
-            "LV" => new LatviaNationalIdValidator(),
-            "LI" => new LiechtensteinNationalIdValidator(),
-            "LT" => new LithuaniaNationalIdValidator(),
-            "LU" => new LuxembourgNationalIdValidator(),
-            "MT" => new MaltaNationalIdValidator(),
-            "MD" => new MoldovaNationalIdValidator(),
-            "MC" => new MonacoNationalIdValidator(),
-            "ME" => new MontenegroNationalIdValidator(),
-            "NL" => new NetherlandsNationalIdValidator(),
-            "MK" => new NorthMacedoniaNationalIdValidator(),
-            "NO" => new NorwayNationalIdValidator(),
-            "PL" => new PolandNationalIdValidator(),
-            "PT" => new PortugalNationalIdValidator(),
-            "RO" => new RomaniaNationalIdValidator(),
-            "SM" => new SanMarinoNationalIdValidator(),
-            "RS" => new SerbiaNationalIdValidator(),
-            "SK" => new SlovakiaNationalIdValidator(),
-            "SI" => new SloveniaNationalIdValidator(),
-            "ES" => new SpainNationalIdValidator(),
-            "SE" => new SwedenNationalIdValidator(),
-            "CH" => new SwitzerlandNationalIdValidator(),
-            "TR" => new TurkeyNationalIdValidator(),
-            "UA" => new UkraineNationalIdValidator(),
-            "GB" or "UK" => new UnitedKingdomNationalIdValidator(),
-            "VA" => new VaticanNationalIdValidator(),
-            "RU" => new RussiaNationalIdValidator(),
-            "CN" => new ChinaResidentIdentityCardValidator(),
-            "JP" => new JapanMyNumberValidator(),
-            "SG" => new SingaporeNricValidator(),
-            "IL" => new IsraelTeudatZehutValidator(),
-            "SA" => new SaudiArabiaIdValidator(),
-            "AE" => new UaeEmiratesIdValidator(),
-            "IN" => new IndiaAadhaarValidator(),
-            "KR" => new SouthKoreaNationalIdValidator(),
-            "US" => new UnitedStatesSsnValidator(),
-            "CA" => new CanadaSinValidator(),
-            "NG" => new NigeriaNinValidator(),
-            "ZA" => new SouthAfricaIdValidator(),
-            "BR" => new BrazilCpfValidator(),
-            _ => null!
-        });
+            validator = country switch
+            {
+                "AL" => new AlbaniaNationalIdValidator(),
+                "AD" => new AndorraNationalIdValidator(),
+                "AT" => new AustriaNationalIdValidator(),
+                "AZ" => new AzerbaijanNationalIdValidator(),
+                "BY" => new BelarusNationalIdValidator(),
+                "BE" => new BelgiumNationalIdValidator(),
+                "BA" => new BosniaAndHerzegovinaNationalIdValidator(),
+                "BG" => new BulgariaNationalIdValidator(),
+                "HR" => new CroatiaOibValidator(),
+                "CY" => new CyprusNationalIdValidator(),
+                "CZ" => new CzechRepublicNationalIdValidator(),
+                "DK" => new DenmarkCprValidator(),
+                "EE" => new EstoniaNationalIdValidator(),
+                "FO" => new FaroeIslandsNationalIdValidator(),
+                "FI" => new FinlandHenkilotunnusValidator(),
+                "FR" => new FranceNationalIdValidator(),
+                "GE" => new GeorgiaNationalIdValidator(),
+                "DE" => new GermanyNationalIdValidator(),
+                "GI" => new GibraltarNationalIdValidator(),
+                "GR" or "EL" => new GreeceNationalIdValidator(),
+                "GL" => new GreenlandNationalIdValidator(),
+                "HU" => new HungaryNationalIdValidator(),
+                "IS" => new IcelandKennitalaValidator(),
+                "IE" => new IrelandNationalIdValidator(),
+                "IT" => new ItalyNationalIdValidator(),
+                "XK" => new KosovoNationalIdValidator(),
+                "LV" => new LatviaNationalIdValidator(),
+                "LI" => new LiechtensteinNationalIdValidator(),
+                "LT" => new LithuaniaNationalIdValidator(),
+                "LU" => new LuxembourgNationalIdValidator(),
+                "MT" => new MaltaNationalIdValidator(),
+                "MD" => new MoldovaNationalIdValidator(),
+                "MC" => new MonacoNationalIdValidator(),
+                "ME" => new MontenegroNationalIdValidator(),
+                "NL" => new NetherlandsNationalIdValidator(),
+                "MK" => new NorthMacedoniaNationalIdValidator(),
+                "NO" => new NorwayNationalIdValidator(),
+                "PL" => new PolandNationalIdValidator(),
+                "PT" => new PortugalNationalIdValidator(),
+                "RO" => new RomaniaNationalIdValidator(),
+                "SM" => new SanMarinoNationalIdValidator(),
+                "RS" => new SerbiaNationalIdValidator(),
+                "SK" => new SlovakiaNationalIdValidator(),
+                "SI" => new SloveniaNationalIdValidator(),
+                "ES" => new SpainNationalIdValidator(),
+                "SE" => new SwedenNationalIdValidator(),
+                "CH" => new SwitzerlandNationalIdValidator(),
+                "TR" => new TurkeyNationalIdValidator(),
+                "UA" => new UkraineNationalIdValidator(),
+                "GB" or "UK" => new UnitedKingdomNationalIdValidator(),
+                "VA" => new VaticanNationalIdValidator(),
+                "RU" => new RussiaNationalIdValidator(),
+                "CN" => new ChinaResidentIdentityCardValidator(),
+                "JP" => new JapanMyNumberValidator(),
+                "SG" => new SingaporeNricValidator(),
+                "IL" => new IsraelTeudatZehutValidator(),
+                "SA" => new SaudiArabiaIdValidator(),
+                "AE" => new UaeEmiratesIdValidator(),
+                "IN" => new IndiaAadhaarValidator(),
+                "KR" => new SouthKoreaNationalIdValidator(),
+                "US" => new UnitedStatesSsnValidator(),
+                "CA" => new CanadaSinValidator(),
+                "NG" => new NigeriaNinValidator(),
+                "ZA" => new SouthAfricaIdValidator(),
+                "BR" => new BrazilCpfValidator(),
+                _ => null
+            };
+
+            if (validator != null)
+            {
+                _nationalIdValidators.TryAdd(country, validator);
+            }
+        }
 
         if (validator != null)
         {
@@ -209,22 +217,30 @@ public static class GlobalIdentityValidator
 
         string country = countryCode.ToUpperInvariant();
 
-        var validator = _taxIdValidators.GetOrAdd(country, code => code switch
+        if (!_taxIdValidators.TryGetValue(country, out var validator))
         {
-            "IN" => new IndiaPanValidator(),
-            "CA" => new CanadaBusinessNumberValidator(),
-            "US" => new UnitedStatesEinValidator(),
-            "BR" => new BrazilCnpjValidator(),
-            "CO" => new ColombiaVatValidator(),
-            "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator(),
-            "VN" => new VietnamTaxIdValidator(),
-            "EG" => new EgyptTaxRegistrationNumberValidator(),
-            "MA" => new Finova.Countries.Africa.Morocco.Validators.MoroccoIceValidator(),
-            "DZ" => new Finova.Countries.Africa.Algeria.Validators.AlgeriaNifValidator(),
-            "TN" => new Finova.Countries.Africa.Tunisia.Validators.TunisiaMatriculeFiscalValidator(),
-            "NG" => new Finova.Countries.Africa.Nigeria.Validators.NigeriaTinValidator(),
-            _ => null!
-        });
+            validator = country switch
+            {
+                "IN" => new IndiaPanValidator(),
+                "CA" => new CanadaBusinessNumberValidator(),
+                "US" => new UnitedStatesEinValidator(),
+                "BR" => new BrazilCnpjValidator(),
+                "CO" => new ColombiaVatValidator(),
+                "KZ" => new Finova.Countries.Asia.Kazakhstan.Validators.KazakhstanBinValidator(),
+                "VN" => new VietnamTaxIdValidator(),
+                "EG" => new EgyptTaxRegistrationNumberValidator(),
+                "MA" => new Finova.Countries.Africa.Morocco.Validators.MoroccoIceValidator(),
+                "DZ" => new Finova.Countries.Africa.Algeria.Validators.AlgeriaNifValidator(),
+                "TN" => new Finova.Countries.Africa.Tunisia.Validators.TunisiaMatriculeFiscalValidator(),
+                "NG" => new Finova.Countries.Africa.Nigeria.Validators.NigeriaTinValidator(),
+                _ => null
+            };
+
+            if (validator != null)
+            {
+                _taxIdValidators.TryAdd(country, validator);
+            }
+        }
 
         if (validator != null)
         {

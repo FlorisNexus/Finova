@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Finova.Core.Common;
 using Finova.Core.Iban;
 
@@ -19,6 +18,6 @@ public class SaudiArabiaIbanValidator : IbanValidatorBase
     /// <inheritdoc/>
     protected override ValidationResult ValidateBban(string bban)
     {
-        return new SaudiArabiaBbanValidator().Validate(bban);
+        return SaudiArabiaBbanValidator.Validate(bban);
     }
 }

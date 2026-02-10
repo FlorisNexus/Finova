@@ -20,12 +20,11 @@ public class NewBbanValidatorsTests
     [InlineData("", false)]
     public void LebanonBbanValidator_Tests(string bban, bool expectedValid)
     {
-        var validator = new LebanonBbanValidator();
-        var result = validator.Validate(bban);
+        var result = LebanonBbanValidator.Validate(bban);
         result.IsValid.Should().Be(expectedValid);
         if (expectedValid)
         {
-            var details = validator.ParseDetails(bban);
+            var details = new LebanonBbanValidator().ParseDetails(bban);
             details.Should().NotBeNull();
             details!.CountryCode.Should().Be("LB");
             details.BankCode.Should().Be(bban[..4]);
@@ -58,12 +57,11 @@ public class NewBbanValidatorsTests
     [InlineData("033123456789012345A", false)] // Digits only
     public void UaeBbanValidator_Tests(string bban, bool expectedValid)
     {
-        var validator = new UaeBbanValidator();
-        var result = validator.Validate(bban);
+        var result = UaeBbanValidator.Validate(bban);
         result.IsValid.Should().Be(expectedValid);
         if (expectedValid)
         {
-            var details = validator.ParseDetails(bban);
+            var details = new UaeBbanValidator().ParseDetails(bban);
             details.Should().NotBeNull();
             details!.CountryCode.Should().Be("AE");
             details.BankCode.Should().Be(bban[..3]);
@@ -77,12 +75,11 @@ public class NewBbanValidatorsTests
     [InlineData("8000000060801016751A", true)] // Alphanumeric allowed
     public void SaudiArabiaBbanValidator_Tests(string bban, bool expectedValid)
     {
-        var validator = new SaudiArabiaBbanValidator();
-        var result = validator.Validate(bban);
+        var result = SaudiArabiaBbanValidator.Validate(bban);
         result.IsValid.Should().Be(expectedValid);
         if (expectedValid)
         {
-            var details = validator.ParseDetails(bban);
+            var details = new SaudiArabiaBbanValidator().ParseDetails(bban);
             details.Should().NotBeNull();
             details!.CountryCode.Should().Be("SA");
             details.BankCode.Should().Be(bban[..2]);
@@ -95,12 +92,11 @@ public class NewBbanValidatorsTests
     [InlineData("CBKU00000000000012345601011", false)] // Too long
     public void KuwaitBbanValidator_Tests(string bban, bool expectedValid)
     {
-        var validator = new KuwaitBbanValidator();
-        var result = validator.Validate(bban);
+        var result = KuwaitBbanValidator.Validate(bban);
         result.IsValid.Should().Be(expectedValid);
         if (expectedValid)
         {
-            var details = validator.ParseDetails(bban);
+            var details = new KuwaitBbanValidator().ParseDetails(bban);
             details.Should().NotBeNull();
             details!.CountryCode.Should().Be("KW");
             details.BankCode.Should().Be(bban[..4]);
@@ -113,12 +109,11 @@ public class NewBbanValidatorsTests
     [InlineData("DOHB0000123456789012345678", false)] // Too long
     public void QatarBbanValidator_Tests(string bban, bool expectedValid)
     {
-        var validator = new QatarBbanValidator();
-        var result = validator.Validate(bban);
+        var result = QatarBbanValidator.Validate(bban);
         result.IsValid.Should().Be(expectedValid);
         if (expectedValid)
         {
-            var details = validator.ParseDetails(bban);
+            var details = new QatarBbanValidator().ParseDetails(bban);
             details.Should().NotBeNull();
             details!.CountryCode.Should().Be("QA");
             details.BankCode.Should().Be(bban[..4]);

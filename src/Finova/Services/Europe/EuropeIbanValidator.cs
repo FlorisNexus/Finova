@@ -138,8 +138,19 @@ public class EuropeIbanValidator : IIbanValidator
         }
 
         string country = IbanHelper.NormalizeIban(iban)[0..2].ToUpperInvariant();
+        var validator = GetOrCreateValidator(country);
 
-        var validator = _staticValidators.GetOrAdd(country, code => code switch
+        return validator != null
+            ? validator.Validate(iban)
+            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
+    }
+
+    private static IIbanValidator? GetOrCreateValidator(string countryCode)
+    {
+        if (_staticValidators.TryGetValue(countryCode, out var validator))
+            return validator;
+
+        validator = countryCode switch
         {
             "DE" => new GermanyIbanValidator(),
             "IT" => new ItalyIbanValidator(),
@@ -193,24 +204,14 @@ public class EuropeIbanValidator : IIbanValidator
             "BY" => new BelarusIbanValidator(),
             "AZ" => new AzerbaijanIbanValidator(),
             "RU" => new RussiaIbanValidator(),
-            _ => null!
-        });
-
-        return validator != null
-            ? validator.Validate(iban)
-            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
-    }
-    public static bool IsCountrySupported(string countryCode)
-    {
-        return countryCode switch
-        {
-            "DE" or "IT" or "ES" or "FR" or "BE" or "NL" or "GB" or "LU" or "IE" or "AT" or
-            "GR" or "FI" or "PT" or "SE" or "DK" or "NO" or "PL" or "CZ" or "HU" or "RO" or
-            "BG" or "HR" or "SI" or "SK" or "EE" or "LV" or "LT" or "CY" or "MT" or "CH" or
-            "MC" or "AD" or "VA" or "SM" or "GI" or "IS" or "LI" or "RS" or "UA" or "ME" or
-            "MK" or "AL" or "TR" or "BA" or "GE" or "FO" or "GL" or "XK" or "MD" or "BY" or
-            "AZ" or "RU" => true,
-            _ => false
+            _ => null
         };
+
+        if (validator != null)
+            _staticValidators.TryAdd(countryCode, validator);
+
+        return validator;
     }
+
+    public static bool IsCountrySupported(string countryCode) => GetOrCreateValidator(countryCode) != null;
 }
