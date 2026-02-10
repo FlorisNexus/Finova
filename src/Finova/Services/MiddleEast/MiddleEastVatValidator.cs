@@ -99,15 +99,23 @@ public class MiddleEastVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        if (!_staticValidators.TryGetValue(countryCode, out var validator))
         {
-            "AE" => new UaeVatValidator(),
-            "BH" => new BahrainVatValidator(),
-            "IL" => new IsraelVatValidator(),
-            "OM" => new OmanVatValidator(),
-            "SA" => new SaudiArabiaVatValidator(),
-            _ => null!
-        });
+            validator = countryCode switch
+            {
+                "AE" => new UaeVatValidator(),
+                "BH" => new BahrainVatValidator(),
+                "IL" => new IsraelVatValidator(),
+                "OM" => new OmanVatValidator(),
+                "SA" => new SaudiArabiaVatValidator(),
+                _ => null
+            };
+
+            if (validator != null)
+            {
+                _staticValidators.TryAdd(countryCode, validator);
+            }
+        }
 
         if (validator != null)
         {
@@ -117,7 +125,7 @@ public class MiddleEastVatValidator : IVatValidator
         return countryCode switch
         {
             "QA" => Finova.Countries.MiddleEast.Qatar.Validators.QatarTinValidator.ValidateTin(vat),
-            _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, $"Unsupported country code: {countryCode}")
+            _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, string.Format(ValidationMessages.UnsupportedCountryCodeFormat, countryCode))
         };
     }
 

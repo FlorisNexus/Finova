@@ -1,5 +1,3 @@
-
-using System.Diagnostics.CodeAnalysis;
 using Finova.Core.Common;
 using Finova.Core.Iban;
 

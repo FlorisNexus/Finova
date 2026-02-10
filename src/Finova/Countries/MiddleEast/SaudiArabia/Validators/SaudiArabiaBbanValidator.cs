@@ -6,8 +6,9 @@ namespace Finova.Countries.MiddleEast.SaudiArabia.Validators;
 public class SaudiArabiaBbanValidator : IBbanValidator
 {
     public string CountryCode => "SA";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
 
-    public ValidationResult Validate(string? bban)
+    public static ValidationResult Validate(string? bban)
     {
         if (string.IsNullOrWhiteSpace(bban))
         {

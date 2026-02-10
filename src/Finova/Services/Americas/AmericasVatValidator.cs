@@ -106,15 +106,23 @@ public class AmericasVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        if (!_staticValidators.TryGetValue(countryCode, out var validator))
         {
-            "AR" => new ArgentinaVatValidator(),
-            "BR" => new BrazilVatValidator(),
-            "CL" => new ChileVatValidator(),
-            "CO" => new ColombiaVatValidator(),
-            "MX" => new MexicoVatValidator(),
-            _ => null!
-        });
+            validator = countryCode switch
+            {
+                "AR" => new ArgentinaVatValidator(),
+                "BR" => new BrazilVatValidator(),
+                "CL" => new ChileVatValidator(),
+                "CO" => new ColombiaVatValidator(),
+                "MX" => new MexicoVatValidator(),
+                _ => null
+            };
+
+            if (validator != null)
+            {
+                _staticValidators.TryAdd(countryCode, validator);
+            }
+        }
 
         if (validator != null)
         {
@@ -131,7 +139,7 @@ public class AmericasVatValidator : IVatValidator
             "HN" => HondurasRtnValidator.ValidateRtn(vat),
             "NI" => NicaraguaRucValidator.ValidateRuc(vat),
             "VG" or "VP" => ValidationResult.Success(),
-            _ => ValidationResult.Failure(ValidationErrorCode.InvalidInput, string.Format(ValidationMessages.UnsupportedCountryCodeFormat, countryCode))
+            _ => ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, string.Format(ValidationMessages.UnsupportedCountryCodeFormat, countryCode))
         };
     }
 

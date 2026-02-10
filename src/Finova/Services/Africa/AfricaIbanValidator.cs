@@ -103,8 +103,19 @@ public class AfricaIbanValidator : IIbanValidator
         }
 
         string country = IbanHelper.NormalizeIban(iban)[0..2].ToUpperInvariant();
+        var validator = GetOrCreateValidator(country);
 
-        var validator = _staticValidators.GetOrAdd(country, code => code switch
+        return validator != null
+            ? validator.Validate(iban)
+            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
+    }
+
+    private static IIbanValidator? GetOrCreateValidator(string countryCode)
+    {
+        if (_staticValidators.TryGetValue(countryCode, out var validator))
+            return validator;
+
+        validator = countryCode switch
         {
             "DZ" => new AlgeriaIbanValidator(),
             "AO" => new AngolaIbanValidator(),
@@ -137,12 +148,13 @@ public class AfricaIbanValidator : IIbanValidator
             "SD" => new SudanIbanValidator(),
             "TG" => new TogoIbanValidator(),
             "TN" => new TunisiaIbanValidator(),
-            _ => null!
-        });
+            _ => null
+        };
 
-        return validator != null
-            ? validator.Validate(iban)
-            : ValidationResult.Failure(ValidationErrorCode.UnsupportedCountry, ValidationMessages.UnsupportedCountryOrInvalidIban);
+        if (validator != null)
+            _staticValidators.TryAdd(countryCode, validator);
+
+        return validator;
     }
 
     /// <inheritdoc/>
@@ -159,15 +171,6 @@ public class AfricaIbanValidator : IIbanValidator
 
     /// <inheritdoc/>
     public bool ValidateChecksum(string? iban) => IbanHelper.ValidateChecksum(iban);
-    public static bool IsCountrySupported(string countryCode)
-    {
-        return countryCode switch
-        {
-            "DZ" or "AO" or "BJ" or "BF" or "BI" or "CM" or "CV" or "CF" or "TD" or "KM" or
-            "CG" or "CI" or "DJ" or "EG" or "GQ" or "GA" or "GW" or "LY" or "MG" or "ML" or
-            "MR" or "MA" or "MZ" or "NE" or "ST" or "SN" or "SC" or "SO" or "SD" or "TG" or
-            "TN" => true,
-            _ => false
-        };
-    }
+
+    public static bool IsCountrySupported(string countryCode) => GetOrCreateValidator(countryCode) != null;
 }

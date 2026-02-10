@@ -24,12 +24,11 @@ public class ValidationResult
     public bool IsValid => Errors.Count == 0;
     public List<ValidationError> Errors { get; } = [];
 
+    private static readonly ValidationResult _success = new();
+
     private ValidationResult() { }
 
-    public static ValidationResult Success()
-    {
-        return new ValidationResult();
-    }
+    public static ValidationResult Success() => _success;
 
     public static ValidationResult Failure(ValidationErrorCode code, string message)
     {

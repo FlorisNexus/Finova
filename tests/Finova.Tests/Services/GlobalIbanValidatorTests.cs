@@ -104,7 +104,7 @@ public class GlobalIbanValidatorTests
     [Fact]
     public void ValidateIban_WithShortGermanIban_ReturnsFormattedErrorMessage()
     {
-        // DE89 37546456 (12 chars). 
+        // DE89 37546456 (12 chars).
         // Previously this hit global check (min 15).
         // NOW it should hit Germany validator (Expected 22).
         var result = GlobalIbanValidator.ValidateIban("DE8937546456");
@@ -118,17 +118,48 @@ public class GlobalIbanValidatorTests
     }
 
     [Fact]
-    public void ValidateIban_WithVeryShortGermanIban_ReturnsCountrySpecificError()
+    public void Validate_Instance_WithRegisteredValidator_RoutesCorrectly()
     {
-        // DE12 (4 chars)
-        // Global check would say "Min 15".
-        // Country check should say "Expected 22".
-        var result = GlobalIbanValidator.ValidateIban("DE12");
-        result.IsValid.Should().BeFalse();
+        // Arrange
+        var mockValidator = new MockIbanValidator("ZZ");
+        var globalValidator = new GlobalIbanValidator(new[] { mockValidator });
 
-        var error = result.Errors.FirstOrDefault(e => e.Code == ValidationErrorCode.InvalidLength);
-        error.Should().NotBeNull();
-        error!.Message.Should().Contain("22");
-        error.Message.Should().NotContain("15-34");
+        // Act
+        var result = globalValidator.Validate("ZZ123456789012345");
+
+        // Assert
+        result.IsValid.Should().BeTrue();
+        mockValidator.WasCalled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Validate_Instance_WithUnregisteredCountry_ReturnsUnsupported()
+    {
+        // Arrange
+        var globalValidator = new GlobalIbanValidator(Enumerable.Empty<IIbanValidator>());
+
+        // Act
+        var result = globalValidator.Validate("BE68539007547034");
+
+        // Assert
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Code == ValidationErrorCode.UnsupportedCountry);
+    }
+
+    private class MockIbanValidator : Finova.Core.Iban.IIbanValidator
+    {
+        public MockIbanValidator(string countryCode) => CountryCode = countryCode;
+        public string CountryCode { get; }
+        public bool WasCalled { get; private set; }
+        public ValidationResult Validate(string? iban)
+        {
+            WasCalled = true;
+            return ValidationResult.Success();
+        }
+        public string FormatIban(string? iban) => iban ?? "";
+        public string NormalizeIban(string? iban) => iban ?? "";
+        public string GetCountryCode(string? iban) => CountryCode;
+        public int GetCheckDigits(string? iban) => 0;
+        public bool ValidateChecksum(string? iban) => true;
     }
 }

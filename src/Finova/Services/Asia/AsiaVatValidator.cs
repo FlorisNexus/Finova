@@ -103,18 +103,26 @@ public class AsiaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        if (!_staticValidators.TryGetValue(countryCode, out var validator))
         {
-            "CN" => new ChinaVatValidator(),
-            "ID" => new IndonesiaVatValidator(),
-            "IN" => new IndiaGstinValidator(),
-            "JP" => new JapanVatValidator(),
-            "KR" => new SouthKoreaVatValidator(),
-            "PH" => new PhilippinesVatValidator(),
-            "SG" => new SingaporeGstValidator(),
-            "VN" => new VietnamVatValidator(),
-            _ => null!
-        });
+            validator = countryCode switch
+            {
+                "CN" => new ChinaVatValidator(),
+                "ID" => new IndonesiaVatValidator(),
+                "IN" => new IndiaGstinValidator(),
+                "JP" => new JapanVatValidator(),
+                "KR" => new SouthKoreaVatValidator(),
+                "PH" => new PhilippinesVatValidator(),
+                "SG" => new SingaporeGstValidator(),
+                "VN" => new VietnamVatValidator(),
+                _ => null
+            };
+
+            if (validator != null)
+            {
+                _staticValidators.TryAdd(countryCode, validator);
+            }
+        }
 
         if (validator != null)
         {

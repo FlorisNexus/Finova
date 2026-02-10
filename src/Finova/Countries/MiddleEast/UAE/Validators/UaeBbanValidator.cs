@@ -6,8 +6,9 @@ namespace Finova.Countries.MiddleEast.UAE.Validators;
 public class UaeBbanValidator : IBbanValidator
 {
     public string CountryCode => "AE";
+    ValidationResult IValidator<string>.Validate(string? input) => Validate(input);
 
-    public ValidationResult Validate(string? bban)
+    public static ValidationResult Validate(string? bban)
     {
         if (string.IsNullOrWhiteSpace(bban))
         {

@@ -104,13 +104,21 @@ public class AfricaVatValidator : IVatValidator
 
         countryCode = countryCode.ToUpperInvariant();
 
-        var validator = _staticValidators.GetOrAdd(countryCode, code => code switch
+        if (!_staticValidators.TryGetValue(countryCode, out var validator))
         {
-            "EG" => new EgyptVatValidator(),
-            "KE" => new KenyaVatValidator(),
-            "ZA" => new SouthAfricaVatValidator(),
-            _ => null!
-        });
+            validator = countryCode switch
+            {
+                "EG" => new EgyptVatValidator(),
+                "KE" => new KenyaVatValidator(),
+                "ZA" => new SouthAfricaVatValidator(),
+                _ => null
+            };
+
+            if (validator != null)
+            {
+                _staticValidators.TryAdd(countryCode, validator);
+            }
+        }
 
         if (validator != null)
         {
